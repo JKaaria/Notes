@@ -1,0 +1,13 @@
+I hope this email finds you well. As you know, I have been working on cleaning up client account numbers (SDS mappings) in the databases created by our client facing salespeople within Fixed Income (Bond) Trading operations. I am pleased to report that we have made significant progress in identifying and rectifying incorrect, null, or potentially problematic SDS mappings.
+
+To give you an idea of the scope of the project, we identified around 8,000 SDS mappings across 60 salespeople, with each database containing between 1 and 700 records. In the highest volume database, we found that 147 mappings (around 20%) were incorrect, null, or posed a potential control risk.
+
+To further illustrate the impact of these bad SDS mappings, I conducted an analysis of all trades feeding into our new fails reporting system over a two-week period. This analysis revealed that out of a possible 4,509 trades, 1,728 (just under 40%) returned fail codes for post-trade functions to resolve. This highlights the significant impact that incorrect SDS mappings can have on our operations and reinforces the importance of our efforts to clean up the data.
+
+Attached to this email, you will find the source files for the data, which can be used for reference. Please let me know if you have any questions or would like to discuss this further.
+
+Thank you for your continued support.
+
+Best regards,
+
+[Your Name]
