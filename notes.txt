@@ -1,6 +1,3 @@
-As a business analyst, you analyzed data related to trade fails from a cloud-based reporting system in a global investment bank.
-Your analysis revealed that the manual process of assigning ownership of items between operational departments has resulted in poor quality categorization of ownership.
-Of 412 items, only 311 are currently accurately categorized, and 42 have been completely resolved, leaving 59 items with incorrect categorization.
-This inaccurate categorization can lead to misinformed decisions based on inaccurate reporting and skews management reporting views.
-To improve the categorization of ownership, the investment bank can consider implementing an automated system or standardized process that ensures accuracy and consistency in assigning ownership of items.
-Addressing this issue is crucial to avoid further misinformed decisions and improve the overall efficiency of the trade fails reporting system.
+Incorrect categorization can cause wrong decisions and make management reports less reliable.
+The investment bank should consider an automated system or a standardized process to ensure accurate and consistent ownership assignment.
+It's essential to address this issue to prevent further wrong decisions and increase the overall efficiency of the trade fails reporting system.
