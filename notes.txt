@@ -1,8 +1,15 @@
-Summary:
+What was the issue?
+Incorrect, null, or potentially problematic SDS mappings in databases created by salespeople in Fixed Income (Bond) Trading operations.
+Identified around 8,000 SDS mappings across 60 salespeople, with each database containing between 1 and 700 records. In the highest volume database, 147 mappings (around 20%) were incorrect, null, or posed a potential control risk.
+What is the impact?
+Analysis of trades feeding into new fails reporting system over a two-week period revealed that out of a possible 4,509 trades, 1,728 (just under 40%) returned fail codes for post-trade functions to resolve.
+Incorrect SDS mappings can have a significant impact on operations.
+How are we looking to solve it?
+Cleaning up client account numbers (SDS mappings) in the databases created by salespeople in Fixed Income (Bond) Trading operations.
+Significant progress made in identifying and rectifying incorrect, null, or potentially problematic SDS mappings.
+What will be the desired clean-up outcome and what impact will that have moving forward?
+The desired clean-up outcome is to rectify all incorrect, null, or potentially problematic SDS mappings.
+This will reduce the number of fail codes returned for post-trade functions to resolve, leading to more efficient operations and reducing the risk of control issues.
 
-Project: Cleaning up client account numbers (SDS mappings) in databases created by salespeople in Fixed Income (Bond) Trading operations.
-Progress: Significant progress made in identifying and rectifying incorrect, null, or potentially problematic SDS mappings.
-Scope: Identified around 8,000 SDS mappings across 60 salespeople, with each database containing between 1 and 700 records. In the highest volume database, 147 mappings (around 20%) were incorrect, null, or posed a potential control risk.
-Impact: Analysis of trades feeding into new fails reporting system over a two-week period revealed that out of a possible 4,509 trades, 1,728 (just under 40%) returned fail codes for post-trade functions to resolve.
-Importance: Highlights the significant impact that incorrect SDS mappings can have on operations and reinforces the importance of cleaning up the data.
-Attachment: Source files for the data provided for reference.
+
+
