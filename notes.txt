@@ -1,3 +1,0 @@
-Incorrect categorization can cause wrong decisions and make management reports less reliable.
-The investment bank should consider an automated system or a standardized process to ensure accurate and consistent ownership assignment.
-It's essential to address this issue to prevent further wrong decisions and increase the overall efficiency of the trade fails reporting system.
