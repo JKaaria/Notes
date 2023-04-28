@@ -1,0 +1,12 @@
+Weekly Updates
+
+AFT
+IBMO & ATOM Collaboration piece up and running after successful 2 weeks of testing
+Re-visiting workflow between IBMO & ATOM to only focus on items not existing in FI Cash main view in order to avoid duplication of efforts
+Carried out training for AFT platform and queues across Europe teams
+Helped team set up logins views and columns 
+Scheduled training for AFT with US for week commencing Monday 1st May
+
+Counterparty Favourites
+IB Reference Data completed data ask 1 week ahead of schedule
+Setting new ETA for remediation of all incorrect SDS mappings
