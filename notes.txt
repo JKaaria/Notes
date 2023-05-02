@@ -1,12 +1,10 @@
-Weekly Updates
+I wanted to follow up on your request for a financial impact assessment of the SDS Mappings data. While the fail costs may not provide a complete picture, I wanted to highlight the operational impact that bad SDS counterparty favourites mappings are having on our team.
 
-AFT
-IBMO & ATOM Collaboration piece up and running after successful 2 weeks of testing
-Re-visiting workflow between IBMO & ATOM to only focus on items not existing in FI Cash main view in order to avoid duplication of efforts
-Carried out training for AFT platform and queues across Europe teams
-Helped team set up logins views and columns 
-Scheduled training for AFT with US for week commencing Monday 1st May
+Currently, we have 4 full-time employees and 1 graduate in training who are responsible for managing booking errors resulting from bad SDS counterparty favourites mappings. These errors require significant time and effort to resolve, which has a direct impact on our team's capacity to manage other tasks.
 
-Counterparty Favourites
-IB Reference Data completed data ask 1 week ahead of schedule
-Setting new ETA for remediation of all incorrect SDS mappings
+In addition, we are facing a control risk of trades being booked directly to the settlement market, bypassing operational controls for confirmation, affirmation, settlement and post-settlement. This poses a significant risk to our team's ability to ensure timely and accurate settlement of trades, which could result in financial losses or compliance issues.
+
+I believe it is important for us to take action to address these operational impacts of bad SDS counterparty favourites mappings. This could include investing in additional resources to manage booking errors, implementing more stringent controls to prevent direct booking to the settlement market, or exploring other solutions to improve the accuracy and completeness of our SDS mappings data.
+
+I would be happy to discuss these options further with you and the team. Please let me know if you have any questions or would like to schedule a meeting to discuss further.
+
