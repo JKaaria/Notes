@@ -1,0 +1,24 @@
+Dear ,
+
+I have received a forwarded email complaint from one of our salespeople regarding our firm's inability to set up default SSI logic according to bond type. The client expressed frustration with our current process, which is restricted to only 3 currencies in corporate bonds and does not work at all for government bonds. I would like to address this issue as a potential new initiative within our root cause fix efforts and provide some suggested action points:
+
+Issue:
+- Current process for setting up default SSI logic is limited to only three currencies in corporate bonds and does not work for government bonds.
+- This is causing frustration among clients and is not the first complaint we have received of this nature.
+
+Impact:
+- Poor client experience and potentially losing business.
+
+Resolution:
+- Fix the existing tool to accommodate all bond types, including government bonds.
+- Collaborate with the technology team to update the logic, test the tool, and implement the solution.
+- Estimated time for completion: 3-4 months.
+
+Desired Outcome:
+- Provide clients with an efficient and effective solution for setting up default SSI logic.
+- Identify the root cause of the issue and put forward a comprehensive solution to senior decision makers.
+- Improve overall client experience, attract new business, and address any underlying issues in our processes.
+
+Additional Support:
+- Technology team, data team, and operations team support to ensure the success of the initiative.
+- Access to sufficient resources to fix the existing tool and address the root cause of the issue.
