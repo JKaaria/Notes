@@ -1,0 +1,33 @@
+When approaching a meeting with MarketAxess relationship managers to better understand their MarketAxess Match proposition and its potential fit into the current book of work, here are some key questions and discussion points to bring to the table:
+
+1. Objectives and Benefits:
+   - What are the key objectives and benefits of implementing MarketAxess Match within our current fixed-income middle office operations?
+   - How does MarketAxess Match address the pain points or challenges we currently face in our trading processes?
+   - What specific advantages or efficiencies can MarketAxess Match offer compared to our existing trading protocols?
+
+2. Integration and Workflow:
+   - How does MarketAxess Match integrate with our existing middle office systems and workflows?
+   - What level of effort is required for implementation, and what kind of support or resources will be provided by MarketAxess during the integration process?
+   - Are there any potential conflicts or challenges in aligning our current processes with the MarketAxess Match trading model?
+
+3. Trade Confirmation and Settlement:
+   - How does MarketAxess Match handle trade confirmation and settlement processes?
+   - What enhancements or automation does MarketAxess Match bring to the post-trade processing functions of our middle office?
+   - Can MarketAxess Match seamlessly integrate with our trade confirmation and settlement systems and help improve straight-through processing (STP)?
+
+4. Data Management and Reporting:
+   - How does MarketAxess Match provide data and reporting capabilities? What types of trade data are available and how can we access and utilize this data effectively?
+   - Can MarketAxess Match support our regulatory reporting requirements and compliance obligations?
+   - How does MarketAxess Match ensure data integrity, security, and confidentiality?
+
+5. Support and Service:
+   - What level of ongoing support and service can we expect from MarketAxess after implementation?
+   - Are there dedicated relationship managers or support teams available to assist with any issues or inquiries that may arise?
+   - Can MarketAxess provide training or resources to help our middle office team fully leverage the capabilities of MarketAxess Match?
+
+6. Costs and ROI:
+   - What are the costs associated with implementing and maintaining MarketAxess Match?
+   - Can MarketAxess provide a clear breakdown of the pricing structure, including any potential transaction fees or subscription costs?
+   - How can we assess the return on investment (ROI) of integrating MarketAxess Match into our current book of work?
+
+By discussing these questions and points, you can gain a better understanding of how MarketAxess Match aligns with your organization's objectives and requirements, assess the feasibility of integration, and evaluate the potential impact and benefits for your fixed-income middle office operations. Additionally, it's essential to actively listen to the responses and ask follow-up questions to ensure a comprehensive understanding of the offering.
