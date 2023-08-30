@@ -1,11 +1,1 @@
-Dear [Relevant Department Name],
 
-I hope this message finds you well. As part of the fixed income middle office, I'm seeking your expertise on valuing securities for repo margin calculations during GMRA-defined holidays when the securities market is operational.
-
-Specifically, we're addressing whether to consider the previous day's EOD closing prices or the day before the previous day's EOD closing prices for repo margin calculations. Our current practice aligns with GMRA, using the previous day's EOD closing prices even when the market is open on a GMRA holiday.
-
-Our approach also takes into account ICMA's best practices, valuing collateral based on the Appropriate Market's prior business day close and emphasizing executable prices. We're open to addressing exceptional intraday price movements with agreed intra-day margin calls.
-
-Given the complexity, I'm seeking your guidance to ensure our practices are in line with industry standards. Your insights are crucial in maintaining accuracy and alignment.
-
-Thank you for your time and consideration. Your guidance is greatly appreciated.
