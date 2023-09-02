@@ -7,12 +7,13 @@ Sub AppendToConsolidatedWorkbook()
     Dim SourceFile As String
     Dim FirstFile As Boolean
     Dim WorkbookIsOpen As Boolean
+    Dim CurrentRow As Long
     
     ' Set the source folder path
-    SourceFolderPath = "C:\Your\Folder\Path" ' Replace with your folder path
+    SourceFolderPath = ThisWorkbook.Path ' Use the folder where this workbook is located
     
     ' Set the path to the consolidated workbook
-    ConsolidatedWorkbookPath = ThisWorkbook.Path & "\ConsolidatedWorkbook.xlsm"
+    ConsolidatedWorkbookPath = SourceFolderPath & "\ConsolidatedWorkbook.xlsm"
     
     ' Check if the consolidated workbook is already open
     On Error Resume Next
@@ -39,23 +40,28 @@ Sub AppendToConsolidatedWorkbook()
     ' Loop through files in the folder
     SourceFile = Dir(SourceFolderPath & "\*.xls*")
     Do While SourceFile <> ""
-        ' Open the source workbook
-        Set SourceWorkbook = Workbooks.Open(SourceFolderPath & "\" & SourceFile)
-        
-        ' Loop through worksheets in the source workbook
-        For Each SourceWorksheet In SourceWorkbook.Sheets
-            ' Check if it's the first worksheet to set column headers
-            If FirstFile Then
-                SourceWorksheet.UsedRange.Copy Destination:=ConsolidatedWorkbook.Sheets(1).Cells(1, 1)
-                FirstFile = False
-            Else
-                ' Copy data from column B onward to avoid duplicating column A
-                SourceWorksheet.Range("B1").CurrentRegion.Offset(, 1).Copy Destination:=ConsolidatedWorkbook.Sheets(1).Cells(ConsolidatedWorkbook.Sheets(1).Cells(Rows.Count, 1).End(xlUp).Row + 1, 2)
-            End If
-        Next SourceWorksheet
-        
-        ' Close the source workbook without saving changes
-        SourceWorkbook.Close SaveChanges:=False
+        ' Check if it's not the consolidated workbook
+        If SourceFile <> "ConsolidatedWorkbook.xlsm" Then
+            ' Open the source workbook
+            Set SourceWorkbook = Workbooks.Open(SourceFolderPath & "\" & SourceFile)
+            
+            ' Loop through worksheets in the source workbook
+            For Each SourceWorksheet In SourceWorkbook.Sheets
+                ' Check if it's the first worksheet to set column headers
+                If FirstFile Then
+                    SourceWorksheet.UsedRange.Copy Destination:=ConsolidatedWorkbook.Sheets(1).Cells(1, 1)
+                    FirstFile = False
+                    CurrentRow = ConsolidatedWorkbook.Sheets(1).Cells(Rows.Count, 1).End(xlUp).Row
+                Else
+                    ' Copy data from the second row onward to avoid duplicating the first row
+                    SourceWorksheet.UsedRange.Offset(1, 0).Copy Destination:=ConsolidatedWorkbook.Sheets(1).Cells(CurrentRow + 1, 1)
+                    CurrentRow = ConsolidatedWorkbook.Sheets(1).Cells(Rows.Count, 1).End(xlUp).Row
+                End If
+            Next SourceWorksheet
+            
+            ' Close the source workbook without saving changes
+            SourceWorkbook.Close SaveChanges:=False
+        End If
         
         ' Get the next file in the folder
         SourceFile = Dir
