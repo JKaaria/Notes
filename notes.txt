@@ -1,1 +1,32 @@
 
+Sub CleanConsolidatedData()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim dataRange As Range
+    
+    ' Set the worksheet where the data is located (modify as needed)
+    Set ws = ThisWorkbook.Sheets(1) ' Assumes data is on the first sheet
+    
+    ' Find the last row and last column with data
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Define the data range
+    Set dataRange = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
+    
+    ' Clean data: Remove duplicates, replace blank cells with N/A, and format as table
+    ws.Activate ' Activate the worksheet
+    dataRange.RemoveDuplicates Columns:=Array(1, 2), Header:=xlYes ' Remove duplicates in columns A and B, adjust as needed
+    dataRange.Replace "", "N/A", xlWhole ' Replace blank cells with N/A
+    ws.ListObjects.Add(xlSrcRange, dataRange, , xlYes).Name = "DataTable" ' Convert to table
+    
+    ' Optionally, format the table as desired
+    ' For example, you can set a table style:
+    ' ws.ListObjects("DataTable").TableStyle = "TableStyleMedium9"
+    
+    ' Optionally, adjust column widths or perform other formatting tasks
+    
+    ' AutoFit columns
+    ws.Cells.EntireColumn.AutoFit
+End Sub
