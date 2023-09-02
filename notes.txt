@@ -1,5 +1,4 @@
-
-Sub CleanConsolidatedData()
+Sub CleanDataForPivot()
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim lastCol As Long
@@ -15,17 +14,11 @@ Sub CleanConsolidatedData()
     ' Define the data range
     Set dataRange = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
     
-    ' Clean data: Remove duplicates, replace blank cells with N/A, and format as table
-    ws.Activate ' Activate the worksheet
-    dataRange.RemoveDuplicates Columns:=Array(1, 2), Header:=xlYes ' Remove duplicates in columns A and B, adjust as needed
-    dataRange.Replace "", "N/A", xlWhole ' Replace blank cells with N/A
-    ws.ListObjects.Add(xlSrcRange, dataRange, , xlYes).Name = "DataTable" ' Convert to table
+    ' Remove duplicates based on all columns
+    dataRange.RemoveDuplicates Columns:=Array(1 To lastCol), Header:=xlYes
     
-    ' Optionally, format the table as desired
-    ' For example, you can set a table style:
-    ' ws.ListObjects("DataTable").TableStyle = "TableStyleMedium9"
-    
-    ' Optionally, adjust column widths or perform other formatting tasks
+    ' Format data as a table (optional but recommended)
+    ws.ListObjects.Add(xlSrcRange, dataRange, , xlYes).Name = "MyDataTable"
     
     ' AutoFit columns
     ws.Cells.EntireColumn.AutoFit
