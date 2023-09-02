@@ -15,7 +15,7 @@ Sub CleanDataForPivot()
     Set dataRange = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
     
     ' Remove duplicates based on all columns
-    dataRange.RemoveDuplicates Columns:=Array(1 To lastCol), Header:=xlYes
+    dataRange.RemoveDuplicates Columns:=Array(1, 2, 3), Header:=xlYes ' Add column numbers as needed
     
     ' Format data as a table (optional but recommended)
     ws.ListObjects.Add(xlSrcRange, dataRange, , xlYes).Name = "MyDataTable"
