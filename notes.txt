@@ -1,34 +1,33 @@
-Sub MergeDataFromDelphiAndTmp()
+Sub MergeDataFromFiles()
+    Dim CurrentFolderPath As String
+    Dim DelphiFile As String
+    Dim TmpFile As String
     Dim wb As Workbook
-    Dim wsDelphi As Worksheet
-    Dim wsTmp As Worksheet
     Dim wsFails As Worksheet
     Dim lastRowDelphi As Long
     Dim lastRowTmp As Long
     Dim i As Long, j As Long
     Dim matchFound As Boolean
     
-    ' Set references to the active workbook and worksheets
-    Set wb = ThisWorkbook
-    Set wsDelphi = Nothing
-    Set wsTmp = Nothing
+    ' Get the current working directory path
+    CurrentFolderPath = ThisWorkbook.Path
     
-    ' Look for "Delphi" and "Tmp" worksheets in the active workbook
-    For Each ws In wb.Worksheets
-        If ws.Name Like "Delphi*" Then
-            Set wsDelphi = ws
-        ElseIf ws.Name Like "Tmp*" Then
-            Set wsTmp = ws
-        End If
-    Next ws
+    ' Check for the Delphi file in the current folder
+    DelphiFile = Dir(CurrentFolderPath & "\delphi_fails*.xls*")
     
-    ' Check if both source worksheets were found
-    If wsDelphi Is Nothing Or wsTmp Is Nothing Then
-        MsgBox "Source worksheets not found."
+    ' Check for the Tmp file in the current folder
+    TmpFile = Dir(CurrentFolderPath & "\sstemp*.xls*")
+    
+    ' Check if both files were found
+    If DelphiFile = "" Or TmpFile = "" Then
+        MsgBox "One or both source files not found in the current directory."
         Exit Sub
     End If
     
-    ' Set reference to the "Fails" worksheet in the active workbook
+    ' Open the Delphi file
+    Set wb = Workbooks.Open(CurrentFolderPath & "\" & DelphiFile)
+    
+    ' Set reference to the "Fails" worksheet in the Delphi file
     On Error Resume Next
     Set wsFails = wb.Worksheets("Fails")
     On Error GoTo 0
@@ -40,8 +39,16 @@ Sub MergeDataFromDelphiAndTmp()
     End If
     
     ' Find the last row in each source sheet
-    lastRowDelphi = wsDelphi.Cells(wsDelphi.Rows.Count, "A").End(xlUp).Row
-    lastRowTmp = wsTmp.Cells(wsTmp.Rows.Count, "A").End(xlUp).Row
+    lastRowDelphi = wsFails.Cells(wsFails.Rows.Count, "A").End(xlUp).Row
+    
+    ' Close the Delphi file
+    wb.Close SaveChanges:=False
+    
+    ' Open the Tmp file
+    Set wb = Workbooks.Open(CurrentFolderPath & "\" & TmpFile)
+    
+    ' Find the last row in the Tmp sheet
+    lastRowTmp = wb.Sheets(1).Cells(wb.Sheets(1).Rows.Count, "A").End(xlUp).Row
     
     ' Initialize a flag to check for matches
     matchFound = False
@@ -52,14 +59,17 @@ Sub MergeDataFromDelphiAndTmp()
         ' Loop through the Tmp sheet
         For j = 2 To lastRowTmp ' Assuming headers are in row 1
             ' Check if there is a match based on "External Trade ID"
-            If wsDelphi.Cells(i, "A").Value = wsTmp.Cells(j, "Ticket").Value Then
+            If wsFails.Cells(i, "A").Value = wb.Sheets(1).Cells(j, "Ticket").Value Then
                 ' Copy data from Tmp to Fails
-                wsTmp.Rows(j).Copy wsFails.Rows(i)
+                wb.Sheets(1).Rows(j).Copy wsFails.Rows(i)
                 matchFound = True
                 Exit For ' Exit the Tmp loop once a match is found
             End If
         Next j
     Next i
+    
+    ' Close the Tmp file
+    wb.Close SaveChanges:=False
     
     ' Inform the user about the result
     If matchFound Then
