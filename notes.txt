@@ -1,0 +1,25 @@
+Sub CleanDataForPivot()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim dataRange As Range
+    
+    ' Set the worksheet where the data is located (modify as needed)
+    Set ws = ThisWorkbook.Sheets(1) ' Assumes data is on the first sheet
+    
+    ' Find the last row and last column with data
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Define the data range
+    Set dataRange = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
+    
+    ' Remove duplicates based on all columns
+    dataRange.RemoveDuplicates Columns:=Array(1 To lastCol), Header:=xlYes
+    
+    ' Format data as a table (optional but recommended)
+    ws.ListObjects.Add(xlSrcRange, dataRange, , xlYes).Name = "MyDataTable"
+    
+    ' AutoFit columns
+    ws.Cells.EntireColumn.AutoFit
+End Sub
