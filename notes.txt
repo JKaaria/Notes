@@ -1,31 +1,15 @@
-Sub MergeDataFromExternalWorkbooks()
+Sub MergeDataFromAllWorkbooks()
     Dim CurrentFolderPath As String
-    Dim DelphiFile As String
-    Dim TmpFile As String
+    Dim SourceWorkbook As Workbook
     Dim TargetWorksheet As Worksheet
     Dim lastRowTarget As Long
-    Dim lastRowDelphi As Long
-    Dim lastRowTmp As Long
+    Dim lastRowSource As Long
     Dim i As Long, j As Long
     Dim matchFound As Boolean
-    Dim ExternalWorkbook As Workbook
-    Dim DelphiWorksheet As Worksheet
-    Dim TmpWorksheet As Worksheet
+    Dim SourceWorksheet As Worksheet
     
-    ' Set the directory path where the external workbooks are located
-    CurrentFolderPath = "C:\Some\Directory" ' Modify this path as needed
-    
-    ' Check for the Delphi file in the specified directory
-    DelphiFile = Dir(CurrentFolderPath & "\delphi_fails*.xls*")
-    
-    ' Check for the Tmp file in the specified directory
-    TmpFile = Dir(CurrentFolderPath & "\sstemp*.xls*")
-    
-    ' Check if both files were found
-    If DelphiFile = "" Or TmpFile = "" Then
-        MsgBox "One or both source files not found in the specified directory."
-        Exit Sub
-    End If
+    ' Set the directory path where the source workbooks are located
+    CurrentFolderPath = ThisWorkbook.Path
     
     ' Set reference to the "Fails" worksheet in the active workbook
     On Error Resume Next
@@ -41,48 +25,52 @@ Sub MergeDataFromExternalWorkbooks()
     ' Find the last row in the target worksheet
     lastRowTarget = TargetWorksheet.Cells(TargetWorksheet.Rows.Count, "A").End(xlUp).Row
     
-    ' Open the Delphi file
-    Set ExternalWorkbook = Workbooks.Open(CurrentFolderPath & "\" & DelphiFile)
-    Set DelphiWorksheet = ExternalWorkbook.Sheets(1) ' Assuming data is on the first sheet
+    ' Loop through all files in the current folder
+    Dim FileName As String
+    FileName = Dir(CurrentFolderPath & "\*.xls*")
     
-    ' Find the last row in the Delphi sheet
-    lastRowDelphi = DelphiWorksheet.Cells(DelphiWorksheet.Rows.Count, "A").End(xlUp).Row
-    
-    ' Close the Delphi file
-    ExternalWorkbook.Close SaveChanges:=False
-    
-    ' Open the Tmp file
-    Set ExternalWorkbook = Workbooks.Open(CurrentFolderPath & "\" & TmpFile)
-    Set TmpWorksheet = ExternalWorkbook.Sheets(1) ' Assuming data is on the first sheet
-    
-    ' Find the last row in the Tmp sheet
-    lastRowTmp = TmpWorksheet.Cells(TmpWorksheet.Rows.Count, "A").End(xlUp).Row
-    
-    ' Initialize a flag to check for matches
-    matchFound = False
-    
-    ' Loop through the Delphi sheet
-    For i = 2 To lastRowDelphi ' Assuming headers are in row 1
-        matchFound = False
-        ' Loop through the Tmp sheet
-        For j = 2 To lastRowTmp ' Assuming headers are in row 1
-            ' Check if there is a match based on "External Trade ID" (modify as needed)
-            If DelphiWorksheet.Cells(i, "A").Value = TmpWorksheet.Cells(j, "Ticket").Value Then
-                ' Copy data from Tmp to the target worksheet
-                TmpWorksheet.Rows(j).Copy TargetWorksheet.Rows(lastRowTarget + 1)
-                matchFound = True
-                Exit For ' Exit the Tmp loop once a match is found
+    Do While FileName <> ""
+        ' Exclude the active workbook from processing
+        If FileName <> ThisWorkbook.Name Then
+            ' Open the source workbook
+            Set SourceWorkbook = Workbooks.Open(CurrentFolderPath & "\" & FileName)
+            
+            ' Set reference to the first worksheet in the source workbook
+            Set SourceWorksheet = SourceWorkbook.Sheets(1) ' Assuming data is on the first sheet
+            
+            ' Find the last row in the source sheet
+            lastRowSource = SourceWorksheet.Cells(SourceWorksheet.Rows.Count, "A").End(xlUp).Row
+            
+            ' Initialize a flag to check for matches
+            matchFound = False
+            
+            ' Loop through the source sheet
+            For i = 2 To lastRowSource ' Assuming headers are in row 1
+                matchFound = False
+                ' Loop through the target worksheet
+                For j = 2 To lastRowTarget ' Assuming headers are in row 1
+                    ' Check if there is a match based on "External Trade ID" (modify as needed)
+                    If SourceWorksheet.Cells(i, "A").Value = TargetWorksheet.Cells(j, "External Trade ID").Value Then
+                        ' Copy data from source to target worksheet
+                        SourceWorksheet.Rows(i).Copy TargetWorksheet.Rows(lastRowTarget + 1)
+                        matchFound = True
+                        Exit For ' Exit the target worksheet loop once a match is found
+                    End If
+                Next j
+            Next i
+            
+            ' Close the source workbook
+            SourceWorkbook.Close SaveChanges:=False
+            
+            ' Inform the user about the result
+            If matchFound Then
+                MsgBox "Data merged from " & FileName & " successfully."
+            Else
+                MsgBox "No matching data found to merge from " & FileName & "."
             End If
-        Next j
-    Next i
-    
-    ' Close the Tmp file
-    ExternalWorkbook.Close SaveChanges:=False
-    
-    ' Inform the user about the result
-    If matchFound Then
-        MsgBox "Data merged successfully."
-    Else
-        MsgBox "No matching data found to merge."
-    End If
+        End If
+        
+        ' Get the next file in the folder
+        FileName = Dir
+    Loop
 End Sub
