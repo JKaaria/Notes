@@ -1,1 +1,50 @@
-
+Sub ConsolidateWorksheetsInFolder()
+    Dim SourceFolderPath As String
+    Dim TargetWorkbook As Workbook
+    Dim TargetWorksheet As Worksheet
+    Dim SourceWorkbook As Workbook
+    Dim SourceWorksheet As Worksheet
+    Dim SourceFile As String
+    Dim FirstFile As Boolean
+    
+    ' Set the source folder path
+    SourceFolderPath = "C:\Your\Folder\Path" ' Replace with your folder path
+    
+    ' Create a new workbook to consolidate data
+    Set TargetWorkbook = Workbooks.Add
+    Set TargetWorksheet = TargetWorkbook.Sheets(1)
+    
+    ' Initialize a variable to track if it's the first file
+    FirstFile = True
+    
+    ' Loop through files in the folder
+    SourceFile = Dir(SourceFolderPath & "\*.xls*")
+    Do While SourceFile <> ""
+        ' Open the source workbook
+        Set SourceWorkbook = Workbooks.Open(SourceFolderPath & "\" & SourceFile)
+        
+        ' Loop through worksheets in the source workbook
+        For Each SourceWorksheet In SourceWorkbook.Sheets
+            ' Check if it's the first worksheet to set column headers
+            If FirstFile Then
+                SourceWorksheet.UsedRange.Copy Destination:=TargetWorksheet.Cells(1, 1)
+                FirstFile = False
+            Else
+                ' Copy data from column B onward to avoid duplicating column A
+                SourceWorksheet.Range("B1").CurrentRegion.Offset(, 1).Copy Destination:=TargetWorksheet.Cells(TargetWorksheet.Cells(Rows.Count, 1).End(xlUp).Row + 1, 2)
+            End If
+        Next SourceWorksheet
+        
+        ' Close the source workbook without saving changes
+        SourceWorkbook.Close SaveChanges:=False
+        
+        ' Get the next file in the folder
+        SourceFile = Dir
+    Loop
+    
+    ' Save the consolidated workbook with a meaningful name
+    TargetWorkbook.SaveAs "ConsolidatedWorkbook.xlsx" ' Change the filename as needed
+    
+    ' Close the consolidated workbook
+    TargetWorkbook.Close SaveChanges:=False
+End Sub
