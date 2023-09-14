@@ -1,1 +1,45 @@
-
+Sub DownloadAttachmentsFromSpecificFolder()
+    Dim olApp As Object
+    Dim olNamespace As Object
+    Dim olFolder As Object
+    Dim olSubFolder As Object
+    Dim olItem As Object
+    Dim olAttachment As Object
+    Dim strSaveFolder As String
+    
+    ' Define the path where attachments will be saved
+    strSaveFolder = "C:\Your\Attachment\Folder\"
+    
+    ' Create Outlook Application and Namespace objects
+    Set olApp = CreateObject("Outlook.Application")
+    Set olNamespace = olApp.GetNamespace("MAPI")
+    
+    ' Define the specific folder path
+    On Error Resume Next
+    Set olFolder = olNamespace.Folders("jeremy.kaaria@********.com").Folders("Work").Folders("Reports")
+    On Error GoTo 0
+    
+    ' Check if the folder was found
+    If Not olFolder Is Nothing Then
+        ' Loop through the emails in the folder
+        For Each olItem In olFolder.Items
+            ' Check if the email has attachments
+            If olItem.Attachments.Count > 0 Then
+                ' Loop through the attachments and save them to the specified folder
+                For Each olAttachment In olItem.Attachments
+                    olAttachment.SaveAsFile strSaveFolder & olAttachment.FileName
+                Next olAttachment
+            End If
+        Next olItem
+    Else
+        MsgBox "Folder not found: Location\jeremy.kaaria@********.com\Work\Reports", vbExclamation
+    End If
+    
+    ' Release objects
+    Set olAttachment = Nothing
+    Set olItem = Nothing
+    Set olSubFolder = Nothing
+    Set olFolder = Nothing
+    Set olNamespace = Nothing
+    Set olApp = Nothing
+End Sub
