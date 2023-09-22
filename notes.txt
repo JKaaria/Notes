@@ -19,7 +19,8 @@ Sub CopyFilesAndData()
             SourceWorkbook.Close SaveChanges:=False
         End If
         
-        File2 = Dir(DataFolder & "*.*")
+        ' Get the next file in the "data" folder
+        File2 = Dir
         If File2 <> "" Then
             ' Open the second file in the "data" folder
             Set SourceWorkbook = Workbooks.Open(DataFolder & File2)
