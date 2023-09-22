@@ -1,1 +1,33 @@
 
+Sub RenameAndCopyFiles()
+    Dim DataFolder As String
+    Dim File1 As String
+    Dim File2 As String
+    
+    ' Define the path to the "data" folder
+    DataFolder = ThisWorkbook.Path & "\data\"
+    
+    ' Check if the "data" folder exists
+    If Not Dir(DataFolder, vbDirectory) = "" Then
+        ' Get the list of files in the "data" folder
+        File1 = Dir(DataFolder & "*.*")
+        If File1 <> "" Then
+            ' Rename the first file to "delphi"
+            Name DataFolder & File1 As DataFolder & "delphi"
+            ' Copy data from "delphi" to "Delphi" sheet in Workbook1
+            Workbooks.Open DataFolder & "delphi").Sheets(1).UsedRange.Copy ThisWorkbook.Sheets("Delphi").Cells(1, 3)
+            Workbooks("delphi").Close SaveChanges:=False
+        End If
+        
+        File2 = Dir
+        If File2 <> "" Then
+            ' Rename the second file to "fiss"
+            Name DataFolder & File2 As DataFolder & "fiss"
+            ' Copy data from "fiss" to "FISS" sheet in Workbook1
+            Workbooks.Open DataFolder & "fiss").Sheets(1).UsedRange.Copy ThisWorkbook.Sheets("FISS").Cells(1, 1)
+            Workbooks("fiss").Close SaveChanges:=False
+        End If
+    Else
+        MsgBox "The 'data' folder does not exist in the same directory as this workbook.", vbExclamation
+    End If
+End Sub
