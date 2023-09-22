@@ -1,4 +1,4 @@
-Sub RenameAndCopyFiles()
+Sub CopyFilesAndData()
     Dim DataFolder As String
     Dim File1 As String
     Dim File2 As String
@@ -12,20 +12,18 @@ Sub RenameAndCopyFiles()
         ' Get the list of files in the "data" folder
         File1 = Dir(DataFolder & "*.*")
         If File1 <> "" Then
-            ' Rename the first file to "delphi"
-            Name DataFolder & File1 As DataFolder & "delphi"
-            ' Copy data from "delphi" to "Delphi" sheet in Workbook1
-            Set SourceWorkbook = Workbooks.Open(DataFolder & "delphi")
+            ' Open the first file in the "data" folder
+            Set SourceWorkbook = Workbooks.Open(DataFolder & File1)
+            ' Copy data from the first file to "Delphi" sheet in Workbook1
             SourceWorkbook.Sheets(1).UsedRange.Copy ThisWorkbook.Sheets("Delphi").Cells(1, 3)
             SourceWorkbook.Close SaveChanges:=False
         End If
         
         File2 = Dir(DataFolder & "*.*")
         If File2 <> "" Then
-            ' Rename the second file to "fiss"
-            Name DataFolder & File2 As DataFolder & "fiss"
-            ' Copy data from "fiss" to "FISS" sheet in Workbook1
-            Set SourceWorkbook = Workbooks.Open(DataFolder & "fiss")
+            ' Open the second file in the "data" folder
+            Set SourceWorkbook = Workbooks.Open(DataFolder & File2)
+            ' Copy data from the second file to "FISS" sheet in Workbook1
             SourceWorkbook.Sheets(1).UsedRange.Copy ThisWorkbook.Sheets("FISS").Cells(1, 1)
             SourceWorkbook.Close SaveChanges:=False
         End If
