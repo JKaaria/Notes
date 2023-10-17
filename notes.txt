@@ -1,49 +1,102 @@
-Sub AnalyzeData()
-    ' Define variables
-    Dim wsAllOfferings As Worksheet
-    Dim wsSummary As Worksheet
-    Dim wsMetrics As Worksheet
-    Dim wsVisualizations As Worksheet
-    Dim lastRow As Long
+Sub CreateMarketInsightsDashboard()
+    ' Step 2: Creating Multisheets
+    ' Overview Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Overview"
+    With Sheets("Overview")
+        ' Summarize key metrics using formulas or PivotTables
+        ' Example: Assuming your data starts from cell A1
+        .Range("A1").Value = "Total Value of Offerings"
+        .Range("B1").Formula = "=SUM('All Offerings'!B2:B100)"  ' Adjust the range accordingly
 
-    ' Set references to sheets
-    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
+        ' Add more key metrics as needed
+    End With
 
-    ' Create new sheets
-    Set wsSummary = Sheets.Add(After:=Sheets(Sheets.Count))
-    wsSummary.Name = "Summary"
+    ' Sector Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Sector Analysis"
+    With Sheets("Sector Analysis")
+        ' Use PivotTables for sector analysis
+        ' Example: Assuming your data has sectors in column Z
+        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:Z100", TableDestination:=.Range("A1")
+        ' Create a bar chart to visualize the distribution
+        ' Example: Assuming your PivotTable is in cell A1
+        .Shapes.AddChart2(251, xlColumnClustered).Select
+        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
+    End With
 
-    Set wsMetrics = Sheets.Add(After:=Sheets(Sheets.Count))
-    wsMetrics.Name = "Metrics"
+    ' Rating Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Rating Analysis"
+    With Sheets("Rating Analysis")
+        ' Use PivotTables for rating analysis
+        ' Example: Assuming your data has ratings in columns S, T, U
+        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:U100", TableDestination:=.Range("A1")
+        ' Create charts to show the distribution of ratings
+        ' Example: Assuming your PivotTable is in cell A1
+        .Shapes.AddChart2(251, xlColumnClustered).Select
+        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
+    End With
 
-    Set wsVisualizations = Sheets.Add(After:=Sheets(Sheets.Count))
-    wsVisualizations.Name = "Visualizations"
+    ' Step 3: Creating Visualizations
+    ' Coupon vs. Maturity Date Scatter Plot
+    With Sheets("Overview")
+        ' Assuming your data has Coupon in column Q and Maturity Date in column F
+        .Shapes.AddChart2(73, xlScatterMarkers).Select
+        ActiveChart.SetSourceData Source:=.Range("Q2:Q100, F2:F100")
+        ' Add code to color code points by sector
+    End With
 
-    ' Copy data to the Summary sheet
-    wsAllOfferings.Copy After:=wsSummary
+    ' Issuer-wise Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Issuer Analysis"
+    With Sheets("Issuer Analysis")
+        ' Use PivotTables for issuer analysis
+        ' Example: Assuming your data has issuers in column A
+        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:Z100", TableDestination:=.Range("A1")
+        ' Create a bar chart or pie chart to show the distribution
+        ' Example: Assuming your PivotTable is in cell A1
+        .Shapes.AddChart2(251, xlColumnClustered).Select
+        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
+    End With
 
-    ' Remove unnecessary columns in the Summary sheet
-    wsSummary.Rows("1:1").AutoFilter
-    wsSummary.Rows("1:1").AutoFilter Field:=1, Criteria1:="<>Issuer"
+    ' Time Series Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Time Series Analysis"
+    With Sheets("Time Series Analysis")
+        ' Use a line chart to show the total value of offerings over time
+        ' Example: Assuming your data has Offer Date in column V and Settle Date in column W
+        .Shapes.AddChart2(201, xlLine).Select
+        ActiveChart.SetSourceData Source:=Sheets("Overview").Range("V2:W100")  ' Adjust the range accordingly
+    End With
 
-    ' Calculate metrics in the Metrics sheet
-    ' Example: Calculate average coupon rate
-    lastRow = wsMetrics.Cells(wsMetrics.Rows.Count, "A").End(xlUp).Row + 1
-    wsMetrics.Cells(lastRow, 1).Value = "Average Coupon Rate"
-    wsMetrics.Cells(lastRow, 2).Formula = "=AVERAGE(" & wsAllOfferings.Name & "!S2:S" & wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row & ")"
+    ' Step 4: Interactivity
+    ' Dropdown Menu for Issuers
+    With Sheets("Issuer Analysis")
+        ' Assuming your data has issuers in column A
+        With .Range("A1").Validation
+            .Delete
+            .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+            xlBetween, Formula1:="=UNIQUE('All Offerings'!A2:A100)"
+            .IgnoreBlank = True
+            .InCellDropdown = True
+        End With
+    End With
 
-    ' Create visualizations in the Visualizations sheet
-    ' Example: Create a bar chart for count of offerings by sector
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
-    wsVisualizations.Shapes.AddChart2(251, xlColumnClustered).Select
-    ActiveChart.SetSourceData Source:=wsAllOfferings.Range("Y2:Y" & lastRow)
-    ActiveChart.Axes(xlCategory, xlPrimary).CategoryType = xlCategoryScale
-    ActiveChart.SetElement (msoElementChartTitleAboveChart)
-    ActiveChart.ChartTitle.Text = "Count of Offerings by Sector"
-    ActiveChart.Parent.Name = "OfferingsBySectorChart"
+    ' Dynamic Date Range Selection
+    With Sheets("Time Series Analysis")
+        ' Assuming your data has Offer Date and Settle Date in columns V and W
+        With .Range("X1").Validation
+            .Delete
+            .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+            xlBetween, Formula1:="=UNIQUE('All Offerings'!V2:W100)"
+            .IgnoreBlank = True
+            .InCellDropdown = True
+        End With
+    End With
 
-    ' Add code to analyze patterns and draw insights
-    ' You can customize this based on specific insights you want to draw
+    ' Step 5: Final Touches
+    ' Consistent Formatting - Not provided due to complexity and variability
+    ' Dashboard Navigation - Hyperlinks to navigate between sheets
+    ' Example: On each sheet, create hyperlinks to other sheets
 
-    MsgBox "Analysis completed successfully!"
+    ' Step 6: Save and Share
+    ' Save the workbook with a new name
+    ActiveWorkbook.SaveAs "MarketInsightsDashboard.xlsm"
+
 End Sub
