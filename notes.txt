@@ -18,7 +18,9 @@ Sub CreateMarketInsightsDashboard()
     Set rngData = wsData.UsedRange
 
     ' Define credit rating fields
-    creditRatingFields = Array("S and P", "Moody", "Fitch")
+    Dim creditRatingFieldsList As String
+    creditRatingFieldsList = "S and P,Moody,Fitch"
+    creditRatingFields = Split(creditRatingFieldsList, ",")
 
     ' Create a new worksheet for the dashboard
     Set wsDashboard = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
