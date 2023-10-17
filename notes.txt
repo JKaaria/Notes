@@ -1,10 +1,12 @@
-Sub CreateMarketInsightsDashboard()
+Sub CreateMarketInsightsAndOpportunities()
     ' Declare variables
     Dim wsData As Worksheet
     Dim wsDashboard As Worksheet
     Dim rngData As Range
     Dim chartLocation As Range
     Dim creditRatingFields As Variant
+    Dim lastRow As Long
+    Dim creditRating As String
 
     ' Set references to worksheets
     On Error Resume Next
@@ -17,14 +19,15 @@ Sub CreateMarketInsightsDashboard()
     End If
 
     ' Set the range for data
-    Set rngData = wsData.UsedRange
+    lastRow = wsData.Cells(wsData.Rows.Count, "A").End(xlUp).Row
+    Set rngData = wsData.Range("A1:AI" & lastRow)
 
     ' Create a new worksheet for the dashboard
     Set wsDashboard = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-    wsDashboard.Name = "Market Insights Dashboard"
+    wsDashboard.Name = "Market Insights and Opportunities"
 
     ' Define credit rating fields
-    creditRatingFields = Array("S and P", "Moody", "Fitch")
+    creditRatingFields = Split("S and P,Moody,Fitch", ",")
 
     ' Create charts and tables
     ' Example 1: Offer Amount vs. Discount Price
@@ -43,5 +46,33 @@ Sub CreateMarketInsightsDashboard()
     Set chartLocation = wsDashboard.Range("S1")
     CreatePieChart rngData, chartLocation, "Sector", "Sector-wise Distribution"
 
-    MsgBox "Market Insights Dashboard Created Successfully!", vbInformation
+    ' Business Opportunities Section
+    wsDashboard.Cells(1, 25).Value = "Business Opportunities"
+    wsDashboard.Cells(2, 25).Value = "Issuer"
+    wsDashboard.Cells(2, 26).Value = "Potential Opportunity"
+
+    ' Loop through data to identify potential opportunities
+    For i = 2 To lastRow
+        creditRating = wsData.Cells(i, 9).Value ' Assuming credit rating is in column I (9th column)
+        If IsInArray(creditRating, creditRatingFields) Then
+            ' Add logic to identify specific conditions for business opportunities
+            ' For example, consider issuing more commercial paper for highly rated issuers
+            wsDashboard.Cells(wsDashboard.Cells(wsDashboard.Rows.Count, 25).End(xlUp).Row + 1, 25).Value = wsData.Cells(i, 1).Value ' Issuer name
+            wsDashboard.Cells(wsDashboard.Cells(wsDashboard.Rows.Count, 26).End(xlUp).Row, 26).Value = "High Credit Rating - Explore Opportunities"
+        End If
+    Next i
+
+    MsgBox "Market Insights and Opportunities Dashboard Created Successfully!", vbInformation
 End Sub
+
+Function IsInArray(valToBeFound As Variant, arr As Variant) As Boolean
+    ' Function to check if a value is in an array
+    Dim element As Variant
+    For Each element In arr
+        If element = valToBeFound Then
+            IsInArray = True
+            Exit Function
+        End If
+    Next element
+    IsInArray = False
+End Function
