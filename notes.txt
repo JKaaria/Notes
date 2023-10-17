@@ -1,4 +1,25 @@
 Sub CreateMarketInsightsDashboard()
+
+    ' Step 1: Data Cleaning and Formatting
+    ' Assuming your data starts from cell A1 in "All Offerings" sheet
+    With Sheets("All Offerings").UsedRange
+        ' Remove spaces and special characters from column headers
+        .Replace " ", "_"
+        .Replace "-", "_"
+        .Replace ".", "_"
+        .Replace "(", ""
+        .Replace ")", ""
+
+        ' Remove invalid characters
+        For Each cell In .Rows(1).Cells
+            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, " ", "")
+            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, "-", "")
+            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, ".", "")
+            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, "(", "")
+            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, ")", "")
+        Next cell
+    End With
+
     ' Step 2: Creating Multisheets
     ' Overview Sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Overview"
