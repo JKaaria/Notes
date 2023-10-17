@@ -1,123 +1,115 @@
-Sub CreateMarketInsightsDashboard()
-
-    ' Step 1: Data Cleaning and Formatting
-    ' Assuming your data starts from cell A1 in "All Offerings" sheet
-    With Sheets("All Offerings").UsedRange
-        ' Remove spaces and special characters from column headers
-        .Replace " ", "_"
-        .Replace "-", "_"
-        .Replace ".", "_"
-        .Replace "(", ""
-        .Replace ")", ""
-
-        ' Remove invalid characters
-        For Each cell In .Rows(1).Cells
-            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, " ", "")
-            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, "-", "")
-            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, ".", "")
-            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, "(", "")
-            cell.Value = Application.WorksheetFunction.Substitute(cell.Value, ")", "")
-        Next cell
-    End With
-
-    ' Step 2: Creating Multisheets
-    ' Overview Sheet
+Sub CreateOverviewSheet()
+    ' Create Overview sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Overview"
-    With Sheets("Overview")
-        ' Summarize key metrics using formulas or PivotTables
-        ' Example: Assuming your data starts from cell A1
-        .Range("A1").Value = "Total Value of Offerings"
-        .Range("B1").Formula = "=SUM('All Offerings'!B2:B100)"  ' Adjust the range accordingly
 
-        ' Add more key metrics as needed
-    End With
+    ' Summarize key metrics
+    Sheets("Overview").Range("A1").Value = "Total Value of Offerings"
+    Sheets("Overview").Range("B1").Formula = "=SUM('All Offerings'!B2:B100)"  ' Update the range as needed
 
-    ' Sector Analysis Sheet
+    ' Average Coupon
+    Sheets("Overview").Range("A2").Value = "Average Coupon"
+    Sheets("Overview").Range("B2").Formula = "=AVERAGE('All Offerings'!R2:R100)"  ' Update the range as needed
+End Sub
+
+Sub CreateSectorAnalysisSheet()
+    ' Create Sector Analysis sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Sector Analysis"
-    With Sheets("Sector Analysis")
-        ' Use PivotTables for sector analysis
-        ' Example: Assuming your data has sectors in column Z
-        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:Z100", TableDestination:=.Range("A1")
-        ' Create a bar chart to visualize the distribution
-        ' Example: Assuming your PivotTable is in cell A1
-        .Shapes.AddChart2(251, xlColumnClustered).Select
-        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
-    End With
 
-    ' Rating Analysis Sheet
+    ' Analyze distribution of offerings across sectors
+    ' Assume that Sector is in column W in "All Offerings" sheet
+    Sheets("Sector Analysis").Range("A1").Value = "Sector"
+    Sheets("Sector Analysis").Range("B1").Value = "Number of Offerings"
+    Sheets("Sector Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!W2:W100)"  ' Update the range as needed
+    Sheets("Sector Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!W2:W100,A2)"  ' Update the range as needed
+
+    ' Create a bar chart
+    Dim cht As ChartObject
+    Set cht = Sheets("Sector Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
+    cht.SetSourceData Source:=Sheets("Sector Analysis").Range("A1:B" & Sheets("Sector Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
+End Sub
+
+Sub CreateRatingAnalysisSheet()
+    ' Create Rating Analysis sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Rating Analysis"
-    With Sheets("Rating Analysis")
-        ' Use PivotTables for rating analysis
-        ' Example: Assuming your data has ratings in columns S, T, U
-        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:U100", TableDestination:=.Range("A1")
-        ' Create charts to show the distribution of ratings
-        ' Example: Assuming your PivotTable is in cell A1
-        .Shapes.AddChart2(251, xlColumnClustered).Select
-        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
-    End With
 
-    ' Step 3: Creating Visualizations
-    ' Coupon vs. Maturity Date Scatter Plot
-    With Sheets("Overview")
-        ' Assuming your data has Coupon in column Q and Maturity Date in column F
-        .Shapes.AddChart2(73, xlScatterMarkers).Select
-        ActiveChart.SetSourceData Source:=.Range("Q2:Q100, F2:F100")
-        ' Add code to color code points by sector
-    End With
+    ' Analyze offerings based on credit ratings
+    ' Assume that S&P, Moody's, and Fitch are in columns S, T, U in "All Offerings" sheet
+    Sheets("Rating Analysis").Range("A1").Value = "Rating"
+    Sheets("Rating Analysis").Range("B1").Value = "Number of Offerings"
+    Sheets("Rating Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!S2:S100)"  ' Update the range as needed
+    Sheets("Rating Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!S2:S100,A2)"  ' Update the range as needed
 
-    ' Issuer-wise Analysis Sheet
+    ' Create charts
+    Dim cht As ChartObject
+    Set cht = Sheets("Rating Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
+    cht.SetSourceData Source:=Sheets("Rating Analysis").Range("A1:B" & Sheets("Rating Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
+End Sub
+
+Sub CreateCouponMaturityScatterPlot()
+    ' Create scatter plot on Overview sheet
+    Dim cht As ChartObject
+    Set cht = Sheets("Overview").Shapes.AddChart2(73, xlScatterMarkers, 100, 100, 400, 300).Chart
+    cht.SetSourceData Source:=Sheets("All Offerings").Range("R2:R100,S2:S100")  ' Update the range as needed
+
+    ' Color code by sector
+    cht.SeriesCollection(1).Format.Fill.ForeColor.RGB = RGB(255, 0, 0)  ' Red
+    cht.SeriesCollection(2).Format.Fill.ForeColor.RGB = RGB(0, 255, 0)  ' Green
+    ' Add more colors as needed
+End Sub
+
+Sub CreateIssuerAnalysisSheet()
+    ' Create Issuer Analysis sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Issuer Analysis"
-    With Sheets("Issuer Analysis")
-        ' Use PivotTables for issuer analysis
-        ' Example: Assuming your data has issuers in column A
-        .PivotTableWizard SourceType:=xlDatabase, SourceData:="'All Offerings'!A1:Z100", TableDestination:=.Range("A1")
-        ' Create a bar chart or pie chart to show the distribution
-        ' Example: Assuming your PivotTable is in cell A1
-        .Shapes.AddChart2(251, xlColumnClustered).Select
-        ActiveChart.SetSourceData Source:=.Range("A1").CurrentRegion
-    End With
 
-    ' Time Series Analysis Sheet
+    ' Analyze offerings by issuers
+    ' Assume that Issuer is in column A in "All Offerings" sheet
+    Sheets("Issuer Analysis").Range("A1").Value = "Issuer"
+    Sheets("Issuer Analysis").Range("B1").Value = "Number of Offerings"
+    Sheets("Issuer Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!A2:A100)"  ' Update the range as needed
+    Sheets("Issuer Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!A2:A100,A2)"  ' Update the range as needed
+
+    ' Create a bar chart or pie chart
+    Dim cht As ChartObject
+    Set cht = Sheets("Issuer Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
+    cht.SetSourceData Source:=Sheets("Issuer Analysis").Range("A1:B" & Sheets("Issuer Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
+End Sub
+
+Sub CreateTimeSeriesAnalysisSheet()
+    ' Create Time Series Analysis sheet
     Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Time Series Analysis"
-    With Sheets("Time Series Analysis")
-        ' Use a line chart to show the total value of offerings over time
-        ' Example: Assuming your data has Offer Date in column V and Settle Date in column W
-        .Shapes.AddChart2(201, xlLine).Select
-        ActiveChart.SetSourceData Source:=Sheets("Overview").Range("V2:W100")  ' Adjust the range accordingly
-    End With
 
-    ' Step 4: Interactivity
-    ' Dropdown Menu for Issuers
-    With Sheets("Issuer Analysis")
-        ' Assuming your data has issuers in column A
-        With .Range("A1").Validation
-            .Delete
-            .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-            xlBetween, Formula1:="=UNIQUE('All Offerings'!A2:A100)"
-            .IgnoreBlank = True
-            .InCellDropdown = True
-        End With
-    End With
+    ' Use a line chart to show how the total value of offerings changes over time
+    ' Assume that Offer Date and Settle Date are in columns X and Y in "All Offerings" sheet
+    Sheets("Time Series Analysis").Range("A1").Value = "Date"
+    Sheets("Time Series Analysis").Range("B1").Value = "Total Value"
+    Sheets("Time Series Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!X2:X100)"  ' Update the range as needed
+    Sheets("Time Series Analysis").Range("B2").Formula = "=SUMIFS('All Offerings'!B2:B100, 'All Offerings'!X2:X100, A2)"  ' Update the range as needed
 
-    ' Dynamic Date Range Selection
-    With Sheets("Time Series Analysis")
-        ' Assuming your data has Offer Date and Settle Date in columns V and W
-        With .Range("X1").Validation
-            .Delete
-            .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-            xlBetween, Formula1:="=UNIQUE('All Offerings'!V2:W100)"
-            .IgnoreBlank = True
-            .InCellDropdown = True
-        End With
-    End With
+    ' Create a line chart
+    Dim cht As ChartObject
+    Set cht = Sheets("Time Series Analysis").Shapes.AddChart2(201, xlLine, 100, 100, 400, 300).Chart
+    cht.SetSourceData Source:=Sheets("Time Series Analysis").Range("A1:B" & Sheets("Time Series Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
+End Sub
 
-    ' Step 5: Final Touches
-    ' Consistent Formatting - Not provided due to complexity and variability
-    ' Dashboard Navigation - Hyperlinks to navigate between sheets
-    ' Example: On each sheet, create hyperlinks to other sheets
+Sub CreateDashboardNavigation()
+    ' Create hyperlinks on each sheet for easy navigation
+    For Each ws In Sheets
+        If ws.Name <> "DashboardNavigation" Then
+            Sheets("DashboardNavigation").Hyperlinks.Add _
+                Anchor:=Sheets("DashboardNavigation").Cells(Sheets("DashboardNavigation").Cells(Rows.Count, 1).End(xlUp).Row + 1, 1), _
+                Address:="", SubAddress:="'" & ws.Name & "'!A1", TextToDisplay:=ws.Name
+        End If
+    Next ws
+End Sub
 
-    ' Step 6: Save and Share
-    ' Save the workbook with a new name
-    ActiveWorkbook.SaveAs "MarketInsightsDashboard.xlsm"
+Sub FormatDashboard()
+    ' Ensure consistent formatting
+    ' Apply color coding, font styles, etc.
+End Sub
 
+Sub CreateInstructionsSheet()
+    ' Create Instructions sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Instructions"
+
+    ' Include instructions or tooltips
 End Sub
