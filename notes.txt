@@ -4,6 +4,7 @@ Sub CreateMarketInsightsDashboard()
     Dim wsDashboard As Worksheet
     Dim rngData As Range
     Dim chartLocation As Range
+    Dim creditRatingFields As Variant
 
     ' Set references to worksheets
     Set wsData = ThisWorkbook.Sheets("All Offerings")
@@ -14,6 +15,9 @@ Sub CreateMarketInsightsDashboard()
 
     ' Set the range for data
     Set rngData = wsData.UsedRange
+
+    ' Define credit rating fields
+    creditRatingFields = Array("S and P", "Moody", "Fitch")
 
     ' Create charts and tables
     ' Example 1: Offer Amount vs. Discount Price
@@ -26,7 +30,7 @@ Sub CreateMarketInsightsDashboard()
 
     ' Example 3: Credit Ratings Distribution
     Set chartLocation = wsDashboard.Range("M1")
-    CreateBarChart rngData, chartLocation, Array("S and P", "Moody", "Fitch"), "Count of Offerings by Credit Rating"
+    CreateBarChart rngData, chartLocation, creditRatingFields, "Count of Offerings by Credit Rating"
 
     ' Example 4: Sector-wise Distribution
     Set chartLocation = wsDashboard.Range("S1")
