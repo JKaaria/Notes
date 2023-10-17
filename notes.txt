@@ -2,12 +2,19 @@ Option Explicit
 
 Sub CreateMarketInsightsDashboard()
     Dim dashboardSheet As Worksheet
-    On Error Resume Next
-    Set dashboardSheet = Sheets("Market_Insights_Dashboard")
-    On Error GoTo 0 ' Reset error handling to default
+    Dim sheetExists As Boolean
+    sheetExists = False
+
+    ' Check if "Market_Insights_Dashboard" sheet exists
+    For Each dashboardSheet In Worksheets
+        If dashboardSheet.Name = "Market_Insights_Dashboard" Then
+            sheetExists = True
+            Exit For
+        End If
+    Next dashboardSheet
 
     ' If the sheet doesn't exist, create it
-    If dashboardSheet Is Nothing Then
+    If Not sheetExists Then
         Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Market_Insights_Dashboard"
         Set dashboardSheet = Sheets("Market_Insights_Dashboard")
     End If
