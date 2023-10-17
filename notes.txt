@@ -7,18 +7,8 @@ Sub DisplayColumnNames()
         Exit Sub
     End If
 
-    On Error Resume Next
-    Dim tbl As ListObject
-    Set tbl = wsData.ListObjects(1)
-    On Error GoTo 0
-
-    If tbl Is Nothing Then
-        MsgBox "No structured table (ListObject) found in 'All Offerings' sheet.", vbExclamation
-        Exit Sub
-    End If
-
-    Dim col As ListColumn
-    For Each col In tbl.ListColumns
-        Debug.Print col.Name
+    Dim col As Range
+    For Each col In wsData.UsedRange.Rows(1).Cells
+        Debug.Print col.Value
     Next col
 End Sub
