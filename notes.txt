@@ -1,5 +1,12 @@
-Sub DisplayColumnNames()
+Sub CreateMarketInsightsDashboard()
+    ' Declare variables
     Dim wsData As Worksheet
+    Dim wsDashboard As Worksheet
+    Dim rngData As Range
+    Dim chartLocation As Range
+    Dim creditRatingFields As Variant
+
+    ' Set references to worksheets
     Set wsData = ThisWorkbook.Sheets("All Offerings")
 
     If wsData Is Nothing Then
@@ -7,11 +14,32 @@ Sub DisplayColumnNames()
         Exit Sub
     End If
 
-    Dim lastCol As Long
-    lastCol = wsData.Cells(1, wsData.Columns.Count).End(xlToLeft).Column
+    ' Set the range for data
+    Set rngData = wsData.UsedRange
 
-    Dim colIndex As Long
-    For colIndex = 1 To lastCol
-        Debug.Print wsData.Cells(1, colIndex).Value
-    Next colIndex
+    ' Define credit rating fields
+    creditRatingFields = Array("S and P", "Moody", "Fitch")
+
+    ' Create a new worksheet for the dashboard
+    Set wsDashboard = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    wsDashboard.Name = "Market Insights Dashboard"
+
+    ' Create charts and tables
+    ' Example 1: Offer Amount vs. Discount Price
+    Set chartLocation = wsDashboard.Range("A1")
+    CreateScatterChart rngData, chartLocation, "Offer Amt (MM)", "Price (Discount)"
+
+    ' Example 2: Maturity Distribution
+    Set chartLocation = wsDashboard.Range("G1")
+    CreateColumnChart rngData, chartLocation, "Maturity Date", "Offer Amt (MM)", "Maturity Distribution"
+
+    ' Example 3: Credit Ratings Distribution
+    Set chartLocation = wsDashboard.Range("M1")
+    CreateBarChart rngData, chartLocation, creditRatingFields, "Count of Offerings by Credit Rating"
+
+    ' Example 4: Sector-wise Distribution
+    Set chartLocation = wsDashboard.Range("S1")
+    CreatePieChart rngData, chartLocation, "Sector", "Sector-wise Distribution"
+
+    MsgBox "Market Insights Dashboard Created Successfully!", vbInformation
 End Sub
