@@ -1,1 +1,100 @@
+Sub CreateMarketInsightsDashboard()
+    ' Declare variables
+    Dim wsData As Worksheet
+    Dim wsDashboard As Worksheet
+    Dim rngData As Range
+    Dim chartLocation As Range
+
+    ' Set references to worksheets
+    Set wsData = ThisWorkbook.Sheets("All Offerings")
+    
+    ' Create a new worksheet for the dashboard
+    Set wsDashboard = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    wsDashboard.Name = "Market Insights Dashboard"
+
+    ' Set the range for data
+    Set rngData = wsData.UsedRange
+
+    ' Create charts and tables
+    ' Example 1: Offer Amount vs. Discount Price
+    Set chartLocation = wsDashboard.Range("A1")
+    CreateScatterChart rngData, chartLocation, "Offer Amt (MM)", "Price (Discount)"
+
+    ' Example 2: Maturity Distribution
+    Set chartLocation = wsDashboard.Range("G1")
+    CreateColumnChart rngData, chartLocation, "Maturity Date", "Offer Amt (MM)", "Maturity Distribution"
+
+    ' Example 3: Credit Ratings Distribution
+    Set chartLocation = wsDashboard.Range("M1")
+    CreateBarChart rngData, chartLocation, Array("S and P", "Moody", "Fitch"), "Count of Offerings by Credit Rating"
+
+    ' Example 4: Sector-wise Distribution
+    Set chartLocation = wsDashboard.Range("S1")
+    CreatePieChart rngData, chartLocation, "Sector", "Sector-wise Distribution"
+
+    ' Additional charts and tables can be added based on your requirements
+    
+    MsgBox "Market Insights Dashboard Created Successfully!", vbInformation
+End Sub
+
+Sub CreateScatterChart(rngData As Range, location As Range, xField As String, yField As String)
+    ' Create a scatter chart
+    Dim cht As ChartObject
+    Set cht = location.Parent.ChartObjects.Add(location.Left, location.Top, 400, 300)
+    
+    ' Set the data range for the chart
+    cht.Chart.SetSourceData Source:=rngData.Columns(xField).Resize(rngData.Rows.Count - 1), PlotBy:=xlColumns
+    
+    ' Set chart properties
+    cht.Chart.ChartType = xlXYScatterLines
+    cht.Chart.HasTitle = True
+    cht.Chart.ChartTitle.Text = yField & " vs. " & xField
+End Sub
+
+Sub CreateColumnChart(rngData As Range, location As Range, xField As String, yField As String, chartTitle As String)
+    ' Create a column chart
+    Dim cht As ChartObject
+    Set cht = location.Parent.ChartObjects.Add(location.Left, location.Top, 400, 300)
+    
+    ' Set the data range for the chart
+    cht.Chart.SetSourceData Source:=rngData.Columns(xField).Resize(rngData.Rows.Count - 1, 1).Offset(1, 0).Resize(rngData.Rows.Count - 1, 1).Resize(rngData.Rows.Count - 1, 1).Offset(, rngData.ListObject.ListColumns(yField).Index - 1)
+    
+    ' Set chart properties
+    cht.Chart.ChartType = xlColumnClustered
+    cht.Chart.HasTitle = True
+    cht.Chart.ChartTitle.Text = chartTitle
+End Sub
+
+Sub CreateBarChart(rngData As Range, location As Range, fields() As Variant, chartTitle As String)
+    ' Create a bar chart
+    Dim cht As ChartObject
+    Set cht = location.Parent.ChartObjects.Add(location.Left, location.Top, 400, 300)
+    
+    ' Set the data range for the chart
+    Dim i As Integer
+    For i = LBound(fields) To UBound(fields)
+        cht.Chart.SeriesCollection.NewSeries
+        cht.Chart.SeriesCollection(i + 1).Name = fields(i)
+        cht.Chart.SeriesCollection(i + 1).Values = rngData.ListObject.ListColumns(fields(i)).DataBodyRange
+    Next i
+    
+    ' Set chart properties
+    cht.Chart.ChartType = xlColumnClustered
+    cht.Chart.HasTitle = True
+    cht.Chart.ChartTitle.Text = chartTitle
+End Sub
+
+Sub CreatePieChart(rngData As Range, location As Range, field As String, chartTitle As String)
+    ' Create a pie chart
+    Dim cht As ChartObject
+    Set cht = location.Parent.ChartObjects.Add(location.Left, location.Top, 400, 300)
+    
+    ' Set the data range for the chart
+    cht.Chart.SetSourceData Source:=rngData.ListObject.ListColumns(field).DataBodyRange.Resize(rngData.Rows.Count - 1, 1).Offset(1, 0)
+    
+    ' Set chart properties
+    cht.Chart.ChartType = xlPie
+    cht.Chart.HasTitle = True
+    cht.Chart.ChartTitle.Text = chartTitle
+End Sub
 
