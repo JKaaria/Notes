@@ -7,11 +7,8 @@ Sub DisplayColumnNames()
         Exit Sub
     End If
 
-    Dim lastCol As Long
-    lastCol = wsData.Cells(1, wsData.Columns.Count).End(xlToLeft).Column
-
-    Dim col As Range
-    For Each col In wsData.Range(wsData.Cells(1, 1), wsData.Cells(1, lastCol))
+    Dim col As Variant
+    For Each col In wsData.Rows(1).SpecialCells(xlCellTypeConstants)
         Debug.Print col.Value
     Next col
 End Sub
