@@ -9,6 +9,6 @@ Sub DisplayColumnNames()
 
     Dim col As ListColumn
     For Each col In wsData.ListObjects(1).ListColumns
-        MsgBox col.Name
+        Debug.Print col.Name
     Next col
 End Sub
