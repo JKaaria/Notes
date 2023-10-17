@@ -1,115 +1,40 @@
-Sub CreateOverviewSheet()
-    ' Create Overview sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Overview"
+Sub ResolveTypeMismatches()
+    Dim myString As String
+    Dim myNumber As Double
+    Dim myInteger As Integer
+    Dim myBoolean As Boolean
 
-    ' Summarize key metrics
-    Sheets("Overview").Range("A1").Value = "Total Value of Offerings"
-    Sheets("Overview").Range("B1").Formula = "=SUM('All Offerings'!B2:B100)"  ' Update the range as needed
+    ' Type mismatch example 1: Assigning a string to a numeric variable
+    On Error Resume Next
+    myNumber = "123"
+    On Error GoTo 0
+    If Err.Number <> 0 Then
+        Debug.Print "Type mismatch: Unable to assign a string to a numeric variable."
+        Err.Clear
+    Else
+        Debug.Print "No type mismatch."
+    End If
 
-    ' Average Coupon
-    Sheets("Overview").Range("A2").Value = "Average Coupon"
-    Sheets("Overview").Range("B2").Formula = "=AVERAGE('All Offerings'!R2:R100)"  ' Update the range as needed
-End Sub
+    ' Type mismatch example 2: Assigning a double to an integer variable
+    On Error Resume Next
+    myInteger = 123.45
+    On Error GoTo 0
+    If Err.Number <> 0 Then
+        Debug.Print "Type mismatch: Unable to assign a double to an integer variable."
+        Err.Clear
+    Else
+        Debug.Print "No type mismatch."
+    End If
 
-Sub CreateSectorAnalysisSheet()
-    ' Create Sector Analysis sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Sector Analysis"
-
-    ' Analyze distribution of offerings across sectors
-    ' Assume that Sector is in column W in "All Offerings" sheet
-    Sheets("Sector Analysis").Range("A1").Value = "Sector"
-    Sheets("Sector Analysis").Range("B1").Value = "Number of Offerings"
-    Sheets("Sector Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!W2:W100)"  ' Update the range as needed
-    Sheets("Sector Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!W2:W100,A2)"  ' Update the range as needed
-
-    ' Create a bar chart
-    Dim cht As ChartObject
-    Set cht = Sheets("Sector Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
-    cht.SetSourceData Source:=Sheets("Sector Analysis").Range("A1:B" & Sheets("Sector Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
-End Sub
-
-Sub CreateRatingAnalysisSheet()
-    ' Create Rating Analysis sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Rating Analysis"
-
-    ' Analyze offerings based on credit ratings
-    ' Assume that S&P, Moody's, and Fitch are in columns S, T, U in "All Offerings" sheet
-    Sheets("Rating Analysis").Range("A1").Value = "Rating"
-    Sheets("Rating Analysis").Range("B1").Value = "Number of Offerings"
-    Sheets("Rating Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!S2:S100)"  ' Update the range as needed
-    Sheets("Rating Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!S2:S100,A2)"  ' Update the range as needed
-
-    ' Create charts
-    Dim cht As ChartObject
-    Set cht = Sheets("Rating Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
-    cht.SetSourceData Source:=Sheets("Rating Analysis").Range("A1:B" & Sheets("Rating Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
-End Sub
-
-Sub CreateCouponMaturityScatterPlot()
-    ' Create scatter plot on Overview sheet
-    Dim cht As ChartObject
-    Set cht = Sheets("Overview").Shapes.AddChart2(73, xlScatterMarkers, 100, 100, 400, 300).Chart
-    cht.SetSourceData Source:=Sheets("All Offerings").Range("R2:R100,S2:S100")  ' Update the range as needed
-
-    ' Color code by sector
-    cht.SeriesCollection(1).Format.Fill.ForeColor.RGB = RGB(255, 0, 0)  ' Red
-    cht.SeriesCollection(2).Format.Fill.ForeColor.RGB = RGB(0, 255, 0)  ' Green
-    ' Add more colors as needed
-End Sub
-
-Sub CreateIssuerAnalysisSheet()
-    ' Create Issuer Analysis sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Issuer Analysis"
-
-    ' Analyze offerings by issuers
-    ' Assume that Issuer is in column A in "All Offerings" sheet
-    Sheets("Issuer Analysis").Range("A1").Value = "Issuer"
-    Sheets("Issuer Analysis").Range("B1").Value = "Number of Offerings"
-    Sheets("Issuer Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!A2:A100)"  ' Update the range as needed
-    Sheets("Issuer Analysis").Range("B2").Formula = "=COUNTIF('All Offerings'!A2:A100,A2)"  ' Update the range as needed
-
-    ' Create a bar chart or pie chart
-    Dim cht As ChartObject
-    Set cht = Sheets("Issuer Analysis").Shapes.AddChart2(201, xlColumnClustered, 100, 100, 400, 300).Chart
-    cht.SetSourceData Source:=Sheets("Issuer Analysis").Range("A1:B" & Sheets("Issuer Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
-End Sub
-
-Sub CreateTimeSeriesAnalysisSheet()
-    ' Create Time Series Analysis sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Time Series Analysis"
-
-    ' Use a line chart to show how the total value of offerings changes over time
-    ' Assume that Offer Date and Settle Date are in columns X and Y in "All Offerings" sheet
-    Sheets("Time Series Analysis").Range("A1").Value = "Date"
-    Sheets("Time Series Analysis").Range("B1").Value = "Total Value"
-    Sheets("Time Series Analysis").Range("A2").Formula = "=UNIQUE('All Offerings'!X2:X100)"  ' Update the range as needed
-    Sheets("Time Series Analysis").Range("B2").Formula = "=SUMIFS('All Offerings'!B2:B100, 'All Offerings'!X2:X100, A2)"  ' Update the range as needed
-
-    ' Create a line chart
-    Dim cht As ChartObject
-    Set cht = Sheets("Time Series Analysis").Shapes.AddChart2(201, xlLine, 100, 100, 400, 300).Chart
-    cht.SetSourceData Source:=Sheets("Time Series Analysis").Range("A1:B" & Sheets("Time Series Analysis").Cells(Rows.Count, 1).End(xlUp).Row)
-End Sub
-
-Sub CreateDashboardNavigation()
-    ' Create hyperlinks on each sheet for easy navigation
-    For Each ws In Sheets
-        If ws.Name <> "DashboardNavigation" Then
-            Sheets("DashboardNavigation").Hyperlinks.Add _
-                Anchor:=Sheets("DashboardNavigation").Cells(Sheets("DashboardNavigation").Cells(Rows.Count, 1).End(xlUp).Row + 1, 1), _
-                Address:="", SubAddress:="'" & ws.Name & "'!A1", TextToDisplay:=ws.Name
-        End If
-    Next ws
-End Sub
-
-Sub FormatDashboard()
-    ' Ensure consistent formatting
-    ' Apply color coding, font styles, etc.
-End Sub
-
-Sub CreateInstructionsSheet()
-    ' Create Instructions sheet
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Instructions"
-
-    ' Include instructions or tooltips
+    ' Type mismatch example 3: Using a boolean variable in a numeric context
+    On Error Resume Next
+    myBoolean = True
+    myNumber = myNumber + myBoolean
+    On Error GoTo 0
+    If Err.Number <> 0 Then
+        Debug.Print "Type mismatch: Unable to use a boolean variable in a numeric context."
+        Err.Clear
+    Else
+        Debug.Print "No type mismatch."
+    End If
 End Sub
