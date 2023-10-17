@@ -1,40 +1,19 @@
 Sub ResolveTypeMismatches()
-    Dim myString As String
-    Dim myNumber As Double
-    Dim myInteger As Integer
-    Dim myBoolean As Boolean
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim cell As Range
 
-    ' Type mismatch example 1: Assigning a string to a numeric variable
-    On Error Resume Next
-    myNumber = "123"
-    On Error GoTo 0
-    If Err.Number <> 0 Then
-        Debug.Print "Type mismatch: Unable to assign a string to a numeric variable."
-        Err.Clear
-    Else
-        Debug.Print "No type mismatch."
-    End If
+    ' Assuming your data is in the "All Offerings" sheet and starts from column B (2) to column AV (49)
+    Set ws = ThisWorkbook.Sheets("All Offerings")
+    Set rng = ws.Range("B2:AV10000")  ' Update the range as needed
 
-    ' Type mismatch example 2: Assigning a double to an integer variable
-    On Error Resume Next
-    myInteger = 123.45
-    On Error GoTo 0
-    If Err.Number <> 0 Then
-        Debug.Print "Type mismatch: Unable to assign a double to an integer variable."
-        Err.Clear
-    Else
-        Debug.Print "No type mismatch."
-    End If
-
-    ' Type mismatch example 3: Using a boolean variable in a numeric context
-    On Error Resume Next
-    myBoolean = True
-    myNumber = myNumber + myBoolean
-    On Error GoTo 0
-    If Err.Number <> 0 Then
-        Debug.Print "Type mismatch: Unable to use a boolean variable in a numeric context."
-        Err.Clear
-    Else
-        Debug.Print "No type mismatch."
-    End If
+    For Each cell In rng
+        ' Check if the cell is not empty
+        If Not IsEmpty(cell.Value) Then
+            ' Attempt to convert the value to Double (you can modify as needed)
+            On Error Resume Next
+            cell.Value = CDbl(cell.Value)
+            On Error GoTo 0
+        End If
+    Next cell
 End Sub
