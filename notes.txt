@@ -1,19 +1,81 @@
-Sub ResolveTypeMismatches()
+Sub CreateMarketInsightsDashboard()
+    ' Create Overview Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Overview"
+    CreateOverviewSheet
+
+    ' Create Sector Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Sector Analysis"
+    CreateSectorAnalysisSheet
+
+    ' Create Rating Analysis Sheet
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Rating Analysis"
+    CreateRatingAnalysisSheet
+End Sub
+
+Sub CreateOverviewSheet()
+    ' Assuming the data is in column B to column X, adjust as needed
     Dim ws As Worksheet
-    Dim rng As Range
-    Dim cell As Range
+    Set ws = ThisWorkbook.Sheets("Overview")
 
-    ' Assuming your data is in the "All Offerings" sheet and starts from column B (2) to column AV (49)
-    Set ws = ThisWorkbook.Sheets("All Offerings")
-    Set rng = ws.Range("B2:AV10000")  ' Update the range as needed
+    ' Total Value of Offerings
+    ws.Range("A1").Value = "Total Value of Offerings"
+    ws.Range("B1").Formula = "=SUM('All Offerings'!B2:B" & Rows.Count & ")"
 
-    For Each cell In rng
-        ' Check if the cell is not empty
-        If Not IsEmpty(cell.Value) Then
-            ' Attempt to convert the value to Double (you can modify as needed)
-            On Error Resume Next
-            cell.Value = CDbl(cell.Value)
-            On Error GoTo 0
-        End If
-    Next cell
+    ' Average Coupon
+    ws.Range("A2").Value = "Average Coupon"
+    ws.Range("B2").Formula = "=AVERAGE('All Offerings'!R2:R" & Rows.Count & ")"
+
+    ' Other metrics...
+
+    ' Apply formatting or additional metrics as needed
+End Sub
+
+Sub CreateSectorAnalysisSheet()
+    ' Assuming the Sector data is in column Y, adjust as needed
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Sector Analysis")
+
+    ' Extract unique sectors
+    ws.Range("A1").Value = "Sector"
+    ws.Range("A2").Formula = "=UNIQUE('All Offerings'!Y2:Y" & Rows.Count & ")"
+
+    ' Count offerings in each sector
+    ws.Range("B1").Value = "Number of Offerings"
+    ws.Range("B2").Formula = "=COUNTIF('All Offerings'!Y2:Y" & Rows.Count & ", A2)"
+
+    ' Create a bar chart
+    Call CreateBarChart(ws, "A1:B" & ws.Cells(ws.Rows.Count, "A").End(xlUp).Row, "Sector Analysis", "Number of Offerings")
+End Sub
+
+Sub CreateRatingAnalysisSheet()
+    ' Assuming the Rating data is in columns S, T, U, adjust as needed
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Rating Analysis")
+
+    ' Extract unique ratings
+    ws.Range("A1").Value = "Rating"
+    ws.Range("A2").Formula = "=UNIQUE('All Offerings'!S2:U" & Rows.Count & ")"
+
+    ' Count offerings with each rating
+    ws.Range("B1").Value = "Number of Offerings"
+    ws.Range("B2").Formula = "=COUNTIF('All Offerings'!S2:U" & Rows.Count & ", A2)"
+
+    ' Create a bar chart
+    Call CreateBarChart(ws, "A1:B" & ws.Cells(ws.Rows.Count, "A").End(xlUp).Row, "Rating Analysis", "Number of Offerings")
+End Sub
+
+Sub CreateBarChart(ws As Worksheet, sourceRange As String, chartTitle As String, dataLabel As String)
+    ' Create a bar chart on the specified sheet
+    Dim cht As ChartObject
+    Set cht = ws.Shapes.AddChart2(201, xlColumnClustered, 100, 100, 375, 225)
+
+    ' Set chart data source
+    cht.Chart.SetSourceData Source:=ws.Range(sourceRange)
+
+    ' Set chart properties
+    cht.Chart.ChartTitle.Text = chartTitle
+    cht.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
+    cht.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = ws.Range("A1").Value
+    cht.Chart.Axes(xlValue, xlPrimary).HasTitle = True
+    cht.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = dataLabel
 End Sub
