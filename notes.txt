@@ -1,101 +1,49 @@
-Option Explicit
-
-Sub CreateMarketInsightsDashboard()
-    Dim dashboardSheet As Worksheet
-    Dim sheetExists As Boolean
-    sheetExists = False
-
-    ' Check if "Market_Insights_Dashboard" sheet exists
-    For Each dashboardSheet In Worksheets
-        If dashboardSheet.Name = "Market_Insights_Dashboard" Then
-            sheetExists = True
-            Exit For
-        End If
-    Next dashboardSheet
-
-    ' If the sheet doesn't exist, create it
-    If Not sheetExists Then
-        Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Market_Insights_Dashboard"
-        Set dashboardSheet = Sheets("Market_Insights_Dashboard")
-    End If
-
-    ' Create a new sheet for the dashboard
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = "Market_Insights_Dashboard"
-    Dim dashboardSheet As Worksheet
-    Set dashboardSheet = Sheets("Market_Insights_Dashboard")
-
-    ' Set up headers for the dashboard
-    dashboardSheet.Cells(1, 1).Value = "Issuer"
-    dashboardSheet.Cells(1, 2).Value = "Offer Amt (MM)"
-    dashboardSheet.Cells(1, 3).Value = "Price (Discount)"
-    dashboardSheet.Cells(1, 4).Value = "DTM"
-    dashboardSheet.Cells(1, 5).Value = "Sector"
-
-    ' Copy relevant data from "All Offerings" sheet to the dashboard
-    Dim allOfferingsSheet As Worksheet
-    Set allOfferingsSheet = Sheets("All Offerings")
-
-    ' Assuming your data starts from row 2 (headers in row 1)
+Sub AnalyzeData()
+    ' Define variables
+    Dim wsAllOfferings As Worksheet
+    Dim wsSummary As Worksheet
+    Dim wsMetrics As Worksheet
+    Dim wsVisualizations As Worksheet
     Dim lastRow As Long
-    lastRow = allOfferingsSheet.Cells(allOfferingsSheet.Rows.Count, "A").End(xlUp).Row
 
-    ' Copy data from "All Offerings" to the dashboard
-    allOfferingsSheet.Range("A2:AA" & lastRow).Copy Destination:=dashboardSheet.Range("A2")
+    ' Set references to sheets
+    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
 
-    ' Add charts or visualizations as needed
-    ' Example: Add a bar chart for Offer Amount
-    Dim chartObj1 As ChartObject
-    Set chartObj1 = dashboardSheet.ChartObjects.Add(Left:=10, Width:=375, Top:=75, Height:=225)
-    chartObj1.Chart.SetSourceData Source:=dashboardSheet.Range("B2:B" & lastRow)
-    chartObj1.Chart.ChartType = xlColumnClustered
-    chartObj1.Chart.HasTitle = True
-    chartObj1.Chart.ChartTitle.Text = "Offer Amount Distribution"
+    ' Create new sheets
+    Set wsSummary = Sheets.Add(After:=Sheets(Sheets.Count))
+    wsSummary.Name = "Summary"
 
-    ' Example: Add a line chart for Price (Discount)
-    Dim chartObj2 As ChartObject
-    Set chartObj2 = dashboardSheet.ChartObjects.Add(Left:=400, Width:=375, Top:=75, Height:=225)
-    chartObj2.Chart.SetSourceData Source:=dashboardSheet.Range("C2:C" & lastRow)
-    chartObj2.Chart.ChartType = xlLineMarkers
-    chartObj2.Chart.HasTitle = True
-    chartObj2.Chart.ChartTitle.Text = "Price (Discount) Trends"
+    Set wsMetrics = Sheets.Add(After:=Sheets(Sheets.Count))
+    wsMetrics.Name = "Metrics"
 
-    ' Add more visualizations as needed
+    Set wsVisualizations = Sheets.Add(After:=Sheets(Sheets.Count))
+    wsVisualizations.Name = "Visualizations"
 
-    ' Add a dropdown list for sector selection
-    With dashboardSheet.Shapes.AddFormControl(xlDropDown, Left:=10, Top:=10, Width:=100, Height:=20)
-        .ControlFormat.AddItem "All Sectors"
-        .ControlFormat.AddItem "Sector 1"
-        .ControlFormat.AddItem "Sector 2"
-        .ControlFormat.AddItem "Sector 3"
-        .Name = "SectorDropdown"
-    End With
+    ' Copy data to the Summary sheet
+    wsAllOfferings.Copy After:=wsSummary
 
-    ' Add a button to apply filters
-    With dashboardSheet.Buttons.Add(Left:=120, Top:=10, Width:=80, Height:=20)
-        .OnAction = "ApplyFilters"
-        .Caption = "Apply Filters"
-        .Name = "ApplyFiltersButton"
-    End With
+    ' Remove unnecessary columns in the Summary sheet
+    wsSummary.Rows("1:1").AutoFilter
+    wsSummary.Rows("1:1").AutoFilter Field:=1, Criteria1:="<>Issuer"
 
-    ' Make the dashboard sheet the active sheet
-    dashboardSheet.Activate
-End Sub
+    ' Calculate metrics in the Metrics sheet
+    ' Example: Calculate average coupon rate
+    lastRow = wsMetrics.Cells(wsMetrics.Rows.Count, "A").End(xlUp).Row + 1
+    wsMetrics.Cells(lastRow, 1).Value = "Average Coupon Rate"
+    wsMetrics.Cells(lastRow, 2).Formula = "=AVERAGE(" & wsAllOfferings.Name & "!S2:S" & wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row & ")"
 
-Sub ApplyFilters()
-    ' Apply filters based on the selected sector
-    Dim dashboardSheet As Worksheet
-    Set dashboardSheet = Sheets("Market_Insights_Dashboard")
+    ' Create visualizations in the Visualizations sheet
+    ' Example: Create a bar chart for count of offerings by sector
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    wsVisualizations.Shapes.AddChart2(251, xlColumnClustered).Select
+    ActiveChart.SetSourceData Source:=wsAllOfferings.Range("Y2:Y" & lastRow)
+    ActiveChart.Axes(xlCategory, xlPrimary).CategoryType = xlCategoryScale
+    ActiveChart.SetElement (msoElementChartTitleAboveChart)
+    ActiveChart.ChartTitle.Text = "Count of Offerings by Sector"
+    ActiveChart.Parent.Name = "OfferingsBySectorChart"
 
-    ' Get the selected sector from the dropdown
-    Dim sectorDropdown As Shape
-    Set sectorDropdown = dashboardSheet.Shapes("SectorDropdown")
-    Dim selectedSector As String
-    selectedSector = sectorDropdown.ControlFormat.List(sectorDropdown.ControlFormat.ListIndex)
+    ' Add code to analyze patterns and draw insights
+    ' You can customize this based on specific insights you want to draw
 
-    ' Apply filters based on the selected sector
-    If selectedSector <> "All Sectors" Then
-        dashboardSheet.Rows("2:" & dashboardSheet.Rows.Count).AutoFilter Field:=5, Criteria1:=selectedSector
-    Else
-        dashboardSheet.AutoFilterMode = False ' Clear filters if "All Sectors" is selected
-    End If
+    MsgBox "Analysis completed successfully!"
 End Sub
