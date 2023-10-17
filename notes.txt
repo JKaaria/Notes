@@ -7,7 +7,9 @@ Sub CreateMarketInsightsDashboard()
     Dim creditRatingFields As Variant
 
     ' Set references to worksheets
+    On Error Resume Next
     Set wsData = ThisWorkbook.Sheets("All Offerings")
+    On Error GoTo 0
 
     If wsData Is Nothing Then
         MsgBox "Sheet 'All Offerings' not found!", vbExclamation
@@ -17,14 +19,12 @@ Sub CreateMarketInsightsDashboard()
     ' Set the range for data
     Set rngData = wsData.UsedRange
 
-    ' Define credit rating fields
-    Dim creditRatingFieldsList As String
-    creditRatingFieldsList = "S and P,Moody,Fitch"
-    creditRatingFields = Split(creditRatingFieldsList, ",")
-
     ' Create a new worksheet for the dashboard
     Set wsDashboard = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
     wsDashboard.Name = "Market Insights Dashboard"
+
+    ' Define credit rating fields
+    creditRatingFields = Array("S and P", "Moody", "Fitch")
 
     ' Create charts and tables
     ' Example 1: Offer Amount vs. Discount Price
