@@ -12,7 +12,7 @@ Sub AnalyseRatingsColumns()
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
     ' Clear previous data in Overview sheet
-    wsOverview.Range("M:O").Clear
+    wsOverview.Range("M:P").Clear
     
     ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
@@ -28,6 +28,12 @@ Sub AnalyseRatingsColumns()
         uniqueRatings.Add wsAllOfferings.Cells(i, "K").Value, CStr(wsAllOfferings.Cells(i, "K").Value)
     Next i
     On Error GoTo 0
+    
+    ' Write titles to the Overview sheet
+    wsOverview.Cells(1, "M").Value = "Rating"
+    wsOverview.Cells(1, "N").Value = "Count (S&P)"
+    wsOverview.Cells(1, "O").Value = "Count (Moody)"
+    wsOverview.Cells(1, "P").Value = "Count (Fitch)"
     
     ' Loop through unique ratings and count occurrences
     For Each rating In uniqueRatings
