@@ -36,13 +36,25 @@ Sub CreateOverviewSheet()
     ' Copy headers to the "Overview" sheet
     wsAllOfferings.Rows(1).Copy wsOverview.Rows(1)
 
-    ' Add summary metrics (you can customize this based on your requirements)
+    ' Add summary metrics
     wsOverview.Cells(2, 31).Value = "Total Offerings"
     wsOverview.Cells(3, 31).Formula = "=COUNTA('All Offerings'!A:A)-1"
-    
+
     wsOverview.Cells(2, 32).Value = "Total Offer Amount (MM)"
     wsOverview.Cells(3, 32).Formula = "=SUM('All Offerings'!B2:B" & lastRow & ")"
-    
+
+    wsOverview.Cells(2, 33).Value = "Average Discount"
+    wsOverview.Cells(3, 33).Formula = "=AVERAGE('All Offerings'!C2:C" & lastRow & ")"
+
+    wsOverview.Cells(2, 34).Value = "Total Maturity Value (MM)"
+    wsOverview.Cells(3, 34).Formula = "=SUM('All Offerings'!B2:B" & lastRow & "*(1+'All Offerings'!C2:C" & lastRow & "/100))"
+
+    wsOverview.Cells(2, 35).Value = "Average Days to Maturity (DTM)"
+    wsOverview.Cells(3, 35).Formula = "=AVERAGE('All Offerings'!D2:D" & lastRow & ")"
+
+    wsOverview.Cells(2, 36).Value = "Total Net Upfront (MM)"
+    wsOverview.Cells(3, 36).Formula = "=SUM('All Offerings'!V2:V" & lastRow & ")"
+
     ' Add more summary metrics as needed
 
     ' Format the "Overview" sheet
