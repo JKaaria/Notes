@@ -26,8 +26,16 @@ Sub AnalyzeRatings()
     
     ' Loop through data in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
+        ' Check if the cell value is numeric before adding to mean
+        If IsNumeric(wsAllOfferings.Cells(i, 8).Value) Then
+            meanClientRegType = meanClientRegType + CDbl(wsAllOfferings.Cells(i, 8).Value) ' Column H
+        Else
+            ' Handle the case where the cell value is not numeric (e.g., non-numeric text)
+            ' You can choose to ignore, display a message, or take appropriate action
+            MsgBox "Non-numeric value found in Client Reg Type at row " & i
+        End If
+        
         ' Sum up values for mean
-        meanClientRegType = meanClientRegType + wsAllOfferings.Cells(i, 8) ' Column H
         totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I
         totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J
         totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K
