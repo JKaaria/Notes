@@ -1,8 +1,63 @@
-On Error Resume Next
-Set wsOverview = ThisWorkbook.Sheets("Overview")
-On Error GoTo 0
-
-If wsOverview Is Nothing Then
-    MsgBox "Overview sheet not found!", vbExclamation
-    Exit Sub
-End If
+Sub AnalyzeSectors()
+    Dim wsAllOfferings As Worksheet
+    Dim wsOverview As Worksheet
+    Dim lastRow As Long
+    Dim sector As String
+    Dim uniqueSectors As Collection
+    Dim totalDiscount As Double
+    Dim totalCoupons As Double
+    Dim offeringsCount As Integer
+    
+    ' Set references to worksheets
+    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
+    
+    ' Check if "Overview" sheet exists, if not, create it
+    On Error Resume Next
+    Set wsOverview = ThisWorkbook.Sheets("Overview")
+    On Error GoTo 0
+    If wsOverview Is Nothing Then
+        Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsOverview.Name = "Overview"
+    End If
+    
+    ' Clear previous data in "Overview" sheet
+    wsOverview.Cells.Clear
+    
+    ' Set headers in "Overview" sheet
+    wsOverview.Range("D1").Value = "Sector"
+    wsOverview.Range("E1").Value = "Average Discount"
+    wsOverview.Range("F1").Value = "Total Coupons"
+    wsOverview.Range("G1").Value = "Number of Offerings"
+    
+    ' Set reference to unique sectors using Collection
+    Set uniqueSectors = New Collection
+    
+    ' Find the last row in column A of "All Offerings" sheet
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    
+    ' Loop through each row in "All Offerings" sheet
+    For i = 2 To lastRow ' Assuming headers are in the first row
+        
+        ' Get sector from column X (assuming X is the column number for "Sector")
+        sector = wsAllOfferings.Cells(i, 24).Value
+        
+        ' Check if sector is not already in the collection
+        On Error Resume Next
+        uniqueSectors.Add sector, CStr(sector)
+        On Error GoTo 0
+        
+        ' Update data for the sector
+        totalDiscount = totalDiscount + wsAllOfferings.Cells(i, 3).Value ' Assuming column C is for "Price (Discount)"
+        totalCoupons = totalCoupons + wsAllOfferings.Cells(i, 17).Value ' Assuming column Q is for "Coupon"
+        offeringsCount = offeringsCount + 1
+    Next i
+    
+    ' Populate data in "Overview" sheet
+    For i = 1 To uniqueSectors.Count
+        sector = uniqueSectors(i)
+        wsOverview.Cells(i + 1, 4).Value = sector
+        wsOverview.Cells(i + 1, 5).Value = totalDiscount / offeringsCount
+        wsOverview.Cells(i + 1, 6).Value = totalCoupons
+        wsOverview.Cells(i + 1, 7).Value = offeringsCount
+    Next i
+End Sub
