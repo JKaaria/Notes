@@ -6,6 +6,10 @@ Sub AnalyseRatings()
     Dim i As Long
     Dim clientCategories As Collection
     Dim category As Variant
+    Dim ratingSumSP As Double
+    Dim ratingSumMoody As Double
+    Dim ratingSumFitch As Double
+    Dim ratingCount As Long
     
     ' Set references to sheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
@@ -20,20 +24,37 @@ Sub AnalyseRatings()
     ' Loop through data in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in row 1
         ' Collect unique client categories
+        On Error Resume Next ' Handle type mismatch errors
         clientCategories.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
+        On Error GoTo 0
     Next i
     
     ' Write data to Overview sheet
     wsOverview.Range("I:L").Clear ' Clear existing data in columns I to L
     
     ' Write headers
-    wsOverview.Range("I1").Value = "Reg Type" ' Rename cell I1 as "Reg Type"
+    wsOverview.Range("I1").Value = "Reg Type"
     wsOverview.Range("J1").Value = "Average Rating (S&P)"
     wsOverview.Range("K1").Value = "Average Rating (Moody)"
     wsOverview.Range("L1").Value = "Average Rating (Fitch)"
     
-    ' Loop through unique client categories and calculate averages using formulas
+    ' Loop through unique client categories and calculate averages
     For Each category In clientCategories
+        ratingSumSP = 0
+        ratingSumMoody = 0
+        ratingSumFitch = 0
+        ratingCount = 0
+        
+        ' Loop through data in All Offerings sheet to calculate sum and count
+        For i = 2 To lastRow
+            If wsAllOfferings.Cells(i, 8).Value = category Then
+                ratingSumSP = ratingSumSP + wsAllOfferings.Cells(i, 9).Value
+                ratingSumMoody = ratingSumMoody + wsAllOfferings.Cells(i, 10).Value
+                ratingSumFitch = ratingSumFitch + wsAllOfferings.Cells(i, 11).Value
+                ratingCount = ratingCount + 1
+            End If
+        Next i
+        
         ' Find row in Overview sheet
         Dim overviewRow As Long
         overviewRow = wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Row + 1
@@ -41,12 +62,11 @@ Sub AnalyseRatings()
         ' Write client category to Overview sheet
         wsOverview.Cells(overviewRow, 9).Value = category
         
-        ' Calculate averages using formulas
-        wsOverview.Cells(overviewRow, 10).Formula = "=AVERAGEIFS('All Offerings'!I:I, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
-        wsOverview.Cells(overviewRow, 11).Formula = "=AVERAGEIFS('All Offerings'!J:J, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
-        wsOverview.Cells(overviewRow, 12).Formula = "=AVERAGEIFS('All Offerings'!K:K, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
+        ' Calculate and write average ratings
+        If ratingCount > 0 Then
+            wsOverview.Cells(overviewRow, 10).Value = ratingSumSP / ratingCount
+            wsOverview.Cells(overviewRow, 11).Value = ratingSumMoody / ratingCount
+            wsOverview.Cells(overviewRow, 12).Value = ratingSumFitch / ratingCount
+        End If
     Next category
-    
-    ' Convert formulas to values (optional)
-    wsOverview.Range("J:L").Value = wsOverview.Range("J:L").Value
 End Sub
