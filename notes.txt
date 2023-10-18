@@ -1,165 +1,33 @@
-Sub GenerateCommercialPaperAnalysis()
-
-    ' Load data from "All Offerings" sheet
+Sub CleanAndFormatData()
     Dim ws As Worksheet
+    Dim lastRow As Long
+
+    ' Set the worksheet
     Set ws = ThisWorkbook.Sheets("All Offerings")
 
-    ' Data Cleaning and Formatting
-    Call CleanAndFormatData(ws)
+    ' Find the last row with data
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
 
-    ' Create a new sheet for analysis
-    Dim analysisWs As Worksheet
-    Set analysisWs = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-    analysisWs.Name = "CommercialPaperAnalysis"
+    ' Apply filters to all columns
+    ws.Range("A1").AutoFilter Field:=1, Criteria1:="<>"
 
-    ' Overview Sheet
-    Call CreateOverviewSheet(ws, analysisWs)
+    ' Loop through each column and clean data
+    For Each col In ws.UsedRange.Columns
+        ' Check for empty cells in the column and fill down if necessary
+        col.SpecialCells(xlCellTypeBlanks).FormulaR1C1 = "=R[-1]C"
+    Next col
 
-    ' Sector Analysis
-    Call CreateSectorAnalysis(ws, analysisWs)
+    ' Remove filters
+    ws.AutoFilterMode = False
 
-    ' Rating Analysis
-    Call CreateRatingAnalysis(ws, analysisWs)
+    ' Format dates, numbers, and percentages
+    ws.Columns("D:E").NumberFormat = "yyyy-mm-dd"
+    ws.Columns("B:F,I:J,M:O,S:T,V:X,AA:AC,AF").NumberFormat = "0.00"
+    ws.Columns("Y,Z,AG:AG").NumberFormat = "0%"
+    ws.Columns("U").NumberFormat = "0"
 
-    ' Issuer-wise Analysis
-    Call CreateIssuerAnalysis(ws, analysisWs)
+    ' Autofit columns for better visibility
+    ws.Columns.AutoFit
 
-    ' Coupon vs. Maturity Date
-    Call CreateCouponVsMaturity(ws, analysisWs)
-
-    ' Time Series Analysis
-    Call CreateTimeSeriesAnalysis(ws, analysisWs)
-
-    MsgBox "Commercial Paper Analysis is complete!", vbInformation
-
-End Sub
-
-Sub CleanAndFormatData(ws As Worksheet)
-    ' Data Cleaning and Formatting
-    ws.Cells.Clear
-    ' Add your data loading and cleaning logic here
-End Sub
-
-Sub CreateOverviewSheet(ws As Worksheet, analysisWs As Worksheet)
-    ' Overview Sheet
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Overview"
-    analysisWs.Range("A1:B1").Value = Array("Metric", "Value")
-    analysisWs.Range("A2").Value = "Total Value of Offerings"
-    analysisWs.Range("B2").Formula = "=SUM('" & ws.Name & "'!C2)"
-    ' Add more key metrics as needed
-End Sub
-
-Sub CreateSectorAnalysis(ws As Worksheet, analysisWs As Worksheet)
-    ' Sector Analysis
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Sector Analysis"
-
-    ' Copy relevant columns to analysis sheet
-    ws.Range("C:H").Copy Destination:=analysisWs.Range("A1")
-
-    ' Apply conditional formatting to highlight sectors
-    Dim lastRow As Long
-    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "C").End(xlUp).Row
-
-    analysisWs.Range("C2:C" & lastRow).FormatConditions.Delete
-    analysisWs.Range("C2:C" & lastRow).FormatConditions.AddUniqueValues
-    analysisWs.Range("C2:C" & lastRow).FormatConditions(1).Font.Color = -16383844
-    analysisWs.Range("C2:C" & lastRow).FormatConditions(1).Interior.Color = 13551615
-
-    ' Add annotations
-    Dim cell As Range
-    For Each cell In analysisWs.Range("C2:C" & lastRow)
-        cell.AddComment cell.Value
-    Next cell
-End Sub
-
-Sub CreateRatingAnalysis(ws As Worksheet, analysisWs As Worksheet)
-    ' Rating Analysis
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Rating Analysis"
-
-    ' Copy relevant columns to analysis sheet
-    ws.Range("H:I").Copy Destination:=analysisWs.Range("A1")
-
-    ' Apply conditional formatting to highlight ratings
-    Dim lastRow As Long
-    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
-
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
-
-    ' Add annotations
-    Dim cell As Range
-    For Each cell In analysisWs.Range("A2:A" & lastRow)
-        cell.AddComment cell.Value
-    Next cell
-End Sub
-
-Sub CreateIssuerAnalysis(ws As Worksheet, analysisWs As Worksheet)
-    ' Issuer-wise Analysis
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Issuer-wise Analysis"
-
-    ' Copy relevant columns to analysis sheet
-    ws.Range("A:H").Copy Destination:=analysisWs.Range("A1")
-
-    ' Apply conditional formatting to highlight issuers
-    Dim lastRow As Long
-    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
-
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
-
-    ' Add annotations
-    Dim cell As Range
-    For Each cell In analysisWs.Range("A2:A" & lastRow)
-        cell.AddComment cell.Value
-    Next cell
-End Sub
-
-Sub CreateCouponVsMaturity(ws As Worksheet, analysisWs As Worksheet)
-    ' Coupon vs. Maturity Date
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Coupon vs. Maturity Date"
-
-    ' Copy relevant columns to analysis sheet
-    ws.Range("E:H").Copy Destination:=analysisWs.Range("A1")
-
-    ' Apply conditional formatting to highlight sectors
-    Dim lastRow As Long
-    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
-
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
-    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
-    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
-
-    ' Add annotations
-    Dim cell As Range
-    For Each cell In analysisWs.Range("A2:A" & lastRow)
-        cell.AddComment cell.Value
-    Next cell
-End Sub
-
-Sub CreateTimeSeriesAnalysis(ws As Worksheet, analysisWs As Worksheet)
-    ' Time Series Analysis
-    analysisWs.Cells.Clear
-    analysisWs.Name = "Time Series Analysis"
-
-    ' Copy relevant columns to analysis sheet
-    ws.Range("U:V").Copy Destination:=analysisWs.Range("A1")
-
-    ' Add annotations
-    Dim lastRow As Long
-    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "U").End(xlUp).Row
-
-    Dim cell As Range
-    For Each cell In analysisWs.Range("U2:U" & lastRow)
-        cell.AddComment cell.Value
-    Next cell
+    MsgBox "Data has been cleaned and formatted successfully!", vbInformation
 End Sub
