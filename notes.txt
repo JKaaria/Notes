@@ -27,8 +27,8 @@ Sub AnalyzeRatings()
     ' Loop through data in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
         ' Check if the cell value is numeric before adding to mean
-        If IsNumeric(wsAllOfferings.Cells(i, 8).Value) Then
-            meanClientRegType = meanClientRegType + CDbl(wsAllOfferings.Cells(i, 8).Value) ' Column H
+        If IsNumeric(GetNumericValue(wsAllOfferings.Cells(i, 8).Value)) Then
+            meanClientRegType = meanClientRegType + CDbl(GetNumericValue(wsAllOfferings.Cells(i, 8).Value)) ' Column H
         Else
             ' Handle the case where the cell value is not numeric (e.g., non-numeric text)
             ' You can choose to ignore, display a message, or take appropriate action
@@ -53,3 +53,19 @@ Sub AnalyzeRatings()
     wsOverview.Cells(2, 11).Value = avgMoodyRating ' Column K
     wsOverview.Cells(2, 12).Value = avgFitchRating ' Column L
 End Sub
+
+Function GetNumericValue(value As String) As String
+    Dim result As String
+    Dim i As Integer
+    result = ""
+    
+    For i = 1 To Len(value)
+        Dim currentChar As String
+        currentChar = Mid(value, i, 1)
+        If IsNumeric(currentChar) Or currentChar = "." Then
+            result = result & currentChar
+        End If
+    Next i
+    
+    GetNumericValue = result
+End Function
