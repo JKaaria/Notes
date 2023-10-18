@@ -41,8 +41,8 @@ Sub PerformSectorAnalysis()
     ' Add headers for sector analysis
     wsOverview.Cells(1, 34).Value = "Sector Analysis"
 
-    ' Find the column containing sector information
-    Set sectorColumn = wsAllOfferings.Rows(1).Find(What:="Sector", LookIn:=xlValues, LookAt:=xlWhole)
+    ' Set the sector column to column X
+    Set sectorColumn = wsAllOfferings.Columns("X")
 
     If Not sectorColumn Is Nothing Then
         ' Extract unique sectors using a collection
