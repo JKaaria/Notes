@@ -1,74 +1,55 @@
 Sub AnalyseRatings()
-    ' Declare variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
+    Dim i As Long
     Dim uniqueCodes As Collection
     Dim code As Variant
-    Dim totalSP As Double, totalMoody As Double, totalFitch As Double
-    Dim countSP As Integer, countMoody As Integer, countFitch As Integer
+    Dim spTotal As Double, moodyTotal As Double, fitchTotal As Double
+    Dim spCount As Long, moodyCount As Long, fitchCount As Long
     
     ' Set references to worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in the All Offerings sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "H").End(xlUp).Row
+    ' Find the last row in All Offerings sheet
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Initialize a collection to store unique codes
+    ' Initialize collections and totals
     Set uniqueCodes = New Collection
+    spTotal = 0
+    moodyTotal = 0
+    fitchTotal = 0
+    spCount = 0
+    moodyCount = 0
+    fitchCount = 0
     
-    ' Loop through the All Offerings sheet to collect unique codes
-    For i = 2 To lastRow ' Assuming header is in row 1
+    ' Loop through each row in All Offerings sheet
+    For i = 2 To lastRow ' Assuming headers are in row 1
+        ' Get unique code from column H
+        code = wsAllOfferings.Cells(i, 8).Value
         On Error Resume Next
-        uniqueCodes.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
+        uniqueCodes.Add code, CStr(code)
         On Error GoTo 0
+        
+        ' Sum ratings based on the agency and reg type
+        spTotal = spTotal + wsAllOfferings.Cells(i, 9).Value
+        moodyTotal = moodyTotal + wsAllOfferings.Cells(i, 10).Value
+        fitchTotal = fitchTotal + wsAllOfferings.Cells(i, 11).Value
+        
+        ' Count ratings based on the agency and reg type
+        spCount = spCount + 1
+        moodyCount = moodyCount + 1
+        fitchCount = fitchCount + 1
     Next i
     
-    ' Loop through unique codes to analyze ratings
-    For Each code In uniqueCodes
-        ' Reset variables for each code
-        totalSP = 0
-        totalMoody = 0
-        totalFitch = 0
-        countSP = 0
-        countMoody = 0
-        countFitch = 0
-        
-        ' Loop through All Offerings to calculate totals and counts
-        For i = 2 To lastRow
-            If wsAllOfferings.Cells(i, 8).Value = code Then
-                ' Check if S&P rating exists
-                If Not IsEmpty(wsAllOfferings.Cells(i, 9).Value) Then
-                    totalSP = totalSP + wsAllOfferings.Cells(i, 9).Value
-                    countSP = countSP + 1
-                End If
-                
-                ' Check if Moody's rating exists
-                If Not IsEmpty(wsAllOfferings.Cells(i, 10).Value) Then
-                    totalMoody = totalMoody + wsAllOfferings.Cells(i, 10).Value
-                    countMoody = countMoody + 1
-                End If
-                
-                ' Check if Fitch rating exists
-                If Not IsEmpty(wsAllOfferings.Cells(i, 11).Value) Then
-                    totalFitch = totalFitch + wsAllOfferings.Cells(i, 11).Value
-                    countFitch = countFitch + 1
-                End If
-            End If
-        Next i
-        
-        ' Calculate averages and update Overview sheet
-        If countSP > 0 Then
-            wsOverview.Cells(code, 9).Value = totalSP / countSP
-        End If
-        
-        If countMoody > 0 Then
-            wsOverview.Cells(code, 10).Value = totalMoody / countMoody
-        End If
-        
-        If countFitch > 0 Then
-            wsOverview.Cells(code, 11).Value = totalFitch / countFitch
-        End If
-    Next code
+    ' Write results to Overview sheet
+    wsOverview.Range("I2:I" & uniqueCodes.Count + 1).Value = Application.Transpose(uniqueCodes.Items)
+    wsOverview.Range("J2").Formula = "=AVERAGEIF('All Offerings'!$H$2:$H$" & lastRow & ",$I2,'All Offerings'!$I$2:$I$" & lastRow & ")"
+    wsOverview.Range("K2").Formula = "=AVERAGEIFS('All Offerings'!$J$2:$J$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",$I2)"
+    wsOverview.Range("J3").Formula = "=AVERAGE('All Offerings'!$I$2:$I$" & lastRow & ")"
+    wsOverview.Range("K3").Formula = "=AVERAGE('All Offerings'!$J$2:$J$" & lastRow & ")"
+    
+    ' Clean up
+    Set uniqueCodes = Nothing
 End Sub
