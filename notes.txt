@@ -1,10 +1,10 @@
-Sub AnalyseRatings()
+Sub AnalyseRatingsColumns()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim uniqueRegTypes As Collection
-    Dim regType As Variant
-    Dim countRegType As Long
+    Dim uniqueRatings As Collection
+    Dim rating As Variant
+    Dim countSP As Long, countMoody As Long, countFitch As Long
     Dim i As Long
     
     ' Set worksheets
@@ -12,33 +12,47 @@ Sub AnalyseRatings()
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
     ' Clear previous data in Overview sheet
-    wsOverview.Range("I:O").Clear
+    wsOverview.Range("M:O").Clear
     
     ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
     ' Initialize collections
-    Set uniqueRegTypes = New Collection
+    Set uniqueRatings = New Collection
     
-    ' Loop through All Offerings sheet to gather unique regulatory types
+    ' Loop through All Offerings sheet to gather unique ratings
     On Error Resume Next
     For i = 2 To lastRow ' Assuming headers are in row 1
-        uniqueRegTypes.Add wsAllOfferings.Cells(i, "H").Value, CStr(wsAllOfferings.Cells(i, "H").Value)
+        uniqueRatings.Add wsAllOfferings.Cells(i, "I").Value, CStr(wsAllOfferings.Cells(i, "I").Value)
+        uniqueRatings.Add wsAllOfferings.Cells(i, "J").Value, CStr(wsAllOfferings.Cells(i, "J").Value)
+        uniqueRatings.Add wsAllOfferings.Cells(i, "K").Value, CStr(wsAllOfferings.Cells(i, "K").Value)
     Next i
     On Error GoTo 0
     
-    ' Loop through unique regulatory types and count issuances
-    For Each regType In uniqueRegTypes
-        countRegType = 0
+    ' Loop through unique ratings and count occurrences
+    For Each rating In uniqueRatings
+        countSP = 0
+        countMoody = 0
+        countFitch = 0
         
         For i = 2 To lastRow
-            If CStr(wsAllOfferings.Cells(i, "H").Value) = regType Then
-                countRegType = countRegType + 1
+            If wsAllOfferings.Cells(i, "I").Value = rating Then
+                countSP = countSP + 1
+            End If
+            
+            If wsAllOfferings.Cells(i, "J").Value = rating Then
+                countMoody = countMoody + 1
+            End If
+            
+            If wsAllOfferings.Cells(i, "K").Value = rating Then
+                countFitch = countFitch + 1
             End If
         Next i
         
         ' Write results to Overview sheet
-        wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = regType
-        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = countRegType
-    Next regType
+        wsOverview.Cells(wsOverview.Rows.Count, "M").End(xlUp).Offset(1, 0).Value = rating
+        wsOverview.Cells(wsOverview.Rows.Count, "N").End(xlUp).Offset(1, 0).Value = countSP
+        wsOverview.Cells(wsOverview.Rows.Count, "O").End(xlUp).Offset(1, 0).Value = countMoody
+        wsOverview.Cells(wsOverview.Rows.Count, "P").End(xlUp).Offset(1, 0).Value = countFitch
+    Next rating
 End Sub
