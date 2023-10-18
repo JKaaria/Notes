@@ -1,4 +1,5 @@
 Sub AnalyzeRatings()
+    ' Define variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
@@ -8,7 +9,7 @@ Sub AnalyzeRatings()
     Dim moodyRating As String
     Dim fitchRating As String
     
-    ' Set references to worksheets
+    ' Set references to sheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
@@ -16,28 +17,48 @@ Sub AnalyzeRatings()
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
     ' Loop through each row in All Offerings sheet
-    For i = 2 To lastRow ' Assuming row 1 is header
-        
-        ' Extract values from columns H to K
+    For i = 2 To lastRow ' Assuming the header is in row 1
+        ' Read values from columns H to K
         regType = wsAllOfferings.Cells(i, 8).Value
         spRating = wsAllOfferings.Cells(i, 9).Value
         moodyRating = wsAllOfferings.Cells(i, 10).Value
         fitchRating = wsAllOfferings.Cells(i, 11).Value
         
-        ' Analyze ratings and update Overview sheet
-        
-        ' Column I - Distribution of Ratings
-        ' Your analysis code for distribution of ratings goes here
-        
-        ' Column J - Analyze offerings based on S&P Ratings
-        ' Your analysis code based on S&P Ratings goes here
-        
-        ' Column K - Additional insight
-        ' Your additional analysis code goes here
-        
-        ' Column L - Additional insight
-        ' Your additional analysis code goes here
-        
+        ' Update the Overview sheet based on the ratings
+        If regType <> "" Then
+            wsOverview.Cells(i, 9).Value = regType
+            wsOverview.Cells(i, 10).Value = spRating
+            wsOverview.Cells(i, 11).Value = moodyRating
+            wsOverview.Cells(i, 12).Value = fitchRating
+        End If
     Next i
-
+    
+    ' Create a PivotTable in the Overview sheet to analyze the distribution of ratings
+    Dim pt As PivotTable
+    Dim ptField As PivotField
+    
+    ' Set the data range for PivotTable
+    Set ptDataRange = wsOverview.Cells(1, 1).CurrentRegion
+    
+    ' Create PivotTable in cell A30 of Overview sheet
+    Set pt = wsOverview.PivotTableWizard(TableDestination:=wsOverview.Cells(30, 1), SourceType:=xlDatabase, SourceData:=ptDataRange)
+    
+    ' Add Reg Type, S&P, Moody, and Fitch to the RowFields
+    Set ptField = pt.PivotFields("Reg Type")
+    ptField.Orientation = xlRowField
+    
+    Set ptField = pt.PivotFields("S and P")
+    ptField.Orientation = xlRowField
+    
+    Set ptField = pt.PivotFields("Moody")
+    ptField.Orientation = xlRowField
+    
+    Set ptField = pt.PivotFields("Fitch")
+    ptField.Orientation = xlRowField
+    
+    ' Add Offerings to the DataFields
+    Set ptField = pt.PivotFields("Offerings")
+    ptField.Orientation = xlDataField
+    ptField.Function = xlCount
+    ptField.Name = "Number of Offerings"
 End Sub
