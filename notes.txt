@@ -1,45 +1,52 @@
 Sub AnalyzeSectors()
-    ' Declare variables
     Dim wsOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim sector As String
-    Dim totalOfferAmt As Double
-    Dim avgDiscount As Double
-    Dim totalCoupons As Double
-    Dim numOfferings As Long
-
+    
     ' Set references to worksheets
     Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
-
-    ' Find the last row with data in the "All Offerings" sheet
+    
+    ' Find the last row in the "All Offerings" sheet
     lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "A").End(xlUp).Row
-
-    ' Initialize summary starting point
+    
+    ' Clear existing data in the "Overview" sheet
+    wsOverview.Cells.Clear
+    
+    ' Write headers in the "Overview" sheet
     wsOverview.Range("D1").Value = "Sector"
-    wsOverview.Range("E1").Value = "Total Offer Amount (MM)"
-    wsOverview.Range("F1").Value = "Average Discount"
-    wsOverview.Range("G1").Value = "Total Coupons"
-    wsOverview.Range("H1").Value = "Number of Offerings"
-
+    wsOverview.Range("E1").Value = "Total Offerings"
+    wsOverview.Range("F1").Value = "Total Offer Amount (MM)"
+    ' Add more headers for additional metrics as needed
+    
+    ' Initialize variables to store metrics
+    Dim sector As String
+    Dim totalOfferings As Long
+    Dim totalOfferAmount As Double
+    
     ' Loop through each row in the "All Offerings" sheet
-    For i = 2 To lastRow
-        ' Get the sector from column X (assuming "Sector" is in column X)
-        sector = wsOfferings.Cells(i, 24).Value ' Update the column index if "Sector" is in a different column
-
-        ' Update summary metrics based on the sector
-        totalOfferAmt = totalOfferAmt + wsOfferings.Cells(i, 2).Value
-        avgDiscount = avgDiscount + wsOfferings.Cells(i, 3).Value
-        totalCoupons = totalCoupons + wsOfferings.Cells(i, 17).Value
-        numOfferings = numOfferings + 1
+    For i = 2 To lastRow ' Assuming the data starts from row 2
+        
+        ' Read sector from the current row in column "Y" (assuming "Sector" is in column "Y")
+        sector = wsOfferings.Cells(i, 25).Value ' 25 corresponds to column "Y"
+        
+        ' Update metrics based on the sector
+        totalOfferings = totalOfferings + 1
+        totalOfferAmount = totalOfferAmount + wsOfferings.Cells(i, 2).Value ' Assuming "Offer Amt (MM)" is in column "B"
+        
+        ' You can add more code to update additional metrics based on your analysis
+        
     Next i
-
-    ' Output summary metrics to the "Overview" sheet
+    
+    ' Write summary metrics to the "Overview" sheet
     wsOverview.Range("D2").Value = sector
-    wsOverview.Range("E2").Value = totalOfferAmt
-    wsOverview.Range("F2").Value = avgDiscount / numOfferings ' Calculate average discount
-    wsOverview.Range("G2").Value = totalCoupons
-    wsOverview.Range("H2").Value = numOfferings
+    wsOverview.Range("E2").Value = totalOfferings
+    wsOverview.Range("F2").Value = totalOfferAmount
+    ' Add more lines to write additional summary metrics as needed
+    
+    ' Format the data in the "Overview" sheet if necessary
+    
+    ' Notify the user that the analysis is complete
+    MsgBox "Analysis completed successfully!", vbInformation
 End Sub
