@@ -1,57 +1,47 @@
-Sub AnalyzeCreditRatings()
+Sub AnalyzeRatings()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim i As Long
-    Dim rating As String
-    Dim spCount As Long, moodyCount As Long, fitchCount As Long
+    Dim totalClients As Long
+    Dim totalSP As Double
+    Dim totalMoody As Double
+    Dim totalFitch As Double
+    Dim avgClientRegType As Double
+    Dim avgSPRating As Double
+    Dim avgMoodyRating As Double
+    Dim avgFitchRating As Double
     
-    ' Set references to the worksheets
+    ' Set references to worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in column H (assuming there's data in column H)
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "H").End(xlUp).Row
+    ' Find the last row with data in the All Offerings sheet
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Clear existing data in Overview sheet from column I onwards
-    wsOverview.Range("I:ZZ").Clear
+    ' Initialize totals
+    totalClients = 0
+    totalSP = 0
+    totalMoody = 0
+    totalFitch = 0
     
-    ' Loop through the data in the All Offerings sheet
-    For i = 2 To lastRow ' Assuming row 1 is headers
-        
-        ' Get the rating from each column
-        rating = wsAllOfferings.Cells(i, 8).Value ' Column H (Client Reg Category)
-        
-        ' Check S&P rating (Column I)
-        If rating <> "" Then
-            wsOverview.Cells(2, 9).Value = wsOverview.Cells(2, 9).Value + 1
-            wsOverview.Cells(2, 9 + spCount).Value = rating
-            spCount = spCount + 1
-        End If
-        
-        ' Check Moody rating (Column J)
-        rating = wsAllOfferings.Cells(i, 9).Value ' Column I (S&P Ratings)
-        If rating <> "" Then
-            wsOverview.Cells(2, 10).Value = wsOverview.Cells(2, 10).Value + 1
-            wsOverview.Cells(2, 10 + moodyCount).Value = rating
-            moodyCount = moodyCount + 1
-        End If
-        
-        ' Check Fitch rating (Column K)
-        rating = wsAllOfferings.Cells(i, 10).Value ' Column J (Moody Ratings)
-        If rating <> "" Then
-            wsOverview.Cells(2, 11).Value = wsOverview.Cells(2, 11).Value + 1
-            wsOverview.Cells(2, 11 + fitchCount).Value = rating
-            fitchCount = fitchCount + 1
-        End If
-        
-        ' Add any additional metrics as needed
-        
+    ' Loop through data in All Offerings sheet
+    For i = 2 To lastRow ' Assuming headers are in the first row
+        ' Sum up values for averaging
+        totalClients = totalClients + wsAllOfferings.Cells(i, 8) ' Column H
+        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I
+        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J
+        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K
     Next i
     
-    ' Add headers to the Overview sheet
-    wsOverview.Cells(1, 9).Value = "S&P Ratings"
-    wsOverview.Cells(1, 10).Value = "Moody Ratings"
-    wsOverview.Cells(1, 11).Value = "Fitch Ratings"
+    ' Calculate averages
+    avgClientRegType = totalClients / (lastRow - 1) ' Exclude header row
+    avgSPRating = totalSP / (lastRow - 1)
+    avgMoodyRating = totalMoody / (lastRow - 1)
+    avgFitchRating = totalFitch / (lastRow - 1)
     
+    ' Update Overview sheet with averages
+    wsOverview.Cells(2, 9).Value = avgClientRegType ' Column I
+    wsOverview.Cells(2, 10).Value = avgSPRating ' Column J
+    wsOverview.Cells(2, 11).Value = avgMoodyRating ' Column K
+    wsOverview.Cells(2, 12).Value = avgFitchRating ' Column L
 End Sub
