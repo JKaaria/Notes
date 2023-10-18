@@ -16,19 +16,19 @@ Sub GenerateCommercialPaperAnalysis()
     Call CreateOverviewSheet(ws, analysisWs)
 
     ' Sector Analysis
-    Call CreateSectorAnalysisChart(ws, analysisWs)
+    Call CreateSectorAnalysis(ws, analysisWs)
 
     ' Rating Analysis
-    Call CreateRatingAnalysisChart(ws, analysisWs)
+    Call CreateRatingAnalysis(ws, analysisWs)
 
     ' Issuer-wise Analysis
-    Call CreateIssuerAnalysisChart(ws, analysisWs)
+    Call CreateIssuerAnalysis(ws, analysisWs)
 
     ' Coupon vs. Maturity Date
-    Call CreateCouponVsMaturityChart(ws, analysisWs)
+    Call CreateCouponVsMaturity(ws, analysisWs)
 
     ' Time Series Analysis
-    Call CreateTimeSeriesAnalysisChart(ws, analysisWs)
+    Call CreateTimeSeriesAnalysis(ws, analysisWs)
 
     MsgBox "Commercial Paper Analysis is complete!", vbInformation
 
@@ -50,84 +50,116 @@ Sub CreateOverviewSheet(ws As Worksheet, analysisWs As Worksheet)
     ' Add more key metrics as needed
 End Sub
 
-Sub CreateSectorAnalysisChart(ws As Worksheet, analysisWs As Worksheet)
+Sub CreateSectorAnalysis(ws As Worksheet, analysisWs As Worksheet)
     ' Sector Analysis
-    Dim sectorChart As ChartObject
-    Set sectorChart = analysisWs.ChartObjects.Add(Left:=10, Width:=375, Top:=80, Height:=225)
-    sectorChart.Chart.SetSourceData ws.Range("C2:C" & ws.Cells(ws.Rows.Count, "C").End(xlUp).Row)
-    sectorChart.Chart.ChartType = xlColumnClustered
-    sectorChart.Chart.HasTitle = True
-    sectorChart.Chart.ChartTitle.Text = "Sector Analysis"
-    sectorChart.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
-    sectorChart.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Sector"
-    sectorChart.Chart.Axes(xlValue, xlPrimary).HasTitle = True
-    sectorChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Number of Offerings"
+    analysisWs.Cells.Clear
+    analysisWs.Name = "Sector Analysis"
+
+    ' Copy relevant columns to analysis sheet
+    ws.Range("C:H").Copy Destination:=analysisWs.Range("A1")
+
+    ' Apply conditional formatting to highlight sectors
+    Dim lastRow As Long
+    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "C").End(xlUp).Row
+
+    analysisWs.Range("C2:C" & lastRow).FormatConditions.Delete
+    analysisWs.Range("C2:C" & lastRow).FormatConditions.AddUniqueValues
+    analysisWs.Range("C2:C" & lastRow).FormatConditions(1).Font.Color = -16383844
+    analysisWs.Range("C2:C" & lastRow).FormatConditions(1).Interior.Color = 13551615
+
+    ' Add annotations
+    Dim cell As Range
+    For Each cell In analysisWs.Range("C2:C" & lastRow)
+        cell.AddComment cell.Value
+    Next cell
 End Sub
 
-Sub CreateRatingAnalysisChart(ws As Worksheet, analysisWs As Worksheet)
+Sub CreateRatingAnalysis(ws As Worksheet, analysisWs As Worksheet)
     ' Rating Analysis
-    Dim ratingChart As ChartObject
-    Set ratingChart = analysisWs.ChartObjects.Add(Left:=400, Width:=375, Top:=80, Height:=225)
-    ratingChart.Chart.SetSourceData ws.Range("H2:H" & ws.Cells(ws.Rows.Count, "H").End(xlUp).Row)
-    ratingChart.Chart.ChartType = xlColumnClustered
-    ratingChart.Chart.HasTitle = True
-    ratingChart.Chart.ChartTitle.Text = "Rating Analysis"
-    ratingChart.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
-    ratingChart.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Rating Agency"
-    ratingChart.Chart.Axes(xlValue, xlPrimary).HasTitle = True
-    ratingChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Number of Offerings"
+    analysisWs.Cells.Clear
+    analysisWs.Name = "Rating Analysis"
+
+    ' Copy relevant columns to analysis sheet
+    ws.Range("H:I").Copy Destination:=analysisWs.Range("A1")
+
+    ' Apply conditional formatting to highlight ratings
+    Dim lastRow As Long
+    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
+
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
+
+    ' Add annotations
+    Dim cell As Range
+    For Each cell In analysisWs.Range("A2:A" & lastRow)
+        cell.AddComment cell.Value
+    Next cell
 End Sub
 
-Sub CreateIssuerAnalysisChart(ws As Worksheet, analysisWs As Worksheet)
+Sub CreateIssuerAnalysis(ws As Worksheet, analysisWs As Worksheet)
     ' Issuer-wise Analysis
-    Dim issuerChart As ChartObject
-    Set issuerChart = analysisWs.ChartObjects.Add(Left:=10, Width:=375, Top:=350, Height:=225)
-    issuerChart.Chart.SetSourceData ws.Range("A2:A" & ws.Cells(ws.Rows.Count, "A").End(xlUp).Row)
-    issuerChart.Chart.ChartType = xlColumnClustered
-    issuerChart.Chart.HasTitle = True
-    issuerChart.Chart.ChartTitle.Text = "Issuer-wise Analysis"
-    issuerChart.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
-    issuerChart.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Issuer"
-    issuerChart.Chart.Axes(xlValue, xlPrimary).HasTitle = True
-    issuerChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Number of Offerings"
+    analysisWs.Cells.Clear
+    analysisWs.Name = "Issuer-wise Analysis"
+
+    ' Copy relevant columns to analysis sheet
+    ws.Range("A:H").Copy Destination:=analysisWs.Range("A1")
+
+    ' Apply conditional formatting to highlight issuers
+    Dim lastRow As Long
+    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
+
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
+
+    ' Add annotations
+    Dim cell As Range
+    For Each cell In analysisWs.Range("A2:A" & lastRow)
+        cell.AddComment cell.Value
+    Next cell
 End Sub
 
-Sub CreateCouponVsMaturityChart(ws As Worksheet, analysisWs As Worksheet)
+Sub CreateCouponVsMaturity(ws As Worksheet, analysisWs As Worksheet)
     ' Coupon vs. Maturity Date
-    Dim scatterChart As ChartObject
-    Set scatterChart = analysisWs.ChartObjects.Add(Left:=400, Width:=375, Top:=350, Height:=225)
+    analysisWs.Cells.Clear
+    analysisWs.Name = "Coupon vs. Maturity Date"
 
-    ' Add primary series
-    scatterChart.Chart.SetSourceData ws.Range("E2:E" & ws.Cells(ws.Rows.Count, "E").End(xlUp).Row & ",F2:F" & ws.Cells(ws.Rows.Count, "F").End(xlUp).Row)
+    ' Copy relevant columns to analysis sheet
+    ws.Range("E:H").Copy Destination:=analysisWs.Range("A1")
 
-    ' Add secondary series
-    Dim secondarySeries As Series
-    Set secondarySeries = scatterChart.Chart.SeriesCollection.NewSeries
-    secondarySeries.Values = ws.Range("H2:H" & ws.Cells(ws.Rows.Count, "H").End(xlUp).Row)
-    secondarySeries.AxisGroup = xlSecondary
+    ' Apply conditional formatting to highlight sectors
+    Dim lastRow As Long
+    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "A").End(xlUp).Row
 
-    scatterChart.Chart.ChartType = xlXYScatterLines
-    scatterChart.Chart.HasTitle = True
-    scatterChart.Chart.ChartTitle.Text = "Coupon vs. Maturity Date"
-    scatterChart.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
-    scatterChart.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Maturity Date"
-    scatterChart.Chart.Axes(xlValue, xlPrimary).HasTitle = True
-    scatterChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Coupon"
-    scatterChart.Chart.Axes(xlValue, xlSecondary).HasTitle = True
-    scatterChart.Chart.Axes(xlValue, xlSecondary).AxisTitle.Text = "Sector"
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.Delete
+    analysisWs.Range("A2:A" & lastRow).FormatConditions.AddUniqueValues
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Font.Color = -16383844
+    analysisWs.Range("A2:A" & lastRow).FormatConditions(1).Interior.Color = 13551615
+
+    ' Add annotations
+    Dim cell As Range
+    For Each cell In analysisWs.Range("A2:A" & lastRow)
+        cell.AddComment cell.Value
+    Next cell
 End Sub
 
-
-Sub CreateTimeSeriesAnalysisChart(ws As Worksheet, analysisWs As Worksheet)
+Sub CreateTimeSeriesAnalysis(ws As Worksheet, analysisWs As Worksheet)
     ' Time Series Analysis
-    Dim timeSeriesChart As ChartObject
-    Set timeSeriesChart = analysisWs.ChartObjects.Add(Left:=10, Width:=750, Top:=620, Height:=225)
-    timeSeriesChart.Chart.SetSourceData ws.Range("U2:U" & ws.Cells(ws.Rows.Count, "U").End(xlUp).Row & ",V2:V" & ws.Cells(ws.Rows.Count, "V").End(xlUp).Row)
-    timeSeriesChart.Chart.ChartType = xlLineMarkers
-    timeSeriesChart.Chart.HasTitle = True
-    timeSeriesChart.Chart.ChartTitle.Text = "Time Series Analysis"
-    timeSeriesChart.Chart.Axes(xlCategory, xlPrimary).HasTitle = True
-    timeSeriesChart.Chart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Offer Date"
-    timeSeriesChart.Chart.Axes(xlValue, xlPrimary).HasTitle = True
-    timeSeriesChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Total Value of Offerings (MM)"
+    analysisWs.Cells.Clear
+    analysisWs.Name = "Time Series Analysis"
+
+    ' Copy relevant columns to analysis sheet
+    ws.Range("U:V").Copy Destination:=analysisWs.Range("A1")
+
+    ' Add annotations
+    Dim lastRow As Long
+    lastRow = analysisWs.Cells(analysisWs.Rows.Count, "U").End(xlUp).Row
+
+    Dim cell As Range
+    For Each cell In analysisWs.Range("U2:U" & lastRow)
+        cell.AddComment cell.Value
+    Next cell
 End Sub
