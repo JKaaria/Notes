@@ -1,65 +1,79 @@
 Sub AnalyseRatings()
-    ' Declare variables
+    ' Define variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim clientCategory As String
-    Dim spRatingSum As Double
-    Dim moodyRatingSum As Double
-    Dim fitchRatingSum As Double
-    Dim spRatingCount As Long
-    Dim moodyRatingCount As Long
-    Dim fitchRatingCount As Long
-    Dim uniqueCategories As Collection
+    Dim clientCategories As Collection
+    Dim category As Variant
+    Dim spTotal As Double, moodyTotal As Double, fitchTotal As Double
+    Dim spCount As Long, moodyCount As Long, fitchCount As Long
+    Dim avgSP As Double, avgMoody As Double, avgFitch As Double
     
-    ' Set references to worksheets
+    ' Set references to sheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Clear existing data in Overview sheet
-    wsOverview.Rows("2:" & wsOverview.Rows.Count).Clear
-    
-    ' Find the last row in All Offerings sheet
+    ' Find the last row in the All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Initialize variables
-    Set uniqueCategories = New Collection
+    ' Initialize collection for unique client categories
+    Set clientCategories = New Collection
     
-    ' Loop through All Offerings data
-    For i = 2 To lastRow ' Assuming the headers are in the first row
+    ' Loop through data in All Offerings sheet
+    On Error Resume Next ' Ignore errors temporarily
+    For i = 2 To lastRow ' Assuming headers are in row 1
+        ' Collect unique client categories
+        clientCategories.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
         
-        ' Get client category code
-        clientCategory = wsAllOfferings.Cells(i, 8).Value
-        
-        ' Check if client category is not already added to the collection
-        On Error Resume Next
-        uniqueCategories.Add clientCategory, CStr(clientCategory)
-        On Error GoTo 0
-        
-        ' Sum ratings based on agency and reg type
-        spRatingSum = spRatingSum + wsAllOfferings.Cells(i, 9).Value
-        moodyRatingSum = moodyRatingSum + wsAllOfferings.Cells(i, 10).Value
-        fitchRatingSum = fitchRatingSum + wsAllOfferings.Cells(i, 11).Value
-        
-        ' Count ratings based on agency and reg type
-        spRatingCount = spRatingCount + 1
-        moodyRatingCount = moodyRatingCount + 1
-        fitchRatingCount = fitchRatingCount + 1
-        
+        ' Sum ratings for each agency by category and reg type
+        Select Case UCase(wsAllOfferings.Cells(i, 8).Value)
+            Case "S&P"
+                spTotal = spTotal + wsAllOfferings.Cells(i, 9).Value
+                spCount = spCount + 1
+            Case "MOODY"
+                moodyTotal = moodyTotal + wsAllOfferings.Cells(i, 10).Value
+                moodyCount = moodyCount + 1
+            Case "FITCH"
+                fitchTotal = fitchTotal + wsAllOfferings.Cells(i, 11).Value
+                fitchCount = fitchCount + 1
+        End Select
     Next i
+    On Error GoTo 0 ' Reset error handling
     
-    ' Populate Overview sheet with unique categories
-    wsOverview.Range("I2").Resize(uniqueCategories.Count, 1).Value = WorksheetFunction.Transpose(uniqueCategories.Items)
+    ' Write data to Overview sheet
+    wsOverview.Range("I:K").Clear ' Clear existing data in columns I to K
     
-    ' Calculate average ratings and populate Overview sheet
-    wsOverview.Range("J2").Resize(uniqueCategories.Count, 1).Formula = "=SUMIFS('All Offerings'!I:I, 'All Offerings'!H:H, Overview!I2)/COUNTIFS('All Offerings'!I:I, 'All Offerings'!H:H, Overview!I2)"
+    ' Write headers
+    wsOverview.Range("I1").Value = "Client Category"
+    wsOverview.Range("J1").Value = "Average Rating (S&P)"
+    wsOverview.Range("K1").Value = "Average Rating (Moody)"
+    wsOverview.Range("L1").Value = "Average Rating (Fitch)"
     
-    wsOverview.Range("K2").Resize(uniqueCategories.Count, 1).Formula = "=SUMIFS('All Offerings'!J:J, 'All Offerings'!H:H, Overview!I2)/COUNTIFS('All Offerings'!J:J, 'All Offerings'!H:H, Overview!I2)"
-    
-    wsOverview.Range("L2").Resize(uniqueCategories.Count, 1).Formula = "=SUMIFS('All Offerings'!K:K, 'All Offerings'!H:H, Overview!I2)/COUNTIFS('All Offerings'!K:K, 'All Offerings'!H:H, Overview!I2)"
-    
-    ' Copy other relevant data from All Offerings to Overview
-    wsOverview.Range("A2:H2").Value = wsAllOfferings.Range("A1:H1").Value
+    ' Loop through unique client categories and calculate averages
+    For Each category In clientCategories
+        ' Find row in Overview sheet
+        Dim overviewRow As Long
+        overviewRow = wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Row + 1
+        
+        ' Write client category to Overview sheet
+        wsOverview.Cells(overviewRow, 9).Value = category
+        
+        ' Calculate averages
+        If spCount > 0 Then
+            avgSP = spTotal / spCount
+            wsOverview.Cells(overviewRow, 10).Value = avgSP
+        End If
+        
+        If moodyCount > 0 Then
+            avgMoody = moodyTotal / moodyCount
+            wsOverview.Cells(overviewRow, 11).Value = avgMoody
+        End If
+        
+        If fitchCount > 0 Then
+            avgFitch = fitchTotal / fitchCount
+            wsOverview.Cells(overviewRow, 12).Value = avgFitch
+        End If
+    Next category
     
 End Sub
