@@ -7,16 +7,16 @@ Sub AnalyzeSectors()
     Dim totalDiscount As Double
     Dim totalCoupons As Double
     Dim offeringsCount As Integer
-    Dim overviewLastRow As Long
     Dim existingRow As Variant
     Dim newRow As Long
+    Dim i As Long
     
     ' Set references to worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in column A of "Overview" sheet
-    overviewLastRow = wsOverview.Cells(wsOverview.Rows.Count, "A").End(xlUp).Row
+    ' Clear previous data in "Overview" sheet starting from cell D1
+    wsOverview.Range("D1:G" & wsOverview.Rows.Count).Clear
     
     ' Set reference to unique sectors using Collection
     Set uniqueSectors = New Collection
@@ -41,25 +41,18 @@ Sub AnalyzeSectors()
         offeringsCount = offeringsCount + 1
     Next i
     
-    ' Populate data in "Overview" sheet
+    ' Populate data in "Overview" sheet starting from cell D1
+    newRow = 1
     For i = 1 To uniqueSectors.Count
         sector = uniqueSectors(i)
-        
-        ' Check if sector already exists in the "Overview" sheet
-        existingRow = Application.Match(sector, wsOverview.Range("A1:A" & overviewLastRow), 0)
-        
-        If IsError(existingRow) Then
-            ' Sector not found in existing data, add a new row
-            newRow = overviewLastRow + 1
-        Else
-            ' Sector found in existing data, update the existing row
-            newRow = existingRow
-        End If
         
         ' Update data for the sector
         wsOverview.Cells(newRow, 4).Value = sector
         wsOverview.Cells(newRow, 5).Value = totalDiscount / offeringsCount
         wsOverview.Cells(newRow, 6).Value = totalCoupons
         wsOverview.Cells(newRow, 7).Value = offeringsCount
+        
+        ' Move to the next row
+        newRow = newRow + 1
     Next i
 End Sub
