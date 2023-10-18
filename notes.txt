@@ -1,30 +1,25 @@
 Sub CleanAndFormatData()
     Dim ws As Worksheet
     Dim lastRow As Long
+    Dim col As Range
 
     ' Set the worksheet
     Set ws = ThisWorkbook.Sheets("All Offerings")
 
-    ' Find the last row with data
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-
     ' Apply filters to all columns
     ws.Range("A1").AutoFilter Field:=1, Criteria1:="<>"
 
-    ' Loop through each column and clean data
+    ' Find the last row with data
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+
+    ' Loop through each column and fill down empty cells
     For Each col In ws.UsedRange.Columns
-        ' Check for empty cells in the column and fill down if necessary
-        col.SpecialCells(xlCellTypeBlanks).FormulaR1C1 = "=R[-1]C"
+        col.SpecialCells(xlCellTypeBlanks).Formula = "=IF(R[-1]C<>"", R[-1]C, """")"
+        col.Value = col.Value
     Next col
 
     ' Remove filters
     ws.AutoFilterMode = False
-
-    ' Format dates, numbers, and percentages
-    ws.Columns("D:E").NumberFormat = "yyyy-mm-dd"
-    ws.Columns("B:F,I:J,M:O,S:T,V:X,AA:AC,AF").NumberFormat = "0.00"
-    ws.Columns("Y,Z,AG:AG").NumberFormat = "0%"
-    ws.Columns("U").NumberFormat = "0"
 
     ' Autofit columns for better visibility
     ws.Columns.AutoFit
