@@ -1,62 +1,106 @@
-Sub AnalyzeSectors()
-    ' Declare variables
-    Dim wsOfferings As Worksheet
-    Dim wsOverview As Worksheet
+Sub AverageDiscount(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
     Dim lastRow As Long
+    Dim totalDiscount As Double
+    Dim discountCount As Long
+    Dim averageDiscount As Double
     Dim i As Long
-    Dim sector As Variant
-    Dim totalOfferAmt As Double
-    Dim avgDiscount As Double
-    Dim totalCoupons As Double
-    Dim numOfferings As Long
-    Dim sectorSummary As Object
-
-    ' Set references to worksheets
-    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
-
-    ' Find the last row with data in the "All Offerings" sheet
-    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "A").End(xlUp).Row
-
-    ' Initialize summary starting point
-    wsOverview.Range("D1").Value = "Sector"
-    wsOverview.Range("E1").Value = "Total Offer Amount (MM)"
-    wsOverview.Range("F1").Value = "Average Discount"
-    wsOverview.Range("G1").Value = "Total Coupons"
-    wsOverview.Range("H1").Value = "Number of Offerings"
-
-    ' Initialize dictionary to store sector-wise summaries
-    Set sectorSummary = CreateObject("Scripting.Dictionary")
-
-    ' Loop through each row in the "All Offerings" sheet
-    For i = 2 To lastRow
-        ' Get the sector from column X (assuming "Sector" is in column X)
-        sector = wsOfferings.Cells(i, 24).Value ' Update the column index if "Sector" is in a different column
-
-        ' Update summary metrics based on the sector
-        If Not sectorSummary.Exists(sector) Then
-            ' If the sector is not already in the dictionary, initialize metrics
-            sectorSummary(sector) = Array(0, 0, 0, 0)
+    
+    ' Find the last row in the Offerings sheet
+    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
+    
+    ' Initialize variables
+    totalDiscount = 0
+    discountCount = 0
+    
+    ' Loop through each row in the Offerings sheet
+    For i = 2 To lastRow ' Assuming row 1 contains headers
+        ' Check if the current row belongs to the specified sector
+        If wsOfferings.Cells(i, "X").Value = sector Then
+            ' Accumulate discounts
+            totalDiscount = totalDiscount + wsOfferings.Cells(i, "C").Value
+            ' Increment discount count
+            discountCount = discountCount + 1
         End If
-
-        ' Update metrics for the sector
-        sectorSummary(sector)(0) = sectorSummary(sector)(0) + wsOfferings.Cells(i, 2).Value
-        sectorSummary(sector)(1) = sectorSummary(sector)(1) + wsOfferings.Cells(i, 3).Value
-        sectorSummary(sector)(2) = sectorSummary(sector)(2) + wsOfferings.Cells(i, 17).Value
-        sectorSummary(sector)(3) = sectorSummary(sector)(3) + 1
     Next i
-
-    ' Output summary metrics to the "Overview" sheet
-    Dim outputRow As Long
-    outputRow = 2
-
-    For Each sector In sectorSummary.Keys
-        wsOverview.Range("D" & outputRow).Value = sector
-        wsOverview.Range("E" & outputRow).Value = sectorSummary(sector)(0)
-        wsOverview.Range("F" & outputRow).Value = sectorSummary(sector)(1) / sectorSummary(sector)(3) ' Calculate average discount
-        wsOverview.Range("G" & outputRow).Value = sectorSummary(sector)(2)
-        wsOverview.Range("H" & outputRow).Value = sectorSummary(sector)(3)
-
-        outputRow = outputRow + 1
-    Next sector
+    
+    ' Calculate average discount (avoid division by zero)
+    If discountCount > 0 Then
+        averageDiscount = totalDiscount / discountCount
+    Else
+        averageDiscount = 0
+    End If
+    
+    ' Write result to Overview sheet
+    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
+    wsOverview.Cells(wsOverview.Rows.Count, "F").End(xlUp).Offset(1, 0).Value = averageDiscount
 End Sub
+
+Sub AverageDTM(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
+    Dim lastRow As Long
+    Dim totalDTM As Double
+    Dim dtmCount As Long
+    Dim averageDTM As Double
+    Dim i As Long
+    
+    ' Find the last row in the Offerings sheet
+    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
+    
+    ' Initialize variables
+    totalDTM = 0
+    dtmCount = 0
+    
+    ' Loop through each row in the Offerings sheet
+    For i = 2 To lastRow ' Assuming row 1 contains headers
+        ' Check if the current row belongs to the specified sector
+        If wsOfferings.Cells(i, "X").Value = sector Then
+            ' Accumulate DTM
+            totalDTM = totalDTM + wsOfferings.Cells(i, "D").Value
+            ' Increment DTM count
+            dtmCount = dtmCount + 1
+        End If
+    Next i
+    
+    ' Calculate average DTM (avoid division by zero)
+    If dtmCount > 0 Then
+        averageDTM = totalDTM / dtmCount
+    Else
+        averageDTM = 0
+    End If
+    
+    ' Write result to Overview sheet
+    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
+    wsOverview.Cells(wsOverview.Rows.Count, "G").End(xlUp).Offset(1, 0).Value = averageDTM
+End Sub
+
+Sub SecurityTypeDistribution(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
+    Dim lastRow As Long
+    Dim securityTypeCounts As Collection
+    Dim securityType As Variant
+    Dim i As Long
+    
+    ' Find the last row in the Offerings sheet
+    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
+    
+    ' Create a collection to store security type counts
+    Set securityTypeCounts = New Collection
+    
+    ' Loop through each row in the Offerings sheet
+    For i = 2 To lastRow ' Assuming row 1 contains headers
+        ' Check if the current row belongs to the specified sector
+        If wsOfferings.Cells(i, "X").Value = sector Then
+            ' Count security types
+            On Error Resume Next
+            securityTypeCounts.Add 1, CStr(wsOfferings.Cells(i, "L").Value)
+            On Error GoTo 0
+        End If
+    Next i
+    
+    ' Write security type distribution to Overview sheet
+    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
+    For Each securityType In securityTypeCounts
+        wsOverview.Cells(wsOverview.Rows.Count, Columns.Count).End(xlToLeft).Offset(0, 1).Value = securityType
+        wsOverview.Cells(wsOverview.Rows.Count, Columns.Count).End(xlToLeft).Offset(1, 0).Value = securityTypeCounts(securityType)
+    Next securityType
+End Sub
+
+' Add more subroutines for other metrics...
