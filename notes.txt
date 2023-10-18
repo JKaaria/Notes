@@ -4,7 +4,7 @@ Sub AnalyseRatings()
     Dim lastRow As Long
     Dim uniqueRegTypes As Collection
     Dim regType As Variant
-    Dim countSP As Long, countMoody As Long, countFitch As Long
+    Dim countRegType As Long
     Dim i As Long
     
     ' Set worksheets
@@ -29,30 +29,16 @@ Sub AnalyseRatings()
     
     ' Loop through unique regulatory types and count issuances
     For Each regType In uniqueRegTypes
-        countSP = 0
-        countMoody = 0
-        countFitch = 0
+        countRegType = 0
         
         For i = 2 To lastRow
             If CStr(wsAllOfferings.Cells(i, "H").Value) = regType Then
-                If Not IsEmpty(wsAllOfferings.Cells(i, "I").Value) Then
-                    countSP = countSP + 1
-                End If
-                
-                If Not IsEmpty(wsAllOfferings.Cells(i, "J").Value) Then
-                    countMoody = countMoody + 1
-                End If
-                
-                If Not IsEmpty(wsAllOfferings.Cells(i, "K").Value) Then
-                    countFitch = countFitch + 1
-                End If
+                countRegType = countRegType + 1
             End If
         Next i
         
         ' Write results to Overview sheet
         wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = regType
-        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = countSP
-        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = countMoody
-        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = countFitch
+        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = countRegType
     Next regType
 End Sub
