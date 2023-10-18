@@ -1,42 +1,52 @@
 Sub CreateOverviewSheet()
-    ' Declare variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim i As Long
-    
-    ' Set references to worksheets
+
+    ' Set references to sheets
+    On Error Resume Next
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
-    
+    On Error GoTo 0
+
+    If wsAllOfferings Is Nothing Then
+        MsgBox "Sheet 'All Offerings' not found!", vbExclamation
+        Exit Sub
+    End If
+
     ' Check if "Overview" sheet already exists, if yes, delete it
-    For Each ws In ThisWorkbook.Sheets
-        If ws.Name = "Overview" Then
-            Application.DisplayAlerts = False
-            ws.Delete
-            Application.DisplayAlerts = True
-            Exit For
-        End If
-    Next ws
-    
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Set wsOverview = ThisWorkbook.Sheets("Overview")
+    On Error GoTo 0
+    Application.DisplayAlerts = True
+
+    If Not wsOverview Is Nothing Then
+        Application.DisplayAlerts = False
+        wsOverview.Delete
+        Application.DisplayAlerts = True
+    End If
+
     ' Create a new sheet named "Overview"
-    Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    Set wsOverview = Sheets.Add(After:=Sheets(Sheets.Count))
     wsOverview.Name = "Overview"
-    
-    ' Set headers in the "Overview" sheet
-    wsOverview.Range("A1").Value = "Issuer"
-    wsOverview.Range("B1").Value = "Total Offer Amount (MM)"
-    wsOverview.Range("C1").Value = "Average Price (Discount)"
-    ' Add more headers as needed
-    
+
     ' Find the last row in the "All Offerings" sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+
+    ' Copy headers to the "Overview" sheet
+    wsAllOfferings.Rows(1).Copy wsOverview.Rows(1)
+
+    ' Add summary metrics (you can customize this based on your requirements)
+    wsOverview.Cells(2, 31).Value = "Total Offerings"
+    wsOverview.Cells(3, 31).Formula = "=COUNTA('All Offerings'!A:A)-1"
     
-    ' Loop through the data in "All Offerings" and summarize key metrics
-    For i = 2 To lastRow ' Assuming data starts from row 2 (header in row 1)
-        ' Example: Summarize issuer-wise total offer amount
-        wsOverview.Cells(i, 1).Value = wsAllOfferings.Cells(i, 1).Value ' Copy Issuer
-        wsOverview.Cells(i, 2).Value = Application.WorksheetFunction.SumIf(wsAllOfferings.Range("A:A"), wsAllOfferings.Cells(i, 1).Value, wsAllOfferings.Range("B:B")) ' Sum Total Offer Amount for the Issuer
-        wsOverview.Cells(i, 3).Value = Application.WorksheetFunction.AverageIf(wsAllOfferings.Range("A:A"), wsAllOfferings.Cells(i, 1).Value, wsAllOfferings.Range("C:C")) ' Average Price (Discount) for the Issuer
-        ' Add more summarization as needed
-    Next i
+    wsOverview.Cells(2, 32).Value = "Total Offer Amount (MM)"
+    wsOverview.Cells(3, 32).Formula = "=SUM('All Offerings'!B2:B" & lastRow & ")"
+    
+    ' Add more summary metrics as needed
+
+    ' Format the "Overview" sheet
+    wsOverview.Columns.AutoFit
+
+    MsgBox "Overview sheet created successfully!", vbInformation
 End Sub
