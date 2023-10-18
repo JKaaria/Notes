@@ -2,7 +2,7 @@ Sub AnalyzeRatings()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim totalClients As Double
+    Dim meanClientRegType As Double
     Dim totalSP As Double
     Dim totalMoody As Double
     Dim totalFitch As Double
@@ -18,29 +18,29 @@ Sub AnalyzeRatings()
     ' Find the last row with data in the All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Initialize totals
-    totalClients = 0
+    ' Initialize means and totals
+    meanClientRegType = 0
     totalSP = 0
     totalMoody = 0
     totalFitch = 0
     
     ' Loop through data in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
-        ' Sum up values for averaging
-        totalClients = totalClients + wsAllOfferings.Cells(i, 8) ' Column H (reg type)
-        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I (S&P)
-        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J (Moody)
-        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K (Fitch)
+        ' Sum up values for mean
+        meanClientRegType = meanClientRegType + wsAllOfferings.Cells(i, 8) ' Column H
+        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I
+        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J
+        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K
     Next i
     
-    ' Calculate averages
-    avgClientRegType = totalClients / (lastRow - 1) ' Exclude header row
+    ' Calculate means
+    meanClientRegType = meanClientRegType / (lastRow - 1) ' Exclude header row
     avgSPRating = totalSP / (lastRow - 1)
     avgMoodyRating = totalMoody / (lastRow - 1)
     avgFitchRating = totalFitch / (lastRow - 1)
     
-    ' Update Overview sheet with averages
-    wsOverview.Cells(2, 9).Value = avgClientRegType ' Column I
+    ' Update Overview sheet with means
+    wsOverview.Cells(2, 9).Value = meanClientRegType ' Column I (Mean Reg Type)
     wsOverview.Cells(2, 10).Value = avgSPRating ' Column J
     wsOverview.Cells(2, 11).Value = avgMoodyRating ' Column K
     wsOverview.Cells(2, 12).Value = avgFitchRating ' Column L
