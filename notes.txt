@@ -1,12 +1,13 @@
 Sub AnalyseRatings()
+    ' Define variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim uniqueCodes As Collection
-    Dim code As Variant
-    Dim spTotal As Double, moodyTotal As Double, fitchTotal As Double
-    Dim spCount As Long, moodyCount As Long, fitchCount As Long
+    Dim regTypeDict As Object
+    Dim ratingSumDict As Object
+    Dim ratingCountDict As Object
+    Dim regTypeCountDict As Object
     
     ' Set references to worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
@@ -15,47 +16,118 @@ Sub AnalyseRatings()
     ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Initialize collections and totals
-    Set uniqueCodes = New Collection
-    spTotal = 0
-    moodyTotal = 0
-    fitchTotal = 0
-    spCount = 0
-    moodyCount = 0
-    fitchCount = 0
+    ' Initialize dictionaries
+    Set regTypeDict = CreateObject("Scripting.Dictionary")
+    Set ratingSumDict = CreateObject("Scripting.Dictionary")
+    Set ratingCountDict = CreateObject("Scripting.Dictionary")
+    Set regTypeCountDict = CreateObject("Scripting.Dictionary")
     
-    ' Loop through each row in All Offerings sheet
-    For i = 2 To lastRow ' Assuming headers are in row 1
-        ' Get unique code from column H
-        code = wsAllOfferings.Cells(i, 8).Text
-        On Error Resume Next
-        uniqueCodes.Add code, CStr(code)
-        On Error GoTo 0
+    ' Loop through All Offerings data
+    For i = 2 To lastRow ' Assuming row 1 is header
+        ' Extract data from the current row
+        Dim regType As String
+        Dim clientCategory As String
+        Dim spRating As String
+        Dim moodyRating As String
+        Dim fitchRating As String
         
-        ' Sum ratings based on the agency and reg type
-        spTotal = spTotal + ConvertToDouble(wsAllOfferings.Cells(i, 9).Text)
-        moodyTotal = moodyTotal + ConvertToDouble(wsAllOfferings.Cells(i, 10).Text)
-        fitchTotal = fitchTotal + ConvertToDouble(wsAllOfferings.Cells(i, 11).Text)
+        regType = wsAllOfferings.Cells(i, "I").Value
+        clientCategory = wsAllOfferings.Cells(i, "H").Value
+        spRating = wsAllOfferings.Cells(i, "I").Value
+        moodyRating = wsAllOfferings.Cells(i, "J").Value
+        fitchRating = wsAllOfferings.Cells(i, "K").Value
         
-        ' Count ratings based on the agency and reg type
-        spCount = spCount + 1
-        moodyCount = moodyCount + 1
-        fitchCount = fitchCount + 1
+        ' Update dictionaries
+        If Not regTypeDict.Exists(clientCategory) Then
+            regTypeDict(clientCategory) = regType
+        End If
+        
+        If Not ratingSumDict.Exists(clientCategory & "_" & spRating) Then
+            ratingSumDict(clientCategory & "_" & spRating) = 0
+            ratingCountDict(clientCategory & "_" & spRating) = 0
+        End If
+        
+        If Not ratingSumDict.Exists(clientCategory & "_" & moodyRating) Then
+            ratingSumDict(clientCategory & "_" & moodyRating) = 0
+            ratingCountDict(clientCategory & "_" & moodyRating) = 0
+        End If
+        
+        If Not ratingSumDict.Exists(clientCategory & "_" & fitchRating) Then
+            ratingSumDict(clientCategory & "_" & fitchRating) = 0
+            ratingCountDict(clientCategory & "_" & fitchRating) = 0
+        End If
+        
+        ratingSumDict(clientCategory & "_" & spRating) = ratingSumDict(clientCategory & "_" & spRating) + wsAllOfferings.Cells(i, "I").Value
+        ratingSumDict(clientCategory & "_" & moodyRating) = ratingSumDict(clientCategory & "_" & moodyRating) + wsAllOfferings.Cells(i, "J").Value
+        ratingSumDict(clientCategory & "_" & fitchRating) = ratingSumDict(clientCategory & "_" & fitchRating) + wsAllOfferings.Cells(i, "K").Value
+        
+        ratingCountDict(clientCategory & "_" & spRating) = ratingCountDict(clientCategory & "_" & spRating) + 1
+        ratingCountDict(clientCategory & "_" & moodyRating) = ratingCountDict(clientCategory & "_" & moodyRating) + 1
+        ratingCountDict(clientCategory & "_" & fitchRating) = ratingCountDict(clientCategory & "_" & fitchRating) + 1
+        
+        If Not regTypeCountDict.Exists(clientCategory & "_" & regType) Then
+            regTypeCountDict(clientCategory & "_" & regType) = 0
+        End If
+        
+        regTypeCountDict(clientCategory & "_" & regType) = regTypeCountDict(clientCategory & "_" & regType) + 1
     Next i
     
-    ' Write results to Overview sheet
-    wsOverview.Range("I2:I" & uniqueCodes.Count + 1).Value = Application.Transpose(uniqueCodes.Items)
-    wsOverview.Range("J2").Formula = "=SUMIFS('All Offerings'!$I$2:$I$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)/COUNTIFS('All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)"
-    wsOverview.Range("K2").Formula = "=SUMIFS('All Offerings'!$J$2:$J$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)/COUNTIFS('All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)"
-    wsOverview.Range("J3").Formula = "=AVERAGE('All Offerings'!$I$2:$I$" & lastRow & ")"
-    wsOverview.Range("K3").Formula = "=AVERAGE('All Offerings'!$J$2:$J$" & lastRow & ")"
+    ' Output data to Overview sheet
+    wsOverview.Cells.Clear
     
-    ' Clean up
-    Set uniqueCodes = Nothing
+    ' Copy headers from All Offerings to Overview
+    wsOverview.Range("A1:AI1").Value = wsAllOfferings.Range("A1:AI1").Value
+    
+    ' Write headers for the analysis
+    wsOverview.Cells(1, 35).Value = "Average Rating by Agency"
+    wsOverview.Cells(1, 36).Value = "Average Rating by Reg Type"
+    
+    ' Loop through unique client regulatory category codes
+    Dim uniqueClientCategories As Variant
+    uniqueClientCategories = regTypeDict.Keys
+    
+    For i = 0 To UBound(uniqueClientCategories)
+        Dim clientCategoryKey As String
+        clientCategoryKey = uniqueClientCategories(i)
+        
+        ' Extract values from dictionaries
+        Dim spSum As Double
+        Dim moodySum As Double
+        Dim fitchSum As Double
+        Dim spCount As Long
+        Dim moodyCount As Long
+        Dim fitchCount As Long
+        
+        spSum = ratingSumDict(clientCategoryKey & "_" & "S and P")
+        moodySum = ratingSumDict(clientCategoryKey & "_" & "Moody")
+        fitchSum = ratingSumDict(clientCategoryKey & "_" & "Fitch")
+        
+        spCount = ratingCountDict(clientCategoryKey & "_" & "S and P")
+        moodyCount = ratingCountDict(clientCategoryKey & "_" & "Moody")
+        fitchCount = ratingCountDict(clientCategoryKey & "_" & "Fitch")
+        
+        ' Calculate averages
+        Dim spAverage As Double
+        Dim moodyAverage As Double
+        Dim fitchAverage As Double
+        
+        If spCount > 0 Then
+            spAverage = spSum / spCount
+        End If
+        
+        If moodyCount > 0 Then
+            moodyAverage = moodySum / moodyCount
+        End If
+        
+        If fitchCount > 0 Then
+            fitchAverage = fitchSum / fitchCount
+        End If
+        
+        ' Write data to Overview sheet
+        wsOverview.Cells(i + 2, 35).Value = clientCategoryKey
+        wsOverview.Cells(i + 2, 36).Value = regTypeDict(clientCategoryKey)
+        wsOverview.Cells(i + 2, 37).Value = IIf(spCount > 0, spAverage, "")
+        wsOverview.Cells(i + 2, 38).Value = IIf(moodyCount > 0, moodyAverage, "")
+        wsOverview.Cells(i + 2, 39).Value = IIf(fitchCount > 0, fitchAverage, "")
+    Next i
 End Sub
-
-Function ConvertToDouble(value As Variant) As Double
-    On Error Resume Next
-    ConvertToDouble = CDbl(value)
-    On Error GoTo 0
-End Function
