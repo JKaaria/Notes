@@ -4,7 +4,6 @@ Sub AnalyseRatings()
     Dim lastRow As Long
     Dim uniqueRegTypes As Collection
     Dim regType As Variant
-    Dim totalSP As Double, totalMoody As Double, totalFitch As Double
     Dim countSP As Long, countMoody As Long, countFitch As Long
     Dim i As Long
     
@@ -28,29 +27,23 @@ Sub AnalyseRatings()
     Next i
     On Error GoTo 0
     
-    ' Loop through unique regulatory types and calculate averages
+    ' Loop through unique regulatory types and count issuances
     For Each regType In uniqueRegTypes
-        totalSP = 0
-        totalMoody = 0
-        totalFitch = 0
         countSP = 0
         countMoody = 0
         countFitch = 0
         
         For i = 2 To lastRow
             If CStr(wsAllOfferings.Cells(i, "H").Value) = regType Then
-                If IsNumeric(wsAllOfferings.Cells(i, "I").Value) Then
-                    totalSP = totalSP + wsAllOfferings.Cells(i, "I").Value
+                If Not IsEmpty(wsAllOfferings.Cells(i, "I").Value) Then
                     countSP = countSP + 1
                 End If
                 
-                If IsNumeric(wsAllOfferings.Cells(i, "J").Value) Then
-                    totalMoody = totalMoody + wsAllOfferings.Cells(i, "J").Value
+                If Not IsEmpty(wsAllOfferings.Cells(i, "J").Value) Then
                     countMoody = countMoody + 1
                 End If
                 
-                If IsNumeric(wsAllOfferings.Cells(i, "K").Value) Then
-                    totalFitch = totalFitch + wsAllOfferings.Cells(i, "K").Value
+                If Not IsEmpty(wsAllOfferings.Cells(i, "K").Value) Then
                     countFitch = countFitch + 1
                 End If
             End If
@@ -58,8 +51,8 @@ Sub AnalyseRatings()
         
         ' Write results to Overview sheet
         wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = regType
-        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = IIf(countSP > 0, totalSP / countSP, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = IIf(countMoody > 0, totalMoody / countMoody, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = IIf(countFitch > 0, totalFitch / countFitch, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = countSP
+        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = countMoody
+        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = countFitch
     Next regType
 End Sub
