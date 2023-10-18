@@ -25,6 +25,9 @@ Sub GenerateOverview()
     wsOverview.Range("A1").Value = "Issuer"
     wsOverview.Range("B1").Value = "Total Offerings"
     wsOverview.Range("C1").Value = "Average Offer Amount (MM)"
+    wsOverview.Range("D1").Value = "Average Price (Discount)"
+    wsOverview.Range("E1").Value = "Average DTM"
+    wsOverview.Range("F1").Value = "Total Maturity Value (MM)"
     ' Add more headers as needed
     
     ' Find the last row in the "All Offerings" sheet
@@ -36,9 +39,15 @@ Sub GenerateOverview()
         ' Extract relevant data
         Dim issuer As String
         Dim offerAmount As Double
+        Dim priceDiscount As Double
+        Dim dtm As Double
+        Dim maturityValue As Double
         
         issuer = wsOfferings.Cells(i, 1).Value
         offerAmount = wsOfferings.Cells(i, 2).Value
+        priceDiscount = wsOfferings.Cells(i, 3).Value
+        dtm = wsOfferings.Cells(i, 4).Value
+        maturityValue = wsOfferings.Cells(i, 6).Value ' Assuming column F contains Maturity Date
         
         ' Update data in "Overview" sheet
         With wsOverview
@@ -54,6 +63,13 @@ Sub GenerateOverview()
             ' Update total offerings and average offer amount
             .Cells(overviewRow, 2).Value = .Cells(overviewRow, 2).Value + 1
             .Cells(overviewRow, 3).Value = (.Cells(overviewRow, 3).Value * (overviewRow - 2) + offerAmount) / (overviewRow - 1)
+            
+            ' Update average price (discount) and average DTM
+            .Cells(overviewRow, 4).Value = (.Cells(overviewRow, 4).Value * (overviewRow - 2) + priceDiscount) / (overviewRow - 1)
+            .Cells(overviewRow, 5).Value = (.Cells(overviewRow, 5).Value * (overviewRow - 2) + dtm) / (overviewRow - 1)
+            
+            ' Update total maturity value
+            .Cells(overviewRow, 6).Value = .Cells(overviewRow, 6).Value + maturityValue
             
             ' Update more metrics as needed
             
