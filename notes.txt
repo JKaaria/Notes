@@ -46,11 +46,25 @@ Sub AnalyzeSectors()
     For i = 1 To uniqueSectors.Count
         sector = uniqueSectors(i)
         
+        ' Find the row in "All Offerings" corresponding to the sector
+        For j = 2 To lastRow
+            If wsAllOfferings.Cells(j, 24).Value = sector Then
+                totalDiscount = totalDiscount + wsAllOfferings.Cells(j, 3).Value ' Assuming column C is for "Price (Discount)"
+                totalCoupons = totalCoupons + wsAllOfferings.Cells(j, 17).Value ' Assuming column Q is for "Coupon"
+                offeringsCount = offeringsCount + 1
+            End If
+        Next j
+        
         ' Update data for the sector
         wsOverview.Cells(newRow, 4).Value = sector
         wsOverview.Cells(newRow, 5).Value = totalDiscount / offeringsCount
         wsOverview.Cells(newRow, 6).Value = totalCoupons
         wsOverview.Cells(newRow, 7).Value = offeringsCount
+        
+        ' Reset variables for the next sector
+        totalDiscount = 0
+        totalCoupons = 0
+        offeringsCount = 0
         
         ' Move to the next row
         newRow = newRow + 1
