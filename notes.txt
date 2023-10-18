@@ -1,61 +1,43 @@
 Sub AnalyzeRatings()
-    Dim ws As Worksheet
-    Dim dataWs As Worksheet
-    Dim overviewWs As Worksheet
+    Dim wsAllOfferings As Worksheet
+    Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim ratingCell As Range
-    Dim rating As String
+    Dim i As Long
+    Dim regType As String
+    Dim spRating As String
+    Dim moodyRating As String
+    Dim fitchRating As String
     
     ' Set references to worksheets
-    Set dataWs = ThisWorkbook.Sheets("All Offerings")
-    Set overviewWs = ThisWorkbook.Sheets("Overview")
+    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
+    Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in column H
-    lastRow = dataWs.Cells(dataWs.Rows.Count, "H").End(xlUp).Row
+    ' Find the last row in column A of All Offerings sheet
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Create a summary table in the Overview sheet
-    overviewWs.Cells.Clear
-    overviewWs.Range("A1").Value = "Rating"
-    overviewWs.Range("B1").Value = "Count"
-    
-    ' Loop through each row and analyze ratings
-    For Each ratingCell In dataWs.Range("H2:H" & lastRow)
-        ' Assuming that each rating is separated by a "|"
-        Dim ratingsArray() As String
-        ratingsArray = Split(ratingCell.Value, "|")
+    ' Loop through each row in All Offerings sheet
+    For i = 2 To lastRow ' Assuming row 1 is header
         
-        ' Loop through each element in the ratingsArray
-        For Each rating In ratingsArray
-            ' Trim the rating to remove any leading/trailing spaces
-            rating = Trim(rating)
-            
-            ' Check if the rating is not empty
-            If Len(rating) > 0 Then
-                ' Increment the count in the summary table
-                On Error Resume Next
-                overviewWs.Range("A2").Resize(100, 1).Find(rating).Offset(0, 1).Value = overviewWs.Range("A2").Resize(100, 1).Find(rating).Offset(0, 1).Value + 1
-                On Error GoTo 0
-            End If
-        Next rating
-    Next ratingCell
-    
-    ' Add headers to columns in the Overview sheet
-    overviewWs.Range("A:A").Insert Shift:=xlToRight
-    overviewWs.Range("A1").Value = "Overview"
-    overviewWs.Range("B1").Value = "Analysis"
-    overviewWs.Range("A2").Value = "Total Offerings"
-    overviewWs.Range("B2").Formula = "=COUNTA('All Offerings'!A:A)"
-    
-    ' Add additional analyses based on your requirements in columns J and K
-    
-    ' Example Analysis in Column J: Count of Offerings with Credit Ratings
-    overviewWs.Range("A3").Value = "Offerings with Credit Ratings"
-    overviewWs.Range("B3").Formula = "=COUNTIF('All Offerings'!H:H, ""*|*|*"")"
-    
-    ' Example Analysis in Column K: Average Discount for Offerings with Credit Ratings
-    overviewWs.Range("A4").Value = "Average Discount for Offerings with Credit Ratings"
-    overviewWs.Range("B4").Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!H:H, ""*|*|*"")"
-    
-    ' Additional analyses can be added as per your requirements
-    
+        ' Extract values from columns H to K
+        regType = wsAllOfferings.Cells(i, 8).Value
+        spRating = wsAllOfferings.Cells(i, 9).Value
+        moodyRating = wsAllOfferings.Cells(i, 10).Value
+        fitchRating = wsAllOfferings.Cells(i, 11).Value
+        
+        ' Analyze ratings and update Overview sheet
+        
+        ' Column I - Distribution of Ratings
+        ' Your analysis code for distribution of ratings goes here
+        
+        ' Column J - Analyze offerings based on S&P Ratings
+        ' Your analysis code based on S&P Ratings goes here
+        
+        ' Column K - Additional insight
+        ' Your additional analysis code goes here
+        
+        ' Column L - Additional insight
+        ' Your additional analysis code goes here
+        
+    Next i
+
 End Sub
