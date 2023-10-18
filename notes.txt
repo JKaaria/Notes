@@ -1,10 +1,10 @@
-Sub AnalyseRatingsColumns()
+Sub AnalyseIssuers()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim uniqueRatings As Collection
-    Dim rating As Variant
-    Dim countSP As Long, countMoody As Long, countFitch As Long
+    Dim uniqueIssuers As Collection
+    Dim issuer As Variant
+    Dim countIssuers As Long
     Dim i As Long
     
     ' Set worksheets
@@ -12,53 +12,31 @@ Sub AnalyseRatingsColumns()
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
     ' Clear previous data in Overview sheet
-    wsOverview.Range("M:P").Clear
+    wsOverview.Range("Q:S").Clear
     
     ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
     ' Initialize collections
-    Set uniqueRatings = New Collection
+    Set uniqueIssuers = New Collection
     
-    ' Loop through All Offerings sheet to gather unique ratings
+    ' Loop through All Offerings sheet to gather unique issuers
     On Error Resume Next
     For i = 2 To lastRow ' Assuming headers are in row 1
-        uniqueRatings.Add wsAllOfferings.Cells(i, "I").Value, CStr(wsAllOfferings.Cells(i, "I").Value)
-        uniqueRatings.Add wsAllOfferings.Cells(i, "J").Value, CStr(wsAllOfferings.Cells(i, "J").Value)
-        uniqueRatings.Add wsAllOfferings.Cells(i, "K").Value, CStr(wsAllOfferings.Cells(i, "K").Value)
+        uniqueIssuers.Add wsAllOfferings.Cells(i, "A").Value, CStr(wsAllOfferings.Cells(i, "A").Value)
     Next i
     On Error GoTo 0
     
     ' Write titles to the Overview sheet
-    wsOverview.Cells(1, "M").Value = "Rating"
-    wsOverview.Cells(1, "N").Value = "Count (S&P)"
-    wsOverview.Cells(1, "O").Value = "Count (Moody)"
-    wsOverview.Cells(1, "P").Value = "Count (Fitch)"
+    wsOverview.Cells(1, "Q").Value = "Issuer"
+    wsOverview.Cells(1, "R").Value = "Count"
     
-    ' Loop through unique ratings and count occurrences
-    For Each rating In uniqueRatings
-        countSP = 0
-        countMoody = 0
-        countFitch = 0
-        
-        For i = 2 To lastRow
-            If wsAllOfferings.Cells(i, "I").Value = rating Then
-                countSP = countSP + 1
-            End If
-            
-            If wsAllOfferings.Cells(i, "J").Value = rating Then
-                countMoody = countMoody + 1
-            End If
-            
-            If wsAllOfferings.Cells(i, "K").Value = rating Then
-                countFitch = countFitch + 1
-            End If
-        Next i
+    ' Loop through unique issuers and count occurrences
+    For Each issuer In uniqueIssuers
+        countIssuers = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("A:A"), issuer)
         
         ' Write results to Overview sheet
-        wsOverview.Cells(wsOverview.Rows.Count, "M").End(xlUp).Offset(1, 0).Value = rating
-        wsOverview.Cells(wsOverview.Rows.Count, "N").End(xlUp).Offset(1, 0).Value = countSP
-        wsOverview.Cells(wsOverview.Rows.Count, "O").End(xlUp).Offset(1, 0).Value = countMoody
-        wsOverview.Cells(wsOverview.Rows.Count, "P").End(xlUp).Offset(1, 0).Value = countFitch
-    Next rating
+        wsOverview.Cells(wsOverview.Rows.Count, "Q").End(xlUp).Offset(1, 0).Value = issuer
+        wsOverview.Cells(wsOverview.Rows.Count, "R").End(xlUp).Offset(1, 0).Value = countIssuers
+    Next issuer
 End Sub
