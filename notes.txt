@@ -2,7 +2,8 @@ Sub RatingAnalysis()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim rating As String
+    Dim ratings As Variant
+    Dim rating As Variant
     Dim ratingCounts As Collection
     Dim ratingColors As Collection
     Dim i As Long
@@ -37,9 +38,9 @@ Sub RatingAnalysis()
     
     ' Loop through each row in "All Offerings" sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
-        
         ' Get ratings from columns S, T, and U (assuming S, T, U are the column numbers for S&P, Moody's, Fitch)
-        For Each rating In Split(wsAllOfferings.Cells(i, 19).Value, "|") ' Assuming column S is for "S and P"
+        ratings = Split(wsAllOfferings.Cells(i, 19).Value, "|") ' Assuming column S is for "S and P"
+        For Each rating In ratings
             ' Check if rating is not empty
             If Trim(rating) <> "" Then
                 ' Update count for the rating
