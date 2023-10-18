@@ -6,9 +6,6 @@ Sub AnalyseRatings()
     Dim i As Long
     Dim clientCategories As Collection
     Dim category As Variant
-    Dim spTotal As Double, moodyTotal As Double, fitchTotal As Double
-    Dim spCount As Long, moodyCount As Long, fitchCount As Long
-    Dim avgSP As Double, avgMoody As Double, avgFitch As Double
     
     ' Set references to sheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
@@ -21,25 +18,10 @@ Sub AnalyseRatings()
     Set clientCategories = New Collection
     
     ' Loop through data in All Offerings sheet
-    On Error Resume Next ' Ignore errors temporarily
     For i = 2 To lastRow ' Assuming headers are in row 1
         ' Collect unique client categories
         clientCategories.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
-        
-        ' Sum ratings for each agency by category and reg type
-        Select Case UCase(wsAllOfferings.Cells(i, 8).Value)
-            Case "S&P"
-                spTotal = spTotal + wsAllOfferings.Cells(i, 9).Value
-                spCount = spCount + 1
-            Case "MOODY"
-                moodyTotal = moodyTotal + wsAllOfferings.Cells(i, 10).Value
-                moodyCount = moodyCount + 1
-            Case "FITCH"
-                fitchTotal = fitchTotal + wsAllOfferings.Cells(i, 11).Value
-                fitchCount = fitchCount + 1
-        End Select
     Next i
-    On Error GoTo 0 ' Reset error handling
     
     ' Write data to Overview sheet
     wsOverview.Range("I:L").Clear ' Clear existing data in columns I to L
@@ -50,7 +32,7 @@ Sub AnalyseRatings()
     wsOverview.Range("K1").Value = "Average Rating (Moody)"
     wsOverview.Range("L1").Value = "Average Rating (Fitch)"
     
-    ' Loop through unique client categories and calculate averages
+    ' Loop through unique client categories and calculate averages using formulas
     For Each category In clientCategories
         ' Find row in Overview sheet
         Dim overviewRow As Long
@@ -59,21 +41,12 @@ Sub AnalyseRatings()
         ' Write client category to Overview sheet
         wsOverview.Cells(overviewRow, 9).Value = category
         
-        ' Calculate averages
-        If spCount > 0 Then
-            avgSP = spTotal / spCount
-            wsOverview.Cells(overviewRow, 10).Value = avgSP
-        End If
-        
-        If moodyCount > 0 Then
-            avgMoody = moodyTotal / moodyCount
-            wsOverview.Cells(overviewRow, 11).Value = avgMoody
-        End If
-        
-        If fitchCount > 0 Then
-            avgFitch = fitchTotal / fitchCount
-            wsOverview.Cells(overviewRow, 12).Value = avgFitch
-        End If
+        ' Calculate averages using formulas
+        wsOverview.Cells(overviewRow, 10).Formula = "=AVERAGEIFS('All Offerings'!I:I, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
+        wsOverview.Cells(overviewRow, 11).Formula = "=AVERAGEIFS('All Offerings'!J:J, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
+        wsOverview.Cells(overviewRow, 12).Formula = "=AVERAGEIFS('All Offerings'!K:K, 'All Offerings'!H:H, """ & category & """, 'All Offerings'!A:A, ""<>*#"")"
     Next category
     
+    ' Convert formulas to values (optional)
+    wsOverview.Range("J:L").Value = wsOverview.Range("J:L").Value
 End Sub
