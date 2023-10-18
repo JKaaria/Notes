@@ -1,75 +1,74 @@
-Sub AnalyzeRatings()
+Sub AnalyseRatings()
+    ' Declare variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim meanClientRegType As Double
-    Dim totalSP As Double
-    Dim totalMoody As Double
-    Dim totalFitch As Double
-    Dim avgClientRegType As Double
-    Dim avgSPRating As Double
-    Dim avgMoodyRating As Double
-    Dim avgFitchRating As Double
+    Dim uniqueCodes As Collection
+    Dim code As Variant
+    Dim totalSP As Double, totalMoody As Double, totalFitch As Double
+    Dim countSP As Integer, countMoody As Integer, countFitch As Integer
     
     ' Set references to worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row with data in the All Offerings sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    ' Find the last row in the All Offerings sheet
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "H").End(xlUp).Row
     
-    ' Initialize means and totals
-    meanClientRegType = 0
-    totalSP = 0
-    totalMoody = 0
-    totalFitch = 0
+    ' Initialize a collection to store unique codes
+    Set uniqueCodes = New Collection
     
-    ' Loop through data in All Offerings sheet
-    For i = 2 To lastRow ' Assuming headers are in the first row
-        ' Check if the cell value is numeric before adding to mean
-        If IsNumeric(GetNumericValue(wsAllOfferings.Cells(i, 8).Value)) Then
-            meanClientRegType = meanClientRegType + CDbl(GetNumericValue(wsAllOfferings.Cells(i, 8).Value)) ' Column H
-        Else
-            ' Handle the case where the cell value is not numeric (e.g., non-numeric text)
-            ' You can choose to ignore, display a message, or take appropriate action
-            MsgBox "Non-numeric value found in Client Reg Type at row " & i
+    ' Loop through the All Offerings sheet to collect unique codes
+    For i = 2 To lastRow ' Assuming header is in row 1
+        On Error Resume Next
+        uniqueCodes.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
+        On Error GoTo 0
+    Next i
+    
+    ' Loop through unique codes to analyze ratings
+    For Each code In uniqueCodes
+        ' Reset variables for each code
+        totalSP = 0
+        totalMoody = 0
+        totalFitch = 0
+        countSP = 0
+        countMoody = 0
+        countFitch = 0
+        
+        ' Loop through All Offerings to calculate totals and counts
+        For i = 2 To lastRow
+            If wsAllOfferings.Cells(i, 8).Value = code Then
+                ' Check if S&P rating exists
+                If Not IsEmpty(wsAllOfferings.Cells(i, 9).Value) Then
+                    totalSP = totalSP + wsAllOfferings.Cells(i, 9).Value
+                    countSP = countSP + 1
+                End If
+                
+                ' Check if Moody's rating exists
+                If Not IsEmpty(wsAllOfferings.Cells(i, 10).Value) Then
+                    totalMoody = totalMoody + wsAllOfferings.Cells(i, 10).Value
+                    countMoody = countMoody + 1
+                End If
+                
+                ' Check if Fitch rating exists
+                If Not IsEmpty(wsAllOfferings.Cells(i, 11).Value) Then
+                    totalFitch = totalFitch + wsAllOfferings.Cells(i, 11).Value
+                    countFitch = countFitch + 1
+                End If
+            End If
+        Next i
+        
+        ' Calculate averages and update Overview sheet
+        If countSP > 0 Then
+            wsOverview.Cells(code, 9).Value = totalSP / countSP
         End If
         
-        ' Sum up values for mean
-        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I
-        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J
-        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K
-    Next i
-    
-    ' Calculate means
-    meanClientRegType = meanClientRegType / (lastRow - 1) ' Exclude header row
-    avgSPRating = totalSP / (lastRow - 1)
-    avgMoodyRating = totalMoody / (lastRow - 1)
-    avgFitchRating = totalFitch / (lastRow - 1)
-    
-    ' Update Overview sheet with means
-    wsOverview.Cells(2, 9).Value = meanClientRegType ' Column I (Mean Reg Type)
-    wsOverview.Cells(2, 10).Value = avgSPRating ' Column J
-    wsOverview.Cells(2, 11).Value = avgMoodyRating ' Column K
-    wsOverview.Cells(2, 12).Value = avgFitchRating ' Column L
-End Sub
-
-Function GetNumericValue(value As String) As Double
-    Dim result As String
-    Dim i As Integer
-    result = ""
-
-    For i = 1 To Len(value)
-        Dim currentChar As String
-        currentChar = Mid(value, i, 1)
-        If IsNumeric(currentChar) Or currentChar = "." Then
-            result = result & currentChar
+        If countMoody > 0 Then
+            wsOverview.Cells(code, 10).Value = totalMoody / countMoody
         End If
-    Next i
-
-    If Len(result) > 0 Then
-        GetNumericValue = CDbl(result)
-    Else
-        GetNumericValue = 0 ' Default value if no numeric characters found
-    End If
-End Function
+        
+        If countFitch > 0 Then
+            wsOverview.Cells(code, 11).Value = totalFitch / countFitch
+        End If
+    Next code
+End Sub
