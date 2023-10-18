@@ -27,15 +27,15 @@ Sub AnalyseRatings()
     ' Loop through each row in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in row 1
         ' Get unique code from column H
-        code = wsAllOfferings.Cells(i, 8).Value
+        code = wsAllOfferings.Cells(i, 8).Text
         On Error Resume Next
         uniqueCodes.Add code, CStr(code)
         On Error GoTo 0
         
         ' Sum ratings based on the agency and reg type
-        spTotal = spTotal + wsAllOfferings.Cells(i, 9).Value
-        moodyTotal = moodyTotal + wsAllOfferings.Cells(i, 10).Value
-        fitchTotal = fitchTotal + wsAllOfferings.Cells(i, 11).Value
+        spTotal = spTotal + ConvertToDouble(wsAllOfferings.Cells(i, 9).Text)
+        moodyTotal = moodyTotal + ConvertToDouble(wsAllOfferings.Cells(i, 10).Text)
+        fitchTotal = fitchTotal + ConvertToDouble(wsAllOfferings.Cells(i, 11).Text)
         
         ' Count ratings based on the agency and reg type
         spCount = spCount + 1
@@ -45,11 +45,17 @@ Sub AnalyseRatings()
     
     ' Write results to Overview sheet
     wsOverview.Range("I2:I" & uniqueCodes.Count + 1).Value = Application.Transpose(uniqueCodes.Items)
-    wsOverview.Range("J2").Formula = "=AVERAGEIF('All Offerings'!$H$2:$H$" & lastRow & ",$I2,'All Offerings'!$I$2:$I$" & lastRow & ")"
-    wsOverview.Range("K2").Formula = "=AVERAGEIFS('All Offerings'!$J$2:$J$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",$I2)"
+    wsOverview.Range("J2").Formula = "=SUMIFS('All Offerings'!$I$2:$I$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)/COUNTIFS('All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)"
+    wsOverview.Range("K2").Formula = "=SUMIFS('All Offerings'!$J$2:$J$" & lastRow & ",'All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)/COUNTIFS('All Offerings'!$H$2:$H$" & lastRow & ",'Overview'!$I2)"
     wsOverview.Range("J3").Formula = "=AVERAGE('All Offerings'!$I$2:$I$" & lastRow & ")"
     wsOverview.Range("K3").Formula = "=AVERAGE('All Offerings'!$J$2:$J$" & lastRow & ")"
     
     ' Clean up
     Set uniqueCodes = Nothing
 End Sub
+
+Function ConvertToDouble(value As Variant) As Double
+    On Error Resume Next
+    ConvertToDouble = CDbl(value)
+    On Error GoTo 0
+End Function
