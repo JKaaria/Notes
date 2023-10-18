@@ -24,7 +24,7 @@ Sub AnalyzeRatings()
         Dim ratingsArray() As String
         ratingsArray = Split(ratingCell.Value, "|")
         
-        ' Loop through each rating type
+        ' Loop through each element in the ratingsArray
         For Each rating In ratingsArray
             ' Trim the rating to remove any leading/trailing spaces
             rating = Trim(rating)
