@@ -24,6 +24,9 @@ Sub RatingAnalysis()
     wsOverview.Cells.Clear
     wsOverview.Rows.RowHeight = 15
     
+    ' Copy data from cells A:H to "Overview" sheet
+    wsAllOfferings.Range("A:H").Copy wsOverview.Range("A1")
+    
     ' Set headers in "Overview" sheet
     wsOverview.Range("I1").Value = "Rating Analysis"
     wsOverview.Range("I2").Value = "Rating"
@@ -38,8 +41,8 @@ Sub RatingAnalysis()
     
     ' Loop through each row in "All Offerings" sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
-        ' Get ratings from columns S, T, and U (assuming S, T, U are the column numbers for S&P, Moody's, Fitch)
-        ratings = Split(wsAllOfferings.Cells(i, 19).Value, "|") ' Assuming column S is for "S and P"
+        ' Get ratings from columns H, I, J, and K (assuming H, I, J, K are the column numbers for Reg Type, S&P, Moody's, Fitch)
+        ratings = Array(wsAllOfferings.Cells(i, 8).Value, wsAllOfferings.Cells(i, 9).Value, wsAllOfferings.Cells(i, 10).Value, wsAllOfferings.Cells(i, 11).Value)
         For Each rating In ratings
             ' Check if rating is not empty
             If Trim(rating) <> "" Then
@@ -54,7 +57,7 @@ Sub RatingAnalysis()
     ' Populate data in "Overview" sheet starting from cell I3
     For i = 1 To ratingCounts.Count
         wsOverview.Cells(i + 2, 9).Value = ratingCounts(i)
-        wsOverview.Cells(i + 2, 10).Value = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("S:S|T:T|U:U"), ratingCounts(i))
+        wsOverview.Cells(i + 2, 10).Value = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("H:H|I:I|J:J|K:K"), ratingCounts(i))
     Next i
     
     ' Set conditional formatting for the count column
