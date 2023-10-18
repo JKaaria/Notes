@@ -56,7 +56,11 @@ Sub AnalyzeSectors()
         Next j
         
         ' Update data for the sector
-        wsOverview.Cells(newRow, 4).Value = sector
+        If newRow = 1 Then
+            wsOverview.Cells(newRow, 4).Value = "N/A"
+        Else
+            wsOverview.Cells(newRow, 4).Value = sector
+        End If
         wsOverview.Cells(newRow, 5).Value = totalDiscount / offeringsCount
         wsOverview.Cells(newRow, 6).Value = totalCoupons
         wsOverview.Cells(newRow, 7).Value = offeringsCount
