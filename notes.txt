@@ -1,62 +1,8 @@
-Sub AnalyzeSectors()
-    ' Declare variables
-    Dim wsOfferings As Worksheet
-    Dim wsOverview As Worksheet
-    Dim lastRow As Long
-    Dim i As Long
-    Dim sector As Variant
-    Dim uniqueSectors As Collection
-    Dim totalOfferAmt As Double
-    Dim avgDiscount As Double
-    Dim totalCoupons As Double
-    Dim numOfferings As Long
-    
-    ' Set worksheets
-    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
+On Error Resume Next
+Set wsOverview = ThisWorkbook.Sheets("Overview")
+On Error GoTo 0
 
-    ' Find the last row in the "All Offerings" sheet
-    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
-
-    ' Initialize collection to store unique sectors
-    Set uniqueSectors = New Collection
-
-    ' Loop through each row in the "All Offerings" sheet
-    For i = 2 To lastRow ' Assuming the data starts from the second row
-
-        ' Get the sector from column X (change the column index if needed)
-        sector = wsOfferings.Cells(i, 24).Value ' Column X is the 24th column
-
-        ' Check if the sector is not already in the collection
-        If Not IsInCollection(uniqueSectors, sector) Then
-            ' Add the unique sector to the collection
-            uniqueSectors.Add sector
-
-            ' Reset metrics for the new sector
-            totalOfferAmt = 0
-            avgDiscount = 0
-            totalCoupons = 0
-            numOfferings = 0
-        End If
-
-        ' Accumulate metrics for the current sector
-        totalOfferAmt = totalOfferAmt + wsOfferings.Cells(i, 2).Value
-        avgDiscount = avgDiscount + wsOfferings.Cells(i, 3).Value ' Assuming discount is in column 3
-        totalCoupons = totalCoupons + wsOfferings.Cells(i, 18).Value ' Assuming coupons are in column 18
-        numOfferings = numOfferings + 1
-    Next i
-    
-    ' Write the results to the "Overview" sheet
-    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = Application.WorksheetFunction.Transpose(uniqueSectors.Items)
-    wsOverview.Cells(wsOverview.Rows.Count, "E").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = totalOfferAmt
-    wsOverview.Cells(wsOverview.Rows.Count, "F").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = avgDiscount / numOfferings
-    wsOverview.Cells(wsOverview.Rows.Count, "G").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = totalCoupons
-    ' Add more lines for other metrics
-End Sub
-
-Function IsInCollection(col As Collection, key As Variant) As Boolean
-    On Error Resume Next
-    col.Item key
-    IsInCollection = (Err.Number = 0)
-    On Error GoTo 0
-End Function
+If wsOverview Is Nothing Then
+    MsgBox "Overview sheet not found!", vbExclamation
+    Exit Sub
+End If
