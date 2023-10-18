@@ -1,64 +1,57 @@
-Sub AnalyzeRatings()
-    ' Define variables
+Sub AnalyzeCreditRatings()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim regType As String
-    Dim spRating As String
-    Dim moodyRating As String
-    Dim fitchRating As String
+    Dim rating As String
+    Dim spCount As Long, moodyCount As Long, fitchCount As Long
     
-    ' Set references to sheets
+    ' Set references to the worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in column A of All Offerings sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    ' Find the last row in column H (assuming there's data in column H)
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "H").End(xlUp).Row
     
-    ' Loop through each row in All Offerings sheet
-    For i = 2 To lastRow ' Assuming the header is in row 1
-        ' Read values from columns H to K
-        regType = wsAllOfferings.Cells(i, 8).Value
-        spRating = wsAllOfferings.Cells(i, 9).Value
-        moodyRating = wsAllOfferings.Cells(i, 10).Value
-        fitchRating = wsAllOfferings.Cells(i, 11).Value
+    ' Clear existing data in Overview sheet from column I onwards
+    wsOverview.Range("I:ZZ").Clear
+    
+    ' Loop through the data in the All Offerings sheet
+    For i = 2 To lastRow ' Assuming row 1 is headers
         
-        ' Update the Overview sheet based on the ratings
-        If regType <> "" Then
-            wsOverview.Cells(i, 9).Value = regType
-            wsOverview.Cells(i, 10).Value = spRating
-            wsOverview.Cells(i, 11).Value = moodyRating
-            wsOverview.Cells(i, 12).Value = fitchRating
+        ' Get the rating from each column
+        rating = wsAllOfferings.Cells(i, 8).Value ' Column H (Client Reg Category)
+        
+        ' Check S&P rating (Column I)
+        If rating <> "" Then
+            wsOverview.Cells(2, 9).Value = wsOverview.Cells(2, 9).Value + 1
+            wsOverview.Cells(2, 9 + spCount).Value = rating
+            spCount = spCount + 1
         End If
+        
+        ' Check Moody rating (Column J)
+        rating = wsAllOfferings.Cells(i, 9).Value ' Column I (S&P Ratings)
+        If rating <> "" Then
+            wsOverview.Cells(2, 10).Value = wsOverview.Cells(2, 10).Value + 1
+            wsOverview.Cells(2, 10 + moodyCount).Value = rating
+            moodyCount = moodyCount + 1
+        End If
+        
+        ' Check Fitch rating (Column K)
+        rating = wsAllOfferings.Cells(i, 10).Value ' Column J (Moody Ratings)
+        If rating <> "" Then
+            wsOverview.Cells(2, 11).Value = wsOverview.Cells(2, 11).Value + 1
+            wsOverview.Cells(2, 11 + fitchCount).Value = rating
+            fitchCount = fitchCount + 1
+        End If
+        
+        ' Add any additional metrics as needed
+        
     Next i
     
-    ' Create a PivotTable in the Overview sheet to analyze the distribution of ratings
-    Dim pt As PivotTable
-    Dim ptField As PivotField
+    ' Add headers to the Overview sheet
+    wsOverview.Cells(1, 9).Value = "S&P Ratings"
+    wsOverview.Cells(1, 10).Value = "Moody Ratings"
+    wsOverview.Cells(1, 11).Value = "Fitch Ratings"
     
-    ' Set the data range for PivotTable
-    Set ptDataRange = wsOverview.Cells(1, 1).CurrentRegion
-    
-    ' Create PivotTable in cell A30 of Overview sheet
-    Set pt = wsOverview.PivotTableWizard(TableDestination:=wsOverview.Cells(30, 1), SourceType:=xlDatabase, SourceData:=ptDataRange)
-    
-    ' Add Reg Type, S&P, Moody, and Fitch to the RowFields
-    Set ptField = pt.PivotFields("Reg Type")
-    ptField.Orientation = xlRowField
-    
-    Set ptField = pt.PivotFields("S and P")
-    ptField.Orientation = xlRowField
-    
-    Set ptField = pt.PivotFields("Moody")
-    ptField.Orientation = xlRowField
-    
-    Set ptField = pt.PivotFields("Fitch")
-    ptField.Orientation = xlRowField
-    
-    ' Add Offerings to the DataFields
-    Set ptField = pt.PivotFields("Offerings")
-    ptField.Orientation = xlDataField
-    ptField.Function = xlCount
-    ptField.Name = "Number of Offerings"
 End Sub
