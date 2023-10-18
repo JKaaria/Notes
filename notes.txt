@@ -1,7 +1,10 @@
-Sub CreateOverviewSheet()
+Sub CreateSectorAnalysis()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
+    Dim uniqueSectors As Collection
+    Dim sector As Variant
+    Dim i As Long
 
     ' Set references to sheets
     On Error Resume Next
@@ -36,24 +39,40 @@ Sub CreateOverviewSheet()
     ' Copy headers to the "Overview" sheet
     wsAllOfferings.Rows(1).Copy wsOverview.Rows(1)
 
-    ' Add headers for summary metrics
-    wsOverview.Cells(1, 31).Value = "Summary Metrics"
+    ' Add headers for sector analysis
+    wsOverview.Cells(1, 4).Value = "Sector Analysis"
 
-    ' Add summary metrics directly on the "Overview" sheet
-    wsOverview.Cells(2, 31).Value = "Total Offerings"
-    wsOverview.Cells(2, 32).Formula = "=COUNTA('All Offerings'!A:A)-1"
+    ' Find unique sectors
+    Set uniqueSectors = New Collection
+    On Error Resume Next
+    For i = 2 To lastRow
+        uniqueSectors.Add wsAllOfferings.Cells(i, 24).Value, CStr(wsAllOfferings.Cells(i, 24).Value)
+    Next i
+    On Error GoTo 0
 
-    wsOverview.Cells(3, 31).Value = "Total Offer Amount (MM)"
-    wsOverview.Cells(3, 32).Formula = "=SUM('All Offerings'!B2:B" & lastRow & ")"
+    ' Display unique sectors and calculate sector metrics
+    wsOverview.Cells(2, 4).Value = "Sector"
+    wsOverview.Cells(2, 5).Value = "Number of Offerings"
+    wsOverview.Cells(2, 6).Value = "Total Offer Amount (MM)"
+    wsOverview.Cells(2, 7).Value = "Average Discount"
+    wsOverview.Cells(2, 8).Value = "Total Maturity Value (MM)"
+    wsOverview.Cells(2, 9).Value = "Average Days to Maturity (DTM)"
+    wsOverview.Cells(2, 10).Value = "Total Net Upfront (MM)"
 
-    wsOverview.Cells(4, 31).Value = "Average Discount"
-    wsOverview.Cells(4, 32).Formula = "=AVERAGE('All Offerings'!C2:C" & lastRow & ")"
+    For i = 1 To uniqueSectors.Count
+        sector = uniqueSectors(i)
 
-    wsOverview.Cells(5, 31).Value = "Total Maturity Value (MM)"
-    wsOverview.Cells(5, 32).Formula = "=SUM('All Offerings'!B2:B" & lastRow & "*(1+'All Offerings'!C2:C" & lastRow & "/100))"
+        wsOverview.Cells(i + 2, 4).Value = sector
+        wsOverview.Cells(i + 2, 5).Formula = "=COUNTIFS('All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(i + 2, 6).Formula = "=SUMIFS('All Offerings'!B:B, 'All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(i + 2, 7).Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(i + 2, 8).Formula = "=SUMIFS('All Offerings'!B:B*(1+'All Offerings'!C:C/100), 'All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(i + 2, 9).Formula = "=AVERAGEIFS('All Offerings'!D:D, 'All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(i + 2, 10).Formula = "=SUMIFS('All Offerings'!V:V, 'All Offerings'!Y:Y,""" & sector & """)"
+    Next i
 
-    wsOverview.Cells(6, 31).Value = "Average Days to Maturity (DTM)"
-    wsOverview.Cells(6, 32).Formula = "=AVERAGE('All Offerings'!D2:D" & lastRow & ")"
+    ' Format the "Overview" sheet
+    wsOverview.Columns.AutoFit
 
-    wsOverview.Cells(7, 31).Value = "Total Net Upfront (MM)"
-    wsOverview.Cells(7, 32).Formula = "=SUM('All Offerings
+    MsgBox "Sector Analysis completed successfully!", vbInformation
+End Sub
