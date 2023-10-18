@@ -4,7 +4,7 @@ Sub AnalyzeSectors()
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim sector As String
+    Dim sector As Variant
     Dim totalOfferAmt As Double
     Dim avgDiscount As Double
     Dim totalCoupons As Double
