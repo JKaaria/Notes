@@ -96,7 +96,16 @@ Sub CreateCouponVsMaturityChart(ws As Worksheet, analysisWs As Worksheet)
     ' Coupon vs. Maturity Date
     Dim scatterChart As ChartObject
     Set scatterChart = analysisWs.ChartObjects.Add(Left:=400, Width:=375, Top:=350, Height:=225)
-    scatterChart.Chart.SetSourceData ws.Range("E2:E" & ws.Cells(ws.Rows.Count, "E").End(xlUp).Row & ",F2:F" & ws.Cells(ws.Rows.Count, "F").End(xlUp).Row & ",H2:H" & ws.Cells(ws.Rows.Count, "H").End(xlUp).Row)
+
+    ' Add primary series
+    scatterChart.Chart.SetSourceData ws.Range("E2:E" & ws.Cells(ws.Rows.Count, "E").End(xlUp).Row & ",F2:F" & ws.Cells(ws.Rows.Count, "F").End(xlUp).Row)
+
+    ' Add secondary series
+    Dim secondarySeries As Series
+    Set secondarySeries = scatterChart.Chart.SeriesCollection.NewSeries
+    secondarySeries.Values = ws.Range("H2:H" & ws.Cells(ws.Rows.Count, "H").End(xlUp).Row)
+    secondarySeries.AxisGroup = xlSecondary
+
     scatterChart.Chart.ChartType = xlXYScatterLines
     scatterChart.Chart.HasTitle = True
     scatterChart.Chart.ChartTitle.Text = "Coupon vs. Maturity Date"
@@ -106,8 +115,8 @@ Sub CreateCouponVsMaturityChart(ws As Worksheet, analysisWs As Worksheet)
     scatterChart.Chart.Axes(xlValue, xlPrimary).AxisTitle.Text = "Coupon"
     scatterChart.Chart.Axes(xlValue, xlSecondary).HasTitle = True
     scatterChart.Chart.Axes(xlValue, xlSecondary).AxisTitle.Text = "Sector"
-    scatterChart.Chart.SeriesCollection(3).AxisGroup = xlSecondary
 End Sub
+
 
 Sub CreateTimeSeriesAnalysisChart(ws As Worksheet, analysisWs As Worksheet)
     ' Time Series Analysis
