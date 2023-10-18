@@ -2,7 +2,6 @@ Sub PerformSectorAnalysis()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim sectorColumn As Range
     Dim uniqueSectors As Collection
     Dim sector As Variant
     Dim rowNum As Long
@@ -42,6 +41,7 @@ Sub PerformSectorAnalysis()
     wsOverview.Cells(1, 34).Value = "Sector Analysis"
 
     ' Set the sector column to column X
+    Dim sectorColumn As Range
     Set sectorColumn = wsAllOfferings.Columns("X")
 
     If Not sectorColumn Is Nothing Then
