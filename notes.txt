@@ -42,45 +42,48 @@ Sub PerformSectorAnalysis()
 
     ' Set the sector column to column X
     Dim sectorColumn As Range
+    On Error Resume Next
     Set sectorColumn = wsAllOfferings.Columns("X")
+    On Error GoTo 0
 
-    If Not sectorColumn Is Nothing Then
-        ' Extract unique sectors using a collection
-        Set uniqueSectors = New Collection
-
-        For rowNum = 2 To lastRow
-            On Error Resume Next
-            uniqueSectors.Add wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value, CStr(wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value)
-            On Error GoTo 0
-        Next rowNum
-
-        ' Add headers for sector metrics
-        wsOverview.Cells(2, 34).Value = "Sector"
-        wsOverview.Cells(2, 35).Value = "Total Offerings"
-        wsOverview.Cells(2, 36).Value = "Total Offer Amount (MM)"
-        wsOverview.Cells(2, 37).Value = "Average Discount"
-        wsOverview.Cells(2, 38).Value = "Total Maturity Value (MM)"
-        wsOverview.Cells(2, 39).Value = "Average Days to Maturity (DTM)"
-        wsOverview.Cells(2, 40).Value = "Total Net Upfront (MM)"
-
-        ' Loop through unique sectors and calculate metrics
-        summaryRow = 3
-        For Each sector In uniqueSectors
-            wsOverview.Cells(summaryRow, 34).Value = sector
-            wsOverview.Cells(summaryRow, 35).Formula = "=COUNTIFS('All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            wsOverview.Cells(summaryRow, 36).Formula = "=SUMIFS('All Offerings'!B:B,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            wsOverview.Cells(summaryRow, 37).Formula = "=AVERAGEIFS('All Offerings'!C:C,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            wsOverview.Cells(summaryRow, 38).Formula = "=SUMIFS('All Offerings'!B:B*(1+'All Offerings'!C:C/100),'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            wsOverview.Cells(summaryRow, 39).Formula = "=AVERAGEIFS('All Offerings'!D:D,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            wsOverview.Cells(summaryRow, 40).Formula = "=SUMIFS('All Offerings'!V:V,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
-            summaryRow = summaryRow + 1
-        Next sector
-
-        ' Format the "Overview" sheet
-        wsOverview.Columns.AutoFit
-
-        MsgBox "Sector Analysis completed successfully!", vbInformation
-    Else
+    If sectorColumn Is Nothing Then
         MsgBox "Sector column not found in 'All Offerings' sheet!", vbExclamation
+        Exit Sub
     End If
+
+    ' Extract unique sectors using a collection
+    Set uniqueSectors = New Collection
+
+    For rowNum = 2 To lastRow
+        On Error Resume Next
+        uniqueSectors.Add wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value, CStr(wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value)
+        On Error GoTo 0
+    Next rowNum
+
+    ' Add headers for sector metrics
+    wsOverview.Cells(2, 34).Value = "Sector"
+    wsOverview.Cells(2, 35).Value = "Total Offerings"
+    wsOverview.Cells(2, 36).Value = "Total Offer Amount (MM)"
+    wsOverview.Cells(2, 37).Value = "Average Discount"
+    wsOverview.Cells(2, 38).Value = "Total Maturity Value (MM)"
+    wsOverview.Cells(2, 39).Value = "Average Days to Maturity (DTM)"
+    wsOverview.Cells(2, 40).Value = "Total Net Upfront (MM)"
+
+    ' Loop through unique sectors and calculate metrics
+    summaryRow = 3
+    For Each sector In uniqueSectors
+        wsOverview.Cells(summaryRow, 34).Value = sector
+        wsOverview.Cells(summaryRow, 35).Formula = "=COUNTIFS('All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        wsOverview.Cells(summaryRow, 36).Formula = "=SUMIFS('All Offerings'!B:B,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        wsOverview.Cells(summaryRow, 37).Formula = "=AVERAGEIFS('All Offerings'!C:C,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        wsOverview.Cells(summaryRow, 38).Formula = "=SUMIFS('All Offerings'!B:B*(1+'All Offerings'!C:C/100),'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        wsOverview.Cells(summaryRow, 39).Formula = "=AVERAGEIFS('All Offerings'!D:D,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        wsOverview.Cells(summaryRow, 40).Formula = "=SUMIFS('All Offerings'!V:V,'All Offerings'!" & sectorColumn.Address & ",""" & sector & """)"
+        summaryRow = summaryRow + 1
+    Next sector
+
+    ' Format the "Overview" sheet
+    wsOverview.Columns.AutoFit
+
+    MsgBox "Sector Analysis completed successfully!", vbInformation
 End Sub
