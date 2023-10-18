@@ -24,11 +24,10 @@ Sub RatingAnalysis()
     ' Find the next available row in "Overview" sheet
     nextRow = wsOverview.Cells(wsOverview.Rows.Count, "A").End(xlUp).Row + 1
     
-    ' Set headers in "Overview" sheet if the sheet is empty
-    If nextRow = 2 Then
-        wsOverview.Range("I1").Value = "Rating Analysis"
-        wsOverview.Range("I2").Value = "Rating"
-        wsOverview.Range("J2").Value = "Count"
+    ' Copy headers from "All Offerings" to "Overview" only if "Overview" is empty
+    If wsOverview.Cells(1, 1).Value = "" Then
+        wsAllOfferings.Range("A:I").Copy wsOverview.Range("A1")
+        nextRow = 3 ' Start populating data from row 3
     End If
     
     ' Set reference to unique ratings using Collection
