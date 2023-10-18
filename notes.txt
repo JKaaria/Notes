@@ -1,106 +1,62 @@
-Sub AverageDiscount(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
+Sub AnalyzeSectors()
+    ' Declare variables
+    Dim wsOfferings As Worksheet
+    Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim totalDiscount As Double
-    Dim discountCount As Long
-    Dim averageDiscount As Double
     Dim i As Long
+    Dim sector As Variant
+    Dim uniqueSectors As Collection
+    Dim totalOfferAmt As Double
+    Dim avgDiscount As Double
+    Dim totalCoupons As Double
+    Dim numOfferings As Long
     
-    ' Find the last row in the Offerings sheet
+    ' Set worksheets
+    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
+    Set wsOverview = ThisWorkbook.Sheets("Overview")
+
+    ' Find the last row in the "All Offerings" sheet
     lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
-    
-    ' Initialize variables
-    totalDiscount = 0
-    discountCount = 0
-    
-    ' Loop through each row in the Offerings sheet
-    For i = 2 To lastRow ' Assuming row 1 contains headers
-        ' Check if the current row belongs to the specified sector
-        If wsOfferings.Cells(i, "X").Value = sector Then
-            ' Accumulate discounts
-            totalDiscount = totalDiscount + wsOfferings.Cells(i, "C").Value
-            ' Increment discount count
-            discountCount = discountCount + 1
+
+    ' Initialize collection to store unique sectors
+    Set uniqueSectors = New Collection
+
+    ' Loop through each row in the "All Offerings" sheet
+    For i = 2 To lastRow ' Assuming the data starts from the second row
+
+        ' Get the sector from column X (change the column index if needed)
+        sector = wsOfferings.Cells(i, 24).Value ' Column X is the 24th column
+
+        ' Check if the sector is not already in the collection
+        If Not IsInCollection(uniqueSectors, sector) Then
+            ' Add the unique sector to the collection
+            uniqueSectors.Add sector
+
+            ' Reset metrics for the new sector
+            totalOfferAmt = 0
+            avgDiscount = 0
+            totalCoupons = 0
+            numOfferings = 0
         End If
+
+        ' Accumulate metrics for the current sector
+        totalOfferAmt = totalOfferAmt + wsOfferings.Cells(i, 2).Value
+        avgDiscount = avgDiscount + wsOfferings.Cells(i, 3).Value ' Assuming discount is in column 3
+        totalCoupons = totalCoupons + wsOfferings.Cells(i, 18).Value ' Assuming coupons are in column 18
+        numOfferings = numOfferings + 1
     Next i
     
-    ' Calculate average discount (avoid division by zero)
-    If discountCount > 0 Then
-        averageDiscount = totalDiscount / discountCount
-    Else
-        averageDiscount = 0
-    End If
-    
-    ' Write result to Overview sheet
-    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
-    wsOverview.Cells(wsOverview.Rows.Count, "F").End(xlUp).Offset(1, 0).Value = averageDiscount
+    ' Write the results to the "Overview" sheet
+    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = Application.WorksheetFunction.Transpose(uniqueSectors.Items)
+    wsOverview.Cells(wsOverview.Rows.Count, "E").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = totalOfferAmt
+    wsOverview.Cells(wsOverview.Rows.Count, "F").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = avgDiscount / numOfferings
+    wsOverview.Cells(wsOverview.Rows.Count, "G").End(xlUp).Offset(1, 0).Resize(uniqueSectors.Count, 1).Value = totalCoupons
+    ' Add more lines for other metrics
 End Sub
 
-Sub AverageDTM(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
-    Dim lastRow As Long
-    Dim totalDTM As Double
-    Dim dtmCount As Long
-    Dim averageDTM As Double
-    Dim i As Long
-    
-    ' Find the last row in the Offerings sheet
-    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
-    
-    ' Initialize variables
-    totalDTM = 0
-    dtmCount = 0
-    
-    ' Loop through each row in the Offerings sheet
-    For i = 2 To lastRow ' Assuming row 1 contains headers
-        ' Check if the current row belongs to the specified sector
-        If wsOfferings.Cells(i, "X").Value = sector Then
-            ' Accumulate DTM
-            totalDTM = totalDTM + wsOfferings.Cells(i, "D").Value
-            ' Increment DTM count
-            dtmCount = dtmCount + 1
-        End If
-    Next i
-    
-    ' Calculate average DTM (avoid division by zero)
-    If dtmCount > 0 Then
-        averageDTM = totalDTM / dtmCount
-    Else
-        averageDTM = 0
-    End If
-    
-    ' Write result to Overview sheet
-    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
-    wsOverview.Cells(wsOverview.Rows.Count, "G").End(xlUp).Offset(1, 0).Value = averageDTM
-End Sub
-
-Sub SecurityTypeDistribution(wsOverview As Worksheet, wsOfferings As Worksheet, sector As Variant)
-    Dim lastRow As Long
-    Dim securityTypeCounts As Collection
-    Dim securityType As Variant
-    Dim i As Long
-    
-    ' Find the last row in the Offerings sheet
-    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "X").End(xlUp).Row
-    
-    ' Create a collection to store security type counts
-    Set securityTypeCounts = New Collection
-    
-    ' Loop through each row in the Offerings sheet
-    For i = 2 To lastRow ' Assuming row 1 contains headers
-        ' Check if the current row belongs to the specified sector
-        If wsOfferings.Cells(i, "X").Value = sector Then
-            ' Count security types
-            On Error Resume Next
-            securityTypeCounts.Add 1, CStr(wsOfferings.Cells(i, "L").Value)
-            On Error GoTo 0
-        End If
-    Next i
-    
-    ' Write security type distribution to Overview sheet
-    wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
-    For Each securityType In securityTypeCounts
-        wsOverview.Cells(wsOverview.Rows.Count, Columns.Count).End(xlToLeft).Offset(0, 1).Value = securityType
-        wsOverview.Cells(wsOverview.Rows.Count, Columns.Count).End(xlToLeft).Offset(1, 0).Value = securityTypeCounts(securityType)
-    Next securityType
-End Sub
-
-' Add more subroutines for other metrics...
+Function IsInCollection(col As Collection, key As Variant) As Boolean
+    On Error Resume Next
+    col.Item key
+    IsInCollection = (Err.Number = 0)
+    On Error GoTo 0
+End Function
