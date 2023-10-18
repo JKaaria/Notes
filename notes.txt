@@ -1,67 +1,45 @@
-Sub PerformSectorAnalysis()
-    Dim wsAllOfferings As Worksheet
+Sub AnalyzeSectors()
+    ' Declare variables
+    Dim wsOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim uniqueSectors As Collection
-    Dim sector As Variant
-    Dim sectorRow As Long
-    Dim sectorCount As Long
+    Dim i As Long
+    Dim sector As String
+    Dim totalOfferAmt As Double
+    Dim avgDiscount As Double
+    Dim totalCoupons As Double
+    Dim numOfferings As Long
 
-    ' Set references to sheets
-    On Error Resume Next
-    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
-    On Error GoTo 0
-
-    If wsAllOfferings Is Nothing Then
-        MsgBox "Sheet 'All Offerings' not found!", vbExclamation
-        Exit Sub
-    End If
-
-    ' Check if "Overview" sheet already exists, if yes, use it
-    On Error Resume Next
+    ' Set references to worksheets
+    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
-    On Error GoTo 0
 
-    If wsOverview Is Nothing Then
-        MsgBox "Sheet 'Overview' not found! Run the CreateOverviewSheet macro first.", vbExclamation
-        Exit Sub
-    End If
+    ' Find the last row with data in the "All Offerings" sheet
+    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "A").End(xlUp).Row
 
-    ' Find the last row in the "All Offerings" sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    ' Initialize summary starting point
+    wsOverview.Range("D1").Value = "Sector"
+    wsOverview.Range("E1").Value = "Total Offer Amount (MM)"
+    wsOverview.Range("F1").Value = "Average Discount"
+    wsOverview.Range("G1").Value = "Total Coupons"
+    wsOverview.Range("H1").Value = "Number of Offerings"
 
-    ' Find unique sectors using a collection
-    Set uniqueSectors = New Collection
+    ' Loop through each row in the "All Offerings" sheet
+    For i = 2 To lastRow
+        ' Get the sector from column X (assuming "Sector" is in column X)
+        sector = wsOfferings.Cells(i, 24).Value ' Update the column index if "Sector" is in a different column
 
-    On Error Resume Next
-    For sectorRow = 2 To lastRow
-        uniqueSectors.Add wsAllOfferings.Cells(sectorRow, 24).Value, CStr(wsAllOfferings.Cells(sectorRow, 24).Value)
-    Next sectorRow
-    On Error GoTo 0
+        ' Update summary metrics based on the sector
+        totalOfferAmt = totalOfferAmt + wsOfferings.Cells(i, 2).Value
+        avgDiscount = avgDiscount + wsOfferings.Cells(i, 3).Value
+        totalCoupons = totalCoupons + wsOfferings.Cells(i, 17).Value
+        numOfferings = numOfferings + 1
+    Next i
 
-    ' Add headers for sector analysis
-    wsOverview.Cells(1, 34).Value = "Sector Analysis"
-    wsOverview.Cells(2, 34).Value = "Sector"
-    wsOverview.Cells(2, 35).Value = "Number of Offerings"
-    wsOverview.Cells(2, 36).Value = "Total Offer Amount (MM)"
-    wsOverview.Cells(2, 37).Value = "Average Discount"
-    wsOverview.Cells(2, 38).Value = "Average Days to Maturity (DTM)"
-    wsOverview.Cells(2, 39).Value = "Total Net Upfront (MM)"
-
-    ' Loop through unique sectors and calculate metrics
-    For Each sector In uniqueSectors
-        sectorCount = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("X:X"), sector)
-
-        wsOverview.Cells(wsOverview.Rows.Count, 34).End(xlUp).Offset(1, 0).Value = sector
-        wsOverview.Cells(wsOverview.Rows.Count, 35).End(xlUp).Offset(1, 0).Formula = "=COUNTIFS('All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 36).End(xlUp).Offset(1, 0).Formula = "=SUMIFS('All Offerings'!B:B, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 37).End(xlUp).Offset(1, 0).Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 38).End(xlUp).Offset(1, 0).Formula = "=AVERAGEIFS('All Offerings'!D:D, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 39).End(xlUp).Offset(1, 0).Formula = "=SUMIFS('All Offerings'!V:V, 'All Offerings'!X:X, """ & sector & """)"
-    Next sector
-
-    ' Format the "Overview" sheet
-    wsOverview.Columns.AutoFit
-
-    MsgBox "Sector Analysis completed successfully!", vbInformation
+    ' Output summary metrics to the "Overview" sheet
+    wsOverview.Range("D2").Value = sector
+    wsOverview.Range("E2").Value = totalOfferAmt
+    wsOverview.Range("F2").Value = avgDiscount / numOfferings ' Calculate average discount
+    wsOverview.Range("G2").Value = totalCoupons
+    wsOverview.Range("H2").Value = numOfferings
 End Sub
