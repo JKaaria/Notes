@@ -1,72 +1,65 @@
 Sub AnalyseRatings()
-    ' Define variables
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
+    Dim uniqueRegTypes As Collection
+    Dim regType As Variant
+    Dim totalSP As Double, totalMoody As Double, totalFitch As Double
+    Dim countSP As Long, countMoody As Long, countFitch As Long
     Dim i As Long
-    Dim clientCategories As Collection
-    Dim category As Variant
-    Dim ratingSumSP As Double
-    Dim ratingSumMoody As Double
-    Dim ratingSumFitch As Double
-    Dim ratingCount As Long
     
-    ' Set references to sheets
+    ' Set worksheets
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Find the last row in the All Offerings sheet
+    ' Clear previous data in Overview sheet
+    wsOverview.Range("I:O").Clear
+    
+    ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Initialize collection for unique client categories
-    Set clientCategories = New Collection
+    ' Initialize collections
+    Set uniqueRegTypes = New Collection
     
-    ' Loop through data in All Offerings sheet
+    ' Loop through All Offerings sheet to gather unique regulatory types
+    On Error Resume Next
     For i = 2 To lastRow ' Assuming headers are in row 1
-        ' Collect unique client categories
-        On Error Resume Next ' Handle type mismatch errors
-        clientCategories.Add wsAllOfferings.Cells(i, 8).Value, CStr(wsAllOfferings.Cells(i, 8).Value)
-        On Error GoTo 0
+        uniqueRegTypes.Add wsAllOfferings.Cells(i, "H").Value, CStr(wsAllOfferings.Cells(i, "H").Value)
     Next i
+    On Error GoTo 0
     
-    ' Write data to Overview sheet
-    wsOverview.Range("I:L").Clear ' Clear existing data in columns I to L
-    
-    ' Write headers
-    wsOverview.Range("I1").Value = "Reg Type"
-    wsOverview.Range("J1").Value = "Average Rating (S&P)"
-    wsOverview.Range("K1").Value = "Average Rating (Moody)"
-    wsOverview.Range("L1").Value = "Average Rating (Fitch)"
-    
-    ' Loop through unique client categories and calculate averages
-    For Each category In clientCategories
-        ratingSumSP = 0
-        ratingSumMoody = 0
-        ratingSumFitch = 0
-        ratingCount = 0
+    ' Loop through unique regulatory types and calculate averages
+    For Each regType In uniqueRegTypes
+        totalSP = 0
+        totalMoody = 0
+        totalFitch = 0
+        countSP = 0
+        countMoody = 0
+        countFitch = 0
         
-        ' Loop through data in All Offerings sheet to calculate sum and count
         For i = 2 To lastRow
-            If wsAllOfferings.Cells(i, 8).Value = category Then
-                ratingSumSP = ratingSumSP + wsAllOfferings.Cells(i, 9).Value
-                ratingSumMoody = ratingSumMoody + wsAllOfferings.Cells(i, 10).Value
-                ratingSumFitch = ratingSumFitch + wsAllOfferings.Cells(i, 11).Value
-                ratingCount = ratingCount + 1
+            If CStr(wsAllOfferings.Cells(i, "H").Value) = regType Then
+                If IsNumeric(wsAllOfferings.Cells(i, "I").Value) Then
+                    totalSP = totalSP + wsAllOfferings.Cells(i, "I").Value
+                    countSP = countSP + 1
+                End If
+                
+                If IsNumeric(wsAllOfferings.Cells(i, "J").Value) Then
+                    totalMoody = totalMoody + wsAllOfferings.Cells(i, "J").Value
+                    countMoody = countMoody + 1
+                End If
+                
+                If IsNumeric(wsAllOfferings.Cells(i, "K").Value) Then
+                    totalFitch = totalFitch + wsAllOfferings.Cells(i, "K").Value
+                    countFitch = countFitch + 1
+                End If
             End If
         Next i
         
-        ' Find row in Overview sheet
-        Dim overviewRow As Long
-        overviewRow = wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Row + 1
-        
-        ' Write client category to Overview sheet
-        wsOverview.Cells(overviewRow, 9).Value = category
-        
-        ' Calculate and write average ratings
-        If ratingCount > 0 Then
-            wsOverview.Cells(overviewRow, 10).Value = ratingSumSP / ratingCount
-            wsOverview.Cells(overviewRow, 11).Value = ratingSumMoody / ratingCount
-            wsOverview.Cells(overviewRow, 12).Value = ratingSumFitch / ratingCount
-        End If
-    Next category
+        ' Write results to Overview sheet
+        wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = regType
+        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = IIf(countSP > 0, totalSP / countSP, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = IIf(countMoody > 0, totalMoody / countMoody, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = IIf(countFitch > 0, totalFitch / countFitch, 0)
+    Next regType
 End Sub
