@@ -1,78 +1,42 @@
-Sub GenerateOverview()
+Sub CreateOverviewSheet()
     ' Declare variables
-    Dim wsOfferings As Worksheet
+    Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
     Dim i As Long
     
-    ' Set references to sheets
-    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
+    ' Set references to worksheets
+    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     
-    ' Check if "Overview" sheet already exists, if not, create it
-    On Error Resume Next
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
-    On Error GoTo 0
+    ' Check if "Overview" sheet already exists, if yes, delete it
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name = "Overview" Then
+            Application.DisplayAlerts = False
+            ws.Delete
+            Application.DisplayAlerts = True
+            Exit For
+        End If
+    Next ws
     
-    If wsOverview Is Nothing Then
-        Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsOverview.Name = "Overview"
-    Else
-        ' Clear existing data in "Overview" sheet
-        wsOverview.Cells.Clear
-    End If
+    ' Create a new sheet named "Overview"
+    Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    wsOverview.Name = "Overview"
     
-    ' Add headers to "Overview" sheet
+    ' Set headers in the "Overview" sheet
     wsOverview.Range("A1").Value = "Issuer"
-    wsOverview.Range("B1").Value = "Total Offerings"
-    wsOverview.Range("C1").Value = "Average Offer Amount (MM)"
-    wsOverview.Range("D1").Value = "Average Price (Discount)"
-    wsOverview.Range("E1").Value = "Average DTM"
-    wsOverview.Range("F1").Value = "Total Maturity Value (MM)"
+    wsOverview.Range("B1").Value = "Total Offer Amount (MM)"
+    wsOverview.Range("C1").Value = "Average Price (Discount)"
     ' Add more headers as needed
     
     ' Find the last row in the "All Offerings" sheet
-    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "A").End(xlUp).Row
+    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
     
-    ' Loop through each issuer in the "All Offerings" sheet
-    For i = 2 To lastRow ' Assuming data starts from row 2
-        
-        ' Extract relevant data
-        Dim issuer As String
-        Dim offerAmount As Double
-        Dim priceDiscount As Double
-        Dim dtm As Double
-        Dim maturityValue As Double
-        
-        issuer = wsOfferings.Cells(i, 1).Value
-        offerAmount = wsOfferings.Cells(i, 2).Value
-        priceDiscount = wsOfferings.Cells(i, 3).Value
-        dtm = wsOfferings.Cells(i, 4).Value
-        maturityValue = wsOfferings.Cells(i, 6).Value ' Assuming column F contains Maturity Date
-        
-        ' Update data in "Overview" sheet
-        With wsOverview
-            ' Find the row for the current issuer in "Overview" sheet
-            Dim overviewRow As Long
-            overviewRow = .Cells(.Rows.Count, "A").End(xlUp).Row + 1
-            
-            ' If the issuer is not already listed in "Overview," add a new row
-            If Application.WorksheetFunction.CountIf(.Range("A:A"), issuer) = 0 Then
-                .Cells(overviewRow, 1).Value = issuer
-            End If
-            
-            ' Update total offerings and average offer amount
-            .Cells(overviewRow, 2).Value = .Cells(overviewRow, 2).Value + 1
-            .Cells(overviewRow, 3).Value = (.Cells(overviewRow, 3).Value * (overviewRow - 2) + offerAmount) / (overviewRow - 1)
-            
-            ' Update average price (discount) and average DTM
-            .Cells(overviewRow, 4).Value = (.Cells(overviewRow, 4).Value * (overviewRow - 2) + priceDiscount) / (overviewRow - 1)
-            .Cells(overviewRow, 5).Value = (.Cells(overviewRow, 5).Value * (overviewRow - 2) + dtm) / (overviewRow - 1)
-            
-            ' Update total maturity value
-            .Cells(overviewRow, 6).Value = .Cells(overviewRow, 6).Value + maturityValue
-            
-            ' Update more metrics as needed
-            
-        End With
+    ' Loop through the data in "All Offerings" and summarize key metrics
+    For i = 2 To lastRow ' Assuming data starts from row 2 (header in row 1)
+        ' Example: Summarize issuer-wise total offer amount
+        wsOverview.Cells(i, 1).Value = wsAllOfferings.Cells(i, 1).Value ' Copy Issuer
+        wsOverview.Cells(i, 2).Value = Application.WorksheetFunction.SumIf(wsAllOfferings.Range("A:A"), wsAllOfferings.Cells(i, 1).Value, wsAllOfferings.Range("B:B")) ' Sum Total Offer Amount for the Issuer
+        wsOverview.Cells(i, 3).Value = Application.WorksheetFunction.AverageIf(wsAllOfferings.Range("A:A"), wsAllOfferings.Cells(i, 1).Value, wsAllOfferings.Range("C:C")) ' Average Price (Discount) for the Issuer
+        ' Add more summarization as needed
     Next i
 End Sub
