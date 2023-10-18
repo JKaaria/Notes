@@ -1,13 +1,11 @@
-Certainly! Below is a VBA script that creates a "Sector Analysis" on the "Overview" sheet, summarizing key metrics and insights on the distribution of offerings across sectors:
-
-```vba
-Sub CreateSectorAnalysis()
+Sub PerformSectorAnalysis()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
+    Dim sectorColumn As Range
     Dim uniqueSectors As Collection
     Dim sector As Variant
-    Dim i As Long
+    Dim rowNum As Long
 
     ' Set references to sheets
     On Error Resume Next
@@ -39,43 +37,40 @@ Sub CreateSectorAnalysis()
     ' Find the last row in the "All Offerings" sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
 
+    ' Copy headers to the "Overview" sheet
+    wsAllOfferings.Rows(1).Copy wsOverview.Rows(1)
+
     ' Add headers for sector analysis
-    wsOverview.Cells(1, 4).Value = "Sector Analysis"
+    wsOverview.Cells(1, 34).Value = "Sector Analysis"
 
-    ' Create a collection to store unique sectors
-    Set uniqueSectors = New Collection
+    ' Find the column containing sector information
+    Set sectorColumn = wsAllOfferings.Rows(1).Find(What:="Sector", LookIn:=xlValues, LookAt:=xlWhole)
 
-    ' Loop through the "Sector" column and collect unique sectors
-    For i = 2 To lastRow
-        On Error Resume Next
-        uniqueSectors.Add wsAllOfferings.Cells(i, 24).Value, CStr(wsAllOfferings.Cells(i, 24).Value)
-        On Error GoTo 0
-    Next i
+    If Not sectorColumn Is Nothing Then
+        ' Extract unique sectors using a collection
+        Set uniqueSectors = New Collection
 
-    ' Print sector names in column D starting from D2
-    wsOverview.Range("D2").Resize(uniqueSectors.Count, 1).Value = WorksheetFunction.Transpose(uniqueSectors.Items)
+        For rowNum = 2 To lastRow
+            On Error Resume Next
+            uniqueSectors.Add wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value, CStr(wsAllOfferings.Cells(rowNum, sectorColumn.Column).Value)
+            On Error GoTo 0
+        Next rowNum
 
-    ' Loop through each sector and calculate metrics
-    For i = 2 To uniqueSectors.Count + 1
-        sector = wsOverview.Cells(i, 4).Value
+        ' Add sector metrics to "Overview" sheet
+        wsOverview.Cells(2, 34).Value = "Total Sectors"
+        wsOverview.Cells(2, 35).Formula = "=COUNTA(" & sectorColumn.Address & ")-1"
 
-        ' Total Offerings in the sector
-        wsOverview.Cells(i, 5).Formula = "=COUNTIF('All Offerings'!Y:Y,""" & sector & """)"
+        wsOverview.Cells(3, 34).Value = "Most Common Sector"
+        wsOverview.Cells(3, 35).Formula = "=INDEX(" & sectorColumn.Address & ",MODE(MATCH(" & sectorColumn.Address & "," & sectorColumn.Address & ",0)))"
 
-        ' Total Offer Amount in the sector (MM)
-        wsOverview.Cells(i, 6).Formula = "=SUMIFS('All Offerings'!B:B, 'All Offerings'!Y:Y, """ & sector & """)"
+        ' Add more sector metrics as needed
 
-        ' Average Discount in the sector
-        wsOverview.Cells(i, 7).Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!Y:Y, """ & sector & """)"
-
-        ' Add more sector-specific metrics as needed
-    Next i
+    Else
+        MsgBox "Sector column not found in 'All Offerings' sheet!", vbExclamation
+    End If
 
     ' Format the "Overview" sheet
     wsOverview.Columns.AutoFit
 
-    MsgBox "Sector Analysis created successfully!", vbInformation
+    MsgBox "Sector Analysis completed successfully!", vbInformation
 End Sub
-```
-
-This script calculates key metrics such as total offerings, total offer amount, and average discount for each sector. You can add more sector-specific metrics as needed. The results start from cell D1 on the "Overview" sheet. Adjust the code based on your specific requirements for sector analysis.
