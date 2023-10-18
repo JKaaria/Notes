@@ -1,66 +1,61 @@
-Sub RatingAnalysis()
-    Dim wsAllOfferings As Worksheet
-    Dim wsOverview As Worksheet
+Sub AnalyzeRatings()
+    Dim ws As Worksheet
+    Dim dataWs As Worksheet
+    Dim overviewWs As Worksheet
     Dim lastRow As Long
-    Dim ratings As Variant
-    Dim rating As Variant
-    Dim ratingCounts As Collection
-    Dim ratingColors As Collection
-    Dim i As Long
-    Dim nextRow As Long
+    Dim ratingCell As Range
+    Dim rating As String
     
     ' Set references to worksheets
-    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
+    Set dataWs = ThisWorkbook.Sheets("All Offerings")
+    Set overviewWs = ThisWorkbook.Sheets("Overview")
     
-    ' Check if "Overview" sheet exists, if not, create it
-    On Error Resume Next
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
-    On Error GoTo 0
-    If wsOverview Is Nothing Then
-        Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsOverview.Name = "Overview"
-    End If
+    ' Find the last row in column H
+    lastRow = dataWs.Cells(dataWs.Rows.Count, "H").End(xlUp).Row
     
-    ' Find the next available row in "Overview" sheet
-    nextRow = wsOverview.Cells(wsOverview.Rows.Count, "A").End(xlUp).Row + 1
+    ' Create a summary table in the Overview sheet
+    overviewWs.Cells.Clear
+    overviewWs.Range("A1").Value = "Rating"
+    overviewWs.Range("B1").Value = "Count"
     
-    ' Copy headers from "All Offerings" to "Overview" only if "Overview" is empty
-    If wsOverview.Cells(1, 1).Value = "" Then
-        wsAllOfferings.Range("A:I").Copy wsOverview.Range("A1")
-        nextRow = 3 ' Start populating data from row 3
-    End If
-    
-    ' Set reference to unique ratings using Collection
-    Set ratingCounts = New Collection
-    Set ratingColors = New Collection
-    
-    ' Find the last row in column A of "All Offerings" sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
-    
-    ' Loop through each row in "All Offerings" sheet
-    For i = 2 To lastRow ' Assuming headers are in the first row
-        ' Get ratings from columns H, I, J, and K (assuming H, I, J, K are the column numbers for Reg Type, S&P, Moody's, Fitch)
-        ratings = Array(wsAllOfferings.Cells(i, 8).Value, wsAllOfferings.Cells(i, 9).Value, wsAllOfferings.Cells(i, 10).Value, wsAllOfferings.Cells(i, 11).Value)
-        For Each rating In ratings
-            ' Check if rating is not empty
-            If Trim(rating) <> "" Then
-                ' Update count for the rating
+    ' Loop through each row and analyze ratings
+    For Each ratingCell In dataWs.Range("H2:H" & lastRow)
+        ' Assuming that each rating is separated by a "|"
+        Dim ratingsArray() As String
+        ratingsArray = Split(ratingCell.Value, "|")
+        
+        ' Loop through each rating type
+        For Each rating In ratingsArray
+            ' Trim the rating to remove any leading/trailing spaces
+            rating = Trim(rating)
+            
+            ' Check if the rating is not empty
+            If Len(rating) > 0 Then
+                ' Increment the count in the summary table
                 On Error Resume Next
-                ratingCounts.Add rating, CStr(rating)
+                overviewWs.Range("A2").Resize(100, 1).Find(rating).Offset(0, 1).Value = overviewWs.Range("A2").Resize(100, 1).Find(rating).Offset(0, 1).Value + 1
                 On Error GoTo 0
             End If
         Next rating
-    Next i
+    Next ratingCell
     
-    ' Populate data in "Overview" sheet starting from the next available row
-    For i = 1 To ratingCounts.Count
-        wsOverview.Cells(nextRow, 9).Value = ratingCounts(i)
-        wsOverview.Cells(nextRow, 10).Value = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("H:H|I:I|J:J|K:K"), ratingCounts(i))
-        nextRow = nextRow + 1
-    Next i
+    ' Add headers to columns in the Overview sheet
+    overviewWs.Range("A:A").Insert Shift:=xlToRight
+    overviewWs.Range("A1").Value = "Overview"
+    overviewWs.Range("B1").Value = "Analysis"
+    overviewWs.Range("A2").Value = "Total Offerings"
+    overviewWs.Range("B2").Formula = "=COUNTA('All Offerings'!A:A)"
     
-    ' Set conditional formatting for the count column
-    With wsOverview.Range("J3").Resize(ratingCounts.Count, 1).FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreaterEqual, Formula1:="1")
-        .Interior.Color = RGB(0, 255, 0)
-    End With
+    ' Add additional analyses based on your requirements in columns J and K
+    
+    ' Example Analysis in Column J: Count of Offerings with Credit Ratings
+    overviewWs.Range("A3").Value = "Offerings with Credit Ratings"
+    overviewWs.Range("B3").Formula = "=COUNTIF('All Offerings'!H:H, ""*|*|*"")"
+    
+    ' Example Analysis in Column K: Average Discount for Offerings with Credit Ratings
+    overviewWs.Range("A4").Value = "Average Discount for Offerings with Credit Ratings"
+    overviewWs.Range("B4").Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!H:H, ""*|*|*"")"
+    
+    ' Additional analyses can be added as per your requirements
+    
 End Sub
