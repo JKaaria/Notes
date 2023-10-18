@@ -2,7 +2,7 @@ Sub AnalyzeRatings()
     Dim wsAllOfferings As Worksheet
     Dim wsOverview As Worksheet
     Dim lastRow As Long
-    Dim totalClients As Long
+    Dim totalClients As Double
     Dim totalSP As Double
     Dim totalMoody As Double
     Dim totalFitch As Double
@@ -27,10 +27,10 @@ Sub AnalyzeRatings()
     ' Loop through data in All Offerings sheet
     For i = 2 To lastRow ' Assuming headers are in the first row
         ' Sum up values for averaging
-        totalClients = totalClients + wsAllOfferings.Cells(i, 8) ' Column H
-        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I
-        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J
-        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K
+        totalClients = totalClients + wsAllOfferings.Cells(i, 8) ' Column H (reg type)
+        totalSP = totalSP + wsAllOfferings.Cells(i, 9) ' Column I (S&P)
+        totalMoody = totalMoody + wsAllOfferings.Cells(i, 10) ' Column J (Moody)
+        totalFitch = totalFitch + wsAllOfferings.Cells(i, 11) ' Column K (Fitch)
     Next i
     
     ' Calculate averages
