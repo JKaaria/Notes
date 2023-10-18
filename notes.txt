@@ -1,28 +1,47 @@
-Sub CleanAndFormatData()
-    Dim ws As Worksheet
+Sub CreateOverviewSheet()
+    Dim wsOverview As Worksheet
+    Dim wsOfferings As Worksheet
     Dim lastRow As Long
-    Dim col As Range
 
-    ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("All Offerings")
+    ' Set references to sheets
+    Set wsOfferings = ThisWorkbook.Sheets("All Offerings")
 
-    ' Apply filters to all columns
-    ws.Range("A1").AutoFilter Field:=1, Criteria1:="<>"
+    ' Check if "Overview" sheet already exists, if not, create it
+    On Error Resume Next
+    Set wsOverview = ThisWorkbook.Sheets("Overview")
+    On Error GoTo 0
 
-    ' Find the last row with data
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    If wsOverview Is Nothing Then
+        Set wsOverview = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsOverview.Name = "Overview"
+    End If
 
-    ' Loop through each column and fill down empty cells
-    For Each col In ws.UsedRange.Columns
-        col.SpecialCells(xlCellTypeBlanks).Formula = "=IF(R[-1]C<>"", R[-1]C, """")"
-        col.Value = col.Value
-    Next col
+    ' Add headers to the Overview sheet
+    wsOverview.Cells.Clear
+    wsOverview.Range("A1").Value = "Issuer"
+    wsOverview.Range("B1").Value = "Total Offer Amt (MM)"
+    wsOverview.Range("C1").Value = "Average Price (Discount)"
+    ' Add more headers as needed
 
-    ' Remove filters
-    ws.AutoFilterMode = False
+    ' Find the last row in the Offerings sheet
+    lastRow = wsOfferings.Cells(wsOfferings.Rows.Count, "A").End(xlUp).Row
 
-    ' Autofit columns for better visibility
-    ws.Columns.AutoFit
+    ' Loop through the data in the Offerings sheet and summarize key metrics
+    For i = 2 To lastRow ' Assuming row 1 is headers
+        ' Extract data from the Offerings sheet
+        Dim issuer As String
+        Dim offerAmt As Double
+        Dim price As Double
 
-    MsgBox "Data has been cleaned and formatted successfully!", vbInformation
+        issuer = wsOfferings.Cells(i, 1).Value
+        offerAmt = wsOfferings.Cells(i, 2).Value
+        price = wsOfferings.Cells(i, 3).Value
+
+        ' Update the Overview sheet with summarized data
+        wsOverview.Cells(i, 1).Value = issuer
+        wsOverview.Cells(i, 2).Value = wsOverview.Cells(i, 2).Value + offerAmt ' Accumulate total offer amount
+        wsOverview.Cells(i, 3).Value = (wsOverview.Cells(i, 3).Value + price) / 2 ' Calculate average price
+
+        ' Add more summary calculations as needed
+    Next i
 End Sub
