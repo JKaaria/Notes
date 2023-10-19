@@ -1,6 +1,6 @@
 Sub ConvertTextToNumbers()
     Dim wsAllOfferings As Worksheet
-    Dim dataRange As Range
+    Dim dataColumns As Variant
     Dim cell As Range
 
     ' Set references to the "All Offerings" sheet
@@ -13,21 +13,29 @@ Sub ConvertTextToNumbers()
         Exit Sub
     End If
 
-    ' Assuming your numerical data is in columns B to V (adjust as needed)
-    Set dataRange = wsAllOfferings.Range("B:V")
+    ' Columns to convert to decimals (adjust as needed)
+    dataColumns = Array(3, 13, 16, 19, 20, 26, 27, 28)
 
-    ' Loop through each cell in the data range
-    For Each cell In dataRange
-        ' Check if the cell contains text that can be converted to a number
-        If IsNumeric(cell.Value) Then
-            ' If the column is C or V, convert to decimal instead of percentage
-            If cell.Column = 3 Or cell.Column = 22 Then
-                cell.Value = CDbl(cell.Value) / 100
-            Else
-                cell.Value = CDbl(cell.Value)
+    ' Disable alerts to prevent unnecessary prompts
+    Application.DisplayAlerts = False
+
+    ' Loop through each column specified in dataColumns
+    For Each col In dataColumns
+        ' Find the last row in the column
+        lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, col).End(xlUp).Row
+
+        ' Loop through each cell in the column
+        For row = 2 To lastRow
+            ' Check if the cell contains text that can be converted to a number
+            If IsNumeric(wsAllOfferings.Cells(row, col).Value) Then
+                ' Convert the cell value to a decimal
+                wsAllOfferings.Cells(row, col).Value = CDbl(wsAllOfferings.Cells(row, col).Value) / 100
             End If
-        End If
-    Next cell
+        Next row
+    Next col
+
+    ' Re-enable alerts
+    Application.DisplayAlerts = True
 
     MsgBox "Conversion completed successfully!", vbInformation
 End Sub
