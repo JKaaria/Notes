@@ -1,82 +1,41 @@
-Sub AnalyseSectors()
+Sub ConvertTextToNumbers()
     Dim wsAllOfferings As Worksheet
-    Dim wsOverview As Worksheet
-    Dim lastRow As Long
-    Dim uniqueSectors As Collection
-    Dim sector As Variant
-    Dim totalDiscount As Double, totalDTM As Double, totalOfferAmt As Double, totalMMY As Double
-    Dim countOfferings As Long
-    Dim i As Long
-    
-    ' Set worksheets
-    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
-    
-    ' Clear previous data in Overview sheet starting from I14
-    wsOverview.Range("I14:Z" & wsOverview.Rows.Count).Clear
-    
-    ' Find the last row in All Offerings sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
-    
-    ' Initialize collections
-    Set uniqueSectors = New Collection
-    
-    ' Loop through All Offerings sheet to gather unique sectors
+    Dim dataColumns As Variant
+    Dim cell As Range
+
+    ' Set references to the "All Offerings" sheet
     On Error Resume Next
-    For i = 2 To lastRow ' Assuming headers are in row 1
-        uniqueSectors.Add wsAllOfferings.Cells(i, "U").Value, CStr(wsAllOfferings.Cells(i, "U").Value)
-    Next i
+    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     On Error GoTo 0
-    
-    ' Write titles to the Overview sheet
-    wsOverview.Cells(13, "I").Value = "Sector"
-    wsOverview.Cells(13, "J").Value = "Average Price (Discount)"
-    wsOverview.Cells(13, "K").Value = "Average DTM"
-    wsOverview.Cells(13, "L").Value = "Offering Count"
-    wsOverview.Cells(13, "M").Value = "Average Offer Amt"
-    wsOverview.Cells(13, "N").Value = "Average MMY"
-    
-    ' Loop through unique sectors and calculate averages
-    For Each sector In uniqueSectors
-        totalDiscount = 0
-        totalDTM = 0
-        totalOfferAmt = 0
-        totalMMY = 0
-        countOfferings = 0
-        
-        For i = 2 To lastRow
-            If CStr(wsAllOfferings.Cells(i, "U").Value) = sector Then
-                ' Average Price (Discount)
-                If IsNumeric(wsAllOfferings.Cells(i, "C").Value) Then
-                    totalDiscount = totalDiscount + wsAllOfferings.Cells(i, "C").Value
-                End If
-                
-                ' Average DTM
-                If IsNumeric(wsAllOfferings.Cells(i, "D").Value) Then
-                    totalDTM = totalDTM + wsAllOfferings.Cells(i, "D").Value
-                End If
-                
-                ' Average Offer Amt
-                If IsNumeric(wsAllOfferings.Cells(i, "B").Value) Then
-                    totalOfferAmt = totalOfferAmt + wsAllOfferings.Cells(i, "B").Value
-                End If
-                
-                ' Average MMY
-                If IsNumeric(wsAllOfferings.Cells(i, "F").Value) Then
-                    totalMMY = totalMMY + wsAllOfferings.Cells(i, "F").Value
-                End If
-                
-                ' Count Offerings
-                countOfferings = countOfferings + 1
+
+    If wsAllOfferings Is Nothing Then
+        MsgBox "Sheet 'All Offerings' not found!", vbExclamation
+        Exit Sub
+    End If
+
+    ' Columns to convert to decimals (adjust as needed)
+    dataColumns = Array(3, 13, 16, 19, 20, 26, 27, 28)
+
+    ' Disable alerts to prevent unnecessary prompts
+    Application.DisplayAlerts = False
+
+    ' Loop through each column specified in dataColumns
+    For Each col In dataColumns
+        ' Find the last row in the column
+        lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, col).End(xlUp).Row
+
+        ' Loop through each cell in the column
+        For row = 2 To lastRow
+            ' Check if the cell contains text that can be converted to a number
+            If IsNumeric(wsAllOfferings.Cells(row, col).Value) Then
+                ' Convert the cell value to a decimal
+                wsAllOfferings.Cells(row, col).Value = CDbl(wsAllOfferings.Cells(row, col).Value) / 100
             End If
-        Next i
-        
-        ' Write results to Overview sheet
-        wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = sector
-        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDiscount / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDTM / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = countOfferings
-        wsOverview.Cells(wsOverview.Rows.Count, "M").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalOfferAmt / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "N").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalMMY / countOfferings, 0)
-    Next sector
+        Next row
+    Next col
+
+    ' Re-enable alerts
+    Application.DisplayAlerts = True
+
+    MsgBox "Conversion completed successfully!", vbInformation
 End Sub
