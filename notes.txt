@@ -1,37 +1,35 @@
-Sub ArrangeTablesOnOverview()
-    Dim wsOverview As Worksheet
-    Dim lastTableBottom As Long
-    Dim table As ListObject
-
-    ' Check if "Overview" sheet exists, if yes, use it
-    On Error Resume Next
-    Set wsOverview = ThisWorkbook.Sheets("Overview")
-    On Error GoTo 0
-
-    If wsOverview Is Nothing Then
-        MsgBox "Sheet 'Overview' not found!", vbExclamation
-        Exit Sub
-    End If
-
-    ' Clear any existing content below the last table
-    lastTableBottom = wsOverview.ListObjects(wsOverview.ListObjects.Count).HeaderRowRange.Row + _
-                      wsOverview.ListObjects(wsOverview.ListObjects.Count).ListRows.Count + 1
-
-    If lastTableBottom > wsOverview.Rows.Count Then
-        lastTableBottom = wsOverview.Rows.Count
-    End If
-
-    wsOverview.Rows(lastTableBottom & ":" & wsOverview.Rows.Count).Clear
-
-    ' Loop through all tables in the "Overview" sheet
-    For Each table In wsOverview.ListObjects
-        ' Move the table below the last table with a small gap
-        table.HeaderRowRange.Row = lastTableBottom + 2
-        lastTableBottom = table.HeaderRowRange.Row + table.ListRows.Count + 1
-    Next table
-
-    ' Format the "Overview" sheet
-    wsOverview.Columns.AutoFit
-
-    MsgBox "Tables on Overview arranged successfully!", vbInformation
+Sub SummarizeData()
+    Dim ws As Worksheet
+    Dim resultSheet As Worksheet
+    Dim lastRow As Long
+    Dim i As Long, resultRow As Long
+    
+    ' Set reference to the Results sheet
+    Set resultSheet = ThisWorkbook.Sheets("Results")
+    
+    ' Clear existing data in the Results sheet
+    resultSheet.Cells.Clear
+    
+    ' Loop through each sheet in the workbook (excluding Results sheet)
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name <> "Results" Then
+            ' Filter by Pod = "Italy"
+            ws.Rows(1).AutoFilter Field:=1, Criteria1:="Italy"
+            
+            ' Find the last row in the filtered data
+            lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+            
+            ' If there is data after filtering
+            If lastRow > 1 Then
+                ' Copy data to Results sheet
+                ws.Range("B2:B" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "A").End(xlUp).Offset(1, 0)
+                ws.Range("C2:C" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "B").End(xlUp).Offset(1, 0)
+                ws.Range("D2:D" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "C").End(xlUp).Offset(1, 0)
+                ws.Range("E2:E" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "D").End(xlUp).Offset(1, 0)
+                
+                ' Clear filter
+                ws.AutoFilterMode = False
+            End If
+        End If
+    Next ws
 End Sub
