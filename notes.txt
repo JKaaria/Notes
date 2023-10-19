@@ -20,8 +20,12 @@ Sub ConvertTextToNumbers()
     For Each cell In dataRange
         ' Check if the cell contains text that can be converted to a number
         If IsNumeric(cell.Value) Then
-            ' Convert the text to a number
-            cell.Value = CDbl(cell.Value)
+            ' If the column is C or V, convert to decimal instead of percentage
+            If cell.Column = 3 Or cell.Column = 22 Then
+                cell.Value = CDbl(cell.Value) / 100
+            Else
+                cell.Value = CDbl(cell.Value)
+            End If
         End If
     Next cell
 
