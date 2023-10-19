@@ -12,8 +12,8 @@ Sub AnalyseSectors()
     Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     
-    ' Clear previous data in Overview sheet starting from D1
-    wsOverview.Range("D1:Z" & wsOverview.Rows.Count).Clear
+    ' Clear previous data in Overview sheet starting from I14
+    wsOverview.Range("I14:Z" & wsOverview.Rows.Count).Clear
     
     ' Find the last row in All Offerings sheet
     lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
@@ -29,12 +29,12 @@ Sub AnalyseSectors()
     On Error GoTo 0
     
     ' Write titles to the Overview sheet
-    wsOverview.Cells(1, "D").Value = "Sector"
-    wsOverview.Cells(1, "E").Value = "Average Price (Discount)"
-    wsOverview.Cells(1, "F").Value = "Average DTM"
-    wsOverview.Cells(1, "G").Value = "Offering Count"
-    wsOverview.Cells(1, "H").Value = "Average Offer Amt"
-    wsOverview.Cells(1, "I").Value = "Average MMY"
+    wsOverview.Cells(13, "I").Value = "Sector"
+    wsOverview.Cells(13, "J").Value = "Average Price (Discount)"
+    wsOverview.Cells(13, "K").Value = "Average DTM"
+    wsOverview.Cells(13, "L").Value = "Offering Count"
+    wsOverview.Cells(13, "M").Value = "Average Offer Amt"
+    wsOverview.Cells(13, "N").Value = "Average MMY"
     
     ' Loop through unique sectors and calculate averages
     For Each sector In uniqueSectors
@@ -72,11 +72,11 @@ Sub AnalyseSectors()
         Next i
         
         ' Write results to Overview sheet
-        wsOverview.Cells(wsOverview.Rows.Count, "D").End(xlUp).Offset(1, 0).Value = sector
-        wsOverview.Cells(wsOverview.Rows.Count, "E").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDiscount / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "F").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDTM / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "G").End(xlUp).Offset(1, 0).Value = countOfferings
-        wsOverview.Cells(wsOverview.Rows.Count, "H").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalOfferAmt / countOfferings, 0)
-        wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalMMY / countOfferings, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "I").End(xlUp).Offset(1, 0).Value = sector
+        wsOverview.Cells(wsOverview.Rows.Count, "J").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDiscount / countOfferings, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "K").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalDTM / countOfferings, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "L").End(xlUp).Offset(1, 0).Value = countOfferings
+        wsOverview.Cells(wsOverview.Rows.Count, "M").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalOfferAmt / countOfferings, 0)
+        wsOverview.Cells(wsOverview.Rows.Count, "N").End(xlUp).Offset(1, 0).Value = IIf(countOfferings > 0, totalMMY / countOfferings, 0)
     Next sector
 End Sub
