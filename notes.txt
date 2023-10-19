@@ -1,35 +1,38 @@
-Sub SummarizeData()
+Sub ConsolidateData()
     Dim ws As Worksheet
-    Dim resultSheet As Worksheet
+    Dim resultsSheet As Worksheet
+    Dim podFilter As String
     Dim lastRow As Long
-    Dim i As Long, resultRow As Long
+    Dim destRow As Long
     
-    ' Set reference to the Results sheet
-    Set resultSheet = ThisWorkbook.Sheets("Results")
+    ' Set the results sheet
+    Set resultsSheet = ThisWorkbook.Sheets("Results")
     
-    ' Clear existing data in the Results sheet
-    resultSheet.Cells.Clear
-    
-    ' Loop through each sheet in the workbook (excluding Results sheet)
+    ' Loop through each sheet
     For Each ws In ThisWorkbook.Sheets
+        ' Skip the Results sheet
         If ws.Name <> "Results" Then
             ' Filter by Pod = "Italy"
             ws.Rows(1).AutoFilter Field:=1, Criteria1:="Italy"
             
-            ' Find the last row in the filtered data
+            ' Find the last row after filtering
             lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
             
-            ' If there is data after filtering
-            If lastRow > 1 Then
-                ' Copy data to Results sheet
-                ws.Range("B2:B" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "A").End(xlUp).Offset(1, 0)
-                ws.Range("C2:C" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "B").End(xlUp).Offset(1, 0)
-                ws.Range("D2:D" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "C").End(xlUp).Offset(1, 0)
-                ws.Range("E2:E" & lastRow).Copy resultSheet.Cells(resultSheet.Rows.Count, "D").End(xlUp).Offset(1, 0)
-                
-                ' Clear filter
-                ws.AutoFilterMode = False
-            End If
+            ' Loop through visible rows
+            For i = 2 To lastRow
+                If ws.Rows(i).Hidden = False Then
+                    ' Copy data to the results sheet
+                    destRow = resultsSheet.Cells(resultsSheet.Rows.Count, "A").End(xlUp).Row + 1
+                    resultsSheet.Cells(destRow, 1).Value = ws.Cells(i, "A").Value ' Pod
+                    resultsSheet.Cells(destRow, 2).Value = ws.Cells(i, "B").Value ' Counterparty Code
+                    resultsSheet.Cells(destRow, 3).Value = ws.Cells(i, "C").Value ' Salesman Name
+                    resultsSheet.Cells(destRow, 4).Value = ws.Cells(i, "D").Value ' Level 07 Node Name
+                    resultsSheet.Cells(destRow, 5).Value = ws.Cells(i, "E").Value ' Buying Center Name
+                End If
+            Next i
+            
+            ' Turn off the filter
+            ws.AutoFilterMode = False
         End If
     Next ws
 End Sub
