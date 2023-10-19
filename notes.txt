@@ -1,71 +1,37 @@
-Sub PerformSectorAnalysis()
-    Dim wsAllOfferings As Worksheet
+Sub ArrangeTablesOnOverview()
     Dim wsOverview As Worksheet
-    Dim lastRow As Long
-    Dim uniqueSectors As Collection
-    Dim sector As Variant
-    Dim sectorRow As Long
-    Dim sectorCount As Long
-    Dim startRow As Long
+    Dim lastTableBottom As Long
+    Dim table As ListObject
 
-    ' Set references to sheets
-    On Error Resume Next
-    Set wsAllOfferings = ThisWorkbook.Sheets("All Offerings")
-    On Error GoTo 0
-
-    If wsAllOfferings Is Nothing Then
-        MsgBox "Sheet 'All Offerings' not found!", vbExclamation
-        Exit Sub
-    End If
-
-    ' Check if "Overview" sheet already exists, if yes, use it
+    ' Check if "Overview" sheet exists, if yes, use it
     On Error Resume Next
     Set wsOverview = ThisWorkbook.Sheets("Overview")
     On Error GoTo 0
 
     If wsOverview Is Nothing Then
-        MsgBox "Sheet 'Overview' not found! Run the CreateOverviewSheet macro first.", vbExclamation
+        MsgBox "Sheet 'Overview' not found!", vbExclamation
         Exit Sub
     End If
 
-    ' Find the last row in the "All Offerings" sheet
-    lastRow = wsAllOfferings.Cells(wsAllOfferings.Rows.Count, "A").End(xlUp).Row
+    ' Clear any existing content below the last table
+    lastTableBottom = wsOverview.ListObjects(wsOverview.ListObjects.Count).HeaderRowRange.Row + _
+                      wsOverview.ListObjects(wsOverview.ListObjects.Count).ListRows.Count + 1
 
-    ' Find unique sectors using a collection
-    Set uniqueSectors = New Collection
+    If lastTableBottom > wsOverview.Rows.Count Then
+        lastTableBottom = wsOverview.Rows.Count
+    End If
 
-    On Error Resume Next
-    For sectorRow = 2 To lastRow
-        uniqueSectors.Add wsAllOfferings.Cells(sectorRow, 24).Value, CStr(wsAllOfferings.Cells(sectorRow, 24).Value)
-    Next sectorRow
-    On Error GoTo 0
+    wsOverview.Rows(lastTableBottom & ":" & wsOverview.Rows.Count).Clear
 
-    ' Set the start row on the "Overview" sheet
-    startRow = 12
-
-    ' Add headers for sector analysis
-    wsOverview.Cells(startRow - 1, 1).Value = "Sector Analysis"
-    wsOverview.Cells(startRow, 1).Value = "Sector"
-    wsOverview.Cells(startRow, 2).Value = "Number of Offerings"
-    wsOverview.Cells(startRow, 3).Value = "Total Offer Amount (MM)"
-    wsOverview.Cells(startRow, 4).Value = "Average Discount"
-    wsOverview.Cells(startRow, 5).Value = "Average Days to Maturity (DTM)"
-    wsOverview.Cells(startRow, 6).Value = "Total Net Upfront (MM)"
-
-    ' Loop through unique sectors and calculate metrics
-    For Each sector In uniqueSectors
-        sectorCount = Application.WorksheetFunction.CountIf(wsAllOfferings.Range("X:X"), sector)
-
-        wsOverview.Cells(wsOverview.Rows.Count, 1).End(xlUp).Offset(1, 0).Value = sector
-        wsOverview.Cells(wsOverview.Rows.Count, 2).End(xlUp).Offset(1, 0).Formula = "=COUNTIFS('All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 3).End(xlUp).Offset(1, 0).Formula = "=SUMIFS('All Offerings'!B:B, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 4).End(xlUp).Offset(1, 0).Formula = "=AVERAGEIFS('All Offerings'!C:C, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 5).End(xlUp).Offset(1, 0).Formula = "=AVERAGEIFS('All Offerings'!D:D, 'All Offerings'!X:X, """ & sector & """)"
-        wsOverview.Cells(wsOverview.Rows.Count, 6).End(xlUp).Offset(1, 0).Formula = "=SUMIFS('All Offerings'!V:V, 'All Offerings'!X:X, """ & sector & """)"
-    Next sector
+    ' Loop through all tables in the "Overview" sheet
+    For Each table In wsOverview.ListObjects
+        ' Move the table below the last table with a small gap
+        table.HeaderRowRange.Row = lastTableBottom + 2
+        lastTableBottom = table.HeaderRowRange.Row + table.ListRows.Count + 1
+    Next table
 
     ' Format the "Overview" sheet
     wsOverview.Columns.AutoFit
 
-    MsgBox "Sector Analysis completed successfully!", vbInformation
+    MsgBox "Tables on Overview arranged successfully!", vbInformation
 End Sub
