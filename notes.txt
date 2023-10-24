@@ -1,38 +1,21 @@
-Sub ConsolidateData()
-    Dim ws As Worksheet
-    Dim resultsSheet As Worksheet
-    Dim podFilter As String
-    Dim lastRow As Long
-    Dim destRow As Long
-    
-    ' Set the results sheet
-    Set resultsSheet = ThisWorkbook.Sheets("Results")
-    
-    ' Loop through each sheet
-    For Each ws In ThisWorkbook.Sheets
-        ' Skip the Results sheet
-        If ws.Name <> "Results" Then
-            ' Filter by Pod = "Italy"
-            ws.Rows(1).AutoFilter Field:=1, Criteria1:="Italy"
-            
-            ' Find the last row after filtering
-            lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-            
-            ' Loop through visible rows
-            For i = 2 To lastRow
-                If ws.Rows(i).Hidden = False Then
-                    ' Copy data to the results sheet
-                    destRow = resultsSheet.Cells(resultsSheet.Rows.Count, "A").End(xlUp).Row + 1
-                    resultsSheet.Cells(destRow, 1).Value = ws.Cells(i, "A").Value ' Pod
-                    resultsSheet.Cells(destRow, 2).Value = ws.Cells(i, "B").Value ' Counterparty Code
-                    resultsSheet.Cells(destRow, 3).Value = ws.Cells(i, "C").Value ' Salesman Name
-                    resultsSheet.Cells(destRow, 4).Value = ws.Cells(i, "D").Value ' Level 07 Node Name
-                    resultsSheet.Cells(destRow, 5).Value = ws.Cells(i, "E").Value ' Buying Center Name
-                End If
-            Next i
-            
-            ' Turn off the filter
-            ws.AutoFilterMode = False
-        End If
-    Next ws
-End Sub
+Subject: Important: Strategic Settlement Information Update
+
+Dear [Client Name],
+
+I hope this message finds you well. As part of our ongoing commitment to enhancing operational efficiency, we have conducted a thorough analysis of our recent performance with your accounts on the Italy desk.
+
+The data indicates that a significant portion of the challenges we've encountered stems from trade booking issues and unmatched instructions. To address this, we are initiating a proactive outreach to confirm and update Settlement Standing Instructions (SSIs) and allocation rules.
+
+Our aim is to ensure seamless transactions and to better align our processes with your preferences. Specifically, we are seeking clarification on SSIs and rules for Settlement Instruction (SI) selection, especially concerning the bond types outlined in the attached table.
+
+Your collaboration in providing this information is invaluable and will contribute to a more streamlined and error-free settlement process. To facilitate this, we kindly request you to review the attached document and share any updates or clarifications at your earliest convenience.
+
+We understand the importance of a smooth settlement process for your operations, and we are dedicated to addressing any concerns promptly. Wil and I are available to discuss any questions or provide further assistance.
+
+Thank you for your cooperation, and we look forward to strengthening our collaboration for more efficient settlement processes.
+
+Best regards,
+
+[Your Full Name]
+[Your Position]
+[Your Contact Information]
