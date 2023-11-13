@@ -1,17 +1,1 @@
-Subject: Analysis of Failing Settlement Trade Themes in EUR SSA Market
 
-Hi Paul,
-
-I hope this message finds you well. As requested, I've conducted an analysis of failing settlement trade themes in the EUR SSA market, and I wanted to share the key findings with you.
-
-Across various distribution desks, we observed a consistent trend in the mean failed settlement route cause. The primary driver appears to be inventory delays within our own house accounts, coupled with a shortage of inventory in the short term.
-
-Additionally, there is a notable pattern where trades are dispatched to the market before the value date (VD), receiving swift settlement acknowledgments ('ACK'), but the actual cash/securities settlement occurs between VD+1 and VD+3.
-
-To address these issues, I recommend investigating the inventory delays with our relationship manager (RM) at Euroclear. This could provide valuable insights and potential solutions to improve the settlement process.
-
-Please let me know if you would like further details or if there's anything specific you'd like to focus on in our follow-up actions.
-
-Best regards,
-[Your Name]
-Business Analyst, Fixed Income Middle Office
