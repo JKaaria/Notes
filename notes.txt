@@ -1,1 +1,20 @@
+Subject: Re: UST Trade Settlement Issues - Seeking Resolution
 
+Hi Noel,
+
+Thanks for breaking down the issues. Here are some additional points to consider:
+
+- **Client Instruction Errors:** It's worth noting that clients may occasionally send incorrect instructions, adding to the complexity.
+
+- **Internal Rules and Anomalies:** Our company's rules and anomalies, especially tied to individual trader books and client account changes, can lead to unforeseen challenges.
+
+- **Historical Complexity:** A one-size-fits-all fix hasn't historically worked due to edge cases and errors from both our teams and clients.
+
+Considering these factors, let's explore a targeted solution:
+
+- **Automated T+0 Reconciliation:** Implementing this against client emails could streamline processes, addressing both regulatory (TRACE) and operational (settlement) risks.
+
+Let's dive into the trade IDs to uncover more insights and work towards a robust solution.
+
+Best,
+Bill
