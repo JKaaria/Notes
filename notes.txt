@@ -1,1 +1,34 @@
+Subject: Re: UST Trade Settlement Issues - Seeking Resolution
 
+Hi Noel,
+
+Thanks for breaking down the UST trade settlement challenges. Here's a consolidated approach to tackle the issues:
+
+- **Client Instruction Errors:** Acknowledging that clients may occasionally send incorrect instructions, adding complexity.
+
+- **Internal Rules and Anomalies:** Recognizing that our company's rules and anomalies, tied to individual trader books and client account changes, can lead to unforeseen challenges.
+
+- **Historical Complexity:** Highlighting that a one-size-fits-all fix hasn't historically worked due to edge cases and errors from both our teams and clients.
+
+In addition, let's consider:
+
+- **Automated T+0 Reconciliation:** Proposing an automated reconciliation against client emails to streamline processes, addressing both regulatory (TRACE) and operational (settlement) risks.
+
+Building on the collaborative effort:
+
+- **Collaborative Understanding:** Advocating for Sales, TA, and IBMO to join forces to comprehensively understand root cause requirements.
+
+- **Logic Exploration:** Delving into the logic for each book, ensuring notification of new books, traders, and salespeople joining the firm.
+
+- **Client Requirements:** Thoroughly understanding client requirements to build a robust logic for reconciliation.
+
+Considering practical challenges:
+
+- **Global Mailbox Challenge:** Highlighting the impracticality of manual capture in a global mailbox with over 2k emails.
+
+- **Automated Email Allocation Logic:** Addressing issues with automated email allocation logic occasionally hiding emails from relevant personnel.
+
+This consolidated approach aims to cover all bases for an effective resolution. Let's schedule a meeting to kick off this comprehensive exploration.
+
+Best,
+Bill
