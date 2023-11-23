@@ -1,1 +1,23 @@
+Subject: Reevaluating Long-Term Unmatched Trades Protocol and Enhancing Cross-Functional Understanding
 
+Dear Bill,
+
+I trust this message finds you well. I'd like to discuss our current approach to long-term unmatched trades and underscore a few key points:
+
+- **Electronic Trading Platforms:** A significant portion of these trades is executed directly by clients on electronic platforms, ensuring immediate recognition.
+
+- **Duplicate Bookings:** Our EFI team actively monitors platforms like Tradeweb, minimizing the risk of oversight even in the case of duplicates.
+
+- **CTM Confirmation/Affirmation:** The CTM confirmation process provides a robust layer of validation, ensuring the legitimacy of transactions.
+
+- **Hedge Values and Basis Risk:** It's important to note that trades are effectively hedged, and any remaining risk is primarily basis-related. Traders should be monitoring basis risk daily to mitigate potential discrepancies.
+
+From the macro trading floor perspective, both Osama and Magda share the same view as me. There seems to be a disconnect between the Middle Office (MO) and Front Office (FO) priorities. It might be beneficial for us to initiate knowledge-sharing sessions to bridge this gap and gain a deeper understanding of the true risks involved.
+
+I propose a brief meeting to discuss this holistic approach, ensuring that our efforts align seamlessly with the broader goals of the Front Office.
+
+Looking forward to your thoughts.
+
+Best regards,
+
+[Your Name] Business Analyst, FICC Middle Office
