@@ -1,33 +1,38 @@
-Sub SimplifiedReconciliation()
+Sub AmendSettleLegalEntity()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim lastRowTrade As Long
+    Dim lastRow As Long
     Dim settleLegalEntityCol As Integer
     Dim i As Long
     
-    ' Set worksheet
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    ' Set the worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
     
     ' Set column number based on header
     settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
     
-    ' Find the last row in the sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, settleLegalEntityCol).End(xlUp).Row
+    ' Find the last row
+    lastRow = wsTrade.Cells(wsTrade.Rows.Count, settleLegalEntityCol).End(xlUp).Row
     
-    ' Loop through "Settle Legal Entity" column
-    For i = 2 To lastRowTrade
-        ' Check and replace values
-        If InStr(1, UCase(wsTrade.Cells(i, settleLegalEntityCol).Value), "CAPITAL") > 0 Then
+    ' Loop through the "Settle Legal Entity" column
+    For i = 2 To lastRow
+        Dim currentValue As String
+        currentValue = wsTrade.Cells(i, settleLegalEntityCol).Value
+        
+        ' Apply amendments
+        If InStr(1, currentValue, "CAPITAL", vbTextCompare) > 0 Then
+            ' Replace "CAPITAL" with "BCI"
             wsTrade.Cells(i, settleLegalEntityCol).Value = "BCI"
-        ElseIf InStr(1, UCase(wsTrade.Cells(i, settleLegalEntityCol).Value), "PLC-NY") > 0 Then
+        ElseIf InStr(1, currentValue, "PLC-NY", vbTextCompare) > 0 Or InStr(1, currentValue, "LNBR", vbTextCompare) > 0 Then
+            ' Replace "PLC-NY" or "LNBR" with "LNBR"
             wsTrade.Cells(i, settleLegalEntityCol).Value = "LNBR"
         Else
-            ' Handle other cases (e.g., "PLC")
-            ' Add more ElseIf conditions as needed
+            ' If no match, replace with "PLC"
+            wsTrade.Cells(i, settleLegalEntityCol).Value = "PLC"
         End If
     Next i
     
-    MsgBox "Reconciliation complete!", vbInformation
+    MsgBox "Amendments complete!", vbInformation
 
 End Sub
