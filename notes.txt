@@ -1,1 +1,42 @@
+Sub ReconcileSettleLegalEntity()
+
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim wsLogic As Worksheet
+    Dim lastRowTrade As Long
+    Dim lastRowLogic As Long
+    Dim tradeCounterpartyCol As Integer
+    Dim logicSDSCol As Integer
+    Dim settleLegalEntityCol As Integer
+    Dim i As Long, j As Long
+    
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
+    
+    ' Set column numbers based on headers
+    tradeCounterpartyCol = WorksheetFunction.Match("Counterparty", wsTrade.Rows(1), 0)
+    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
+    settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
+    
+    ' Find the last row in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeCounterpartyCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
+    
+    ' Loop through trade data
+    For i = 2 To lastRowTrade
+        ' Loop through logic table
+        For j = 2 To lastRowLogic
+            ' Check if Counterparty matches SDS
+            If wsTrade.Cells(i, tradeCounterpartyCol).Value = wsLogic.Cells(j, logicSDSCol).Value Then
+                ' If match, reconcile Settle Legal Entity
+                wsTrade.Cells(i, settleLegalEntityCol).Value = wsLogic.Cells(j, settleLegalEntityCol).Value
+                Exit For ' Exit inner loop after matching
+            End If
+        Next j
+    Next i
+    
+    MsgBox "Reconciliation complete!", vbInformation
+
+End Sub
 
