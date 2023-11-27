@@ -1,1 +1,21 @@
+Subject: Request for Daily Aggregated RTSR Report for Middle Office
 
+Dear [Settlements Team],
+
+I hope this email finds you well. As part of our ongoing efforts to enhance operational efficiency and proactively manage client relationships, we would like to request access to the aggregated Real-Time Stock Record (RTSR) report on a daily basis.
+
+The purpose of this request is to empower our Middle Office team with real-time insights into stock records, particularly in cases where the trading book might be covered but settlement has not been received. This information is crucial for our traders to effectively manage their positions and take necessary actions, such as covering positions or advising clients accordingly.
+
+Ideally, we would appreciate receiving the aggregated RTSR report at [insert preferred time] each day. This timing will allow our traders sufficient time to assess the status of their positions and take any necessary steps before the end of the trading day.
+
+Additionally, we understand the importance of collaboration between our teams and value the role of Settlements in ensuring the accuracy and timeliness of information. If there are any specific requirements or considerations on your end for providing this report, please let us know, and we will work to accommodate them.
+
+We believe that this collaboration will not only streamline our internal processes but also contribute to a more seamless and informed decision-making process for both Middle Office and Settlements.
+
+Thank you in advance for your attention to this matter. We look forward to working together to implement this improvement in our workflow.
+
+Best Regards,
+
+[Your Name]
+[Your Position]
+[Your Contact Information]
