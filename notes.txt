@@ -1,42 +1,33 @@
-Sub ReconcileSettleLegalEntity()
+Sub SimplifiedReconciliation()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim wsLogic As Worksheet
     Dim lastRowTrade As Long
-    Dim lastRowLogic As Long
-    Dim tradeCounterpartyCol As Integer
-    Dim logicSDSCol As Integer
     Dim settleLegalEntityCol As Integer
-    Dim i As Long, j As Long
+    Dim i As Long
     
-    ' Set worksheets
+    ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
     
-    ' Set column numbers based on headers
-    tradeCounterpartyCol = WorksheetFunction.Match("Counterparty", wsTrade.Rows(1), 0)
-    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
+    ' Set column number based on header
     settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
     
-    ' Find the last row in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeCounterpartyCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
+    ' Find the last row in the sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, settleLegalEntityCol).End(xlUp).Row
     
-    ' Loop through trade data
+    ' Loop through "Settle Legal Entity" column
     For i = 2 To lastRowTrade
-        ' Loop through logic table
-        For j = 2 To lastRowLogic
-            ' Check if Counterparty matches SDS
-            If wsTrade.Cells(i, tradeCounterpartyCol).Value = wsLogic.Cells(j, logicSDSCol).Value Then
-                ' If match, reconcile Settle Legal Entity
-                wsTrade.Cells(i, settleLegalEntityCol).Value = wsLogic.Cells(j, settleLegalEntityCol).Value
-                Exit For ' Exit inner loop after matching
-            End If
-        Next j
+        ' Check and replace values
+        If InStr(1, UCase(wsTrade.Cells(i, settleLegalEntityCol).Value), "CAPITAL") > 0 Then
+            wsTrade.Cells(i, settleLegalEntityCol).Value = "BCI"
+        ElseIf InStr(1, UCase(wsTrade.Cells(i, settleLegalEntityCol).Value), "PLC-NY") > 0 Then
+            wsTrade.Cells(i, settleLegalEntityCol).Value = "LNBR"
+        Else
+            ' Handle other cases (e.g., "PLC")
+            ' Add more ElseIf conditions as needed
+        End If
     Next i
     
     MsgBox "Reconciliation complete!", vbInformation
 
 End Sub
-
