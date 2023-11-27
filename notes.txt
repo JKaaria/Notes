@@ -1,38 +1,47 @@
-Sub AmendSettleLegalEntity()
+Sub VlookupAndAddColumn()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim lastRow As Long
-    Dim settleLegalEntityCol As Integer
+    Dim wsLogic As Worksheet
+    Dim lastRowTrade As Long
+    Dim lastRowLogic As Long
+    Dim colunCol As Integer
+    Dim logicKeyCol As Integer
+    Dim newColumnCol As Integer
     Dim i As Long
     
-    ' Set the worksheet
+    ' Set worksheets
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your sheet
     
-    ' Set column number based on header
-    settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
+    ' Set column numbers based on headers
+    colunCol = WorksheetFunction.Match("Colun", wsTrade.Rows(1), 0)
+    logicKeyCol = WorksheetFunction.Match("KeyColumn", wsLogic.Rows(1), 0) ' Replace "KeyColumn" with the actual header of the key column in LogicTable
     
-    ' Find the last row
-    lastRow = wsTrade.Cells(wsTrade.Rows.Count, settleLegalEntityCol).End(xlUp).Row
+    ' Add a new column in TradeData for the result
+    newColumnCol = wsTrade.Cells(1, wsTrade.Columns.Count).End(xlToLeft).Column + 1
+    wsTrade.Cells(1, newColumnCol).Value = "NewColumn"
     
-    ' Loop through the "Settle Legal Entity" column
-    For i = 2 To lastRow
-        Dim currentValue As String
-        currentValue = wsTrade.Cells(i, settleLegalEntityCol).Value
-        
-        ' Apply amendments
-        If InStr(1, currentValue, "CAPITAL", vbTextCompare) > 0 Then
-            ' Replace "CAPITAL" with "BCI"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "BCI"
-        ElseIf InStr(1, currentValue, "PLC-NY", vbTextCompare) > 0 Or InStr(1, currentValue, "LNBR", vbTextCompare) > 0 Then
-            ' Replace "PLC-NY" or "LNBR" with "LNBR"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "LNBR"
-        Else
-            ' If no match, replace with "PLC"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "PLC"
+    ' Find the last row in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, colunCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicKeyCol).End(xlUp).Row
+    
+    ' Loop through TradeData
+    For i = 2 To lastRowTrade
+        ' Check if the content in Colun is numerical
+        If IsNumeric(wsTrade.Cells(i, colunCol).Value) Then
+            ' Perform VLOOKUP against LogicTable
+            Dim result As Variant
+            result = Application.VLookup(wsTrade.Cells(i, colunCol).Value, wsLogic.Range("A:B"), 2, False)
+            
+            ' Check if VLOOKUP result is not an error
+            If Not IsError(result) Then
+                ' Populate the new column in TradeData with VLOOKUP result
+                wsTrade.Cells(i, newColumnCol).Value = result
+            End If
         End If
     Next i
     
-    MsgBox "Amendments complete!", vbInformation
+    MsgBox "VLOOKUP and new column addition complete!", vbInformation
 
 End Sub
