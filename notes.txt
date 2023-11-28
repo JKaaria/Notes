@@ -1,76 +1,33 @@
-Sub VLookupCounterparty()
+Sub ChangeCounterpartyToSDS()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim wsLogic As Worksheet
-    Dim wsRecBreaks As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowLogic As Long
+    Dim lastRow As Long
     Dim counterpartyCol As Integer
-    Dim newColumn As Integer
     Dim i As Long
-    Dim mismatchCounterparties As Collection
     
-    ' Set worksheets
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your TradeData sheet
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your LogicTable sheet
+    ' Set the worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
     
     ' Set column number based on header
     counterpartyCol = WorksheetFunction.Match("Counterparty", wsTrade.Rows(1), 0)
     
-    ' Find the last row in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, 1).End(xlUp).Row ' Assuming counterparty data is in column A of LogicTable
+    ' Find the last row
+    lastRow = wsTrade.Cells(wsTrade.Rows.Count, counterpartyCol).End(xlUp).Row
     
-    ' Add a new column next to the Counterparty column in TradeData
-    newColumn = wsTrade.Cells(1, counterpartyCol).Column + 1
-    wsTrade.Cells(1, newColumn).Value = "NewColumn" ' Replace "NewColumn" with the desired header
-    
-    ' Set RecBreaks worksheet
-    On Error Resume Next
-    Set wsRecBreaks = ThisWorkbook.Sheets("RecBreaks")
-    On Error GoTo 0
-    
-    ' Create RecBreaks worksheet if it doesn't exist
-    If wsRecBreaks Is Nothing Then
-        Set wsRecBreaks = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-        wsRecBreaks.Name = "RecBreaks"
-    End If
-    
-    ' Initialize collection to store mismatching counterparties
-    Set mismatchCounterparties = New Collection
-    
-    ' Loop through Counterparty column in TradeData
-    For i = 2 To lastRowTrade
-        ' Check if Counterparty is numerical
-        If IsNumeric(wsTrade.Cells(i, counterpartyCol).Value) Then
-            ' Perform VLOOKUP in LogicTable and store result in the new column
-            wsTrade.Cells(i, newColumn).Value = Application.VLookup(wsTrade.Cells(i, counterpartyCol).Value, wsLogic.Range("A:D"), 4, False)
-            
-            ' Check if VLOOKUP result is an error (mismatch)
-            If IsError(wsTrade.Cells(i, newColumn).Value) Then
-                ' Add mismatching Counterparty to collection
-                mismatchCounterparties.Add wsTrade.Cells(i, counterpartyCol).Value
-            End If
-        Else
-            ' If Counterparty is not numerical, leave the new column blank
-            wsTrade.Cells(i, newColumn).Value = ""
+    ' Loop through the "Counterparty" column
+    For i = 2 To lastRow
+        Dim currentValue As Variant
+        currentValue = wsTrade.Cells(i, counterpartyCol).Value
+        
+        ' Check if the content is numerical
+        If IsNumeric(currentValue) Then
+            ' Change the column header to "SDS"
+            wsTrade.Cells(1, counterpartyCol).Value = "SDS"
+            Exit For ' Exit loop after the first numerical value is found
         End If
     Next i
     
-    ' Copy mismatching counterparties to RecBreaks worksheet
-    If mismatchCounterparties.Count > 0 Then
-        wsRecBreaks.Cells.Clear ' Clear previous data in RecBreaks worksheet
-        
-        ' Add headers to RecBreaks worksheet
-        wsRecBreaks.Cells(1, 1).Value = "Mismatching Counterparties"
-        
-        ' Copy mismatching counterparties to RecBreaks worksheet
-        For i = 1 To mismatchCounterparties.Count
-            wsRecBreaks.Cells(i + 1, 1).Value = mismatchCounterparties(i)
-        Next i
-    End If
-    
-    MsgBox "VLOOKUP complete! Mismatching counterparties copied to RecBreaks worksheet.", vbInformation
+    MsgBox "Column header changed to 'SDS' if a numerical value was found.", vbInformation
 
 End Sub
