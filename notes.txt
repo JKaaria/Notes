@@ -1,33 +1,52 @@
-Sub ChangeCounterpartyToSDS()
+Sub CompareAndCopyRows()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim lastRow As Long
-    Dim counterpartyCol As Integer
-    Dim i As Long
+    Dim wsLogic As Worksheet
+    Dim wsRecBreaks As Worksheet
+    Dim lastRowTrade As Long
+    Dim lastRowLogic As Long
+    Dim counterpartyIDCol As Integer
+    Dim entityColLogic As Integer
+    Dim settleLegalEntityColTrade As Integer
+    Dim i As Long, j As Long
+    Dim counterpartyID As Variant
+    Dim entityTrade As Variant
     
-    ' Set the worksheet
+    ' Set worksheets
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your sheet
+    Set wsRecBreaks = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsRecBreaks.Name = "RecBreaks"
     
-    ' Set column number based on header
-    counterpartyCol = WorksheetFunction.Match("Counterparty", wsTrade.Rows(1), 0)
+    ' Set column numbers based on headers
+    counterpartyIDCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
+    entityColLogic = WorksheetFunction.Match("Entity", wsLogic.Rows(1), 0)
+    settleLegalEntityColTrade = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
     
-    ' Find the last row
-    lastRow = wsTrade.Cells(wsTrade.Rows.Count, counterpartyCol).End(xlUp).Row
+    ' Find the last row in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyIDCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, entityColLogic).End(xlUp).Row
     
-    ' Loop through the "Counterparty" column
-    For i = 2 To lastRow
-        Dim currentValue As Variant
-        currentValue = wsTrade.Cells(i, counterpartyCol).Value
+    ' Loop through trade data
+    For i = 2 To lastRowTrade
+        ' Get Counterparty ID and Settle Legal Entity values
+        counterpartyID = wsTrade.Cells(i, counterpartyIDCol).Value
+        entityTrade = wsTrade.Cells(i, settleLegalEntityColTrade).Value
         
-        ' Check if the content is numerical
-        If IsNumeric(currentValue) Then
-            ' Change the column header to "SDS"
-            wsTrade.Cells(1, counterpartyCol).Value = "SDS"
-            Exit For ' Exit loop after the first numerical value is found
-        End If
+        ' Search for Counterparty ID in LogicTable
+        For j = 2 To lastRowLogic
+            If counterpartyID = wsLogic.Cells(j, entityColLogic).Value Then
+                ' If Counterparty ID is found, compare Entity values
+                If entityTrade <> wsLogic.Cells(j, entityColLogic).Value Then
+                    ' If not matching, copy the whole row to RecBreaks sheet
+                    wsTrade.Rows(i).Copy Destination:=wsRecBreaks.Rows(wsRecBreaks.Cells(wsRecBreaks.Rows.Count, 1).End(xlUp).Row + 1)
+                    Exit For ' Exit inner loop after finding a match
+                End If
+            End If
+        Next j
     Next i
     
-    MsgBox "Column header changed to 'SDS' if a numerical value was found.", vbInformation
+    MsgBox "Comparison and copying complete!", vbInformation
 
 End Sub
