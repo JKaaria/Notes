@@ -1,57 +1,47 @@
-Sub HighlightRecBreaksAlternative()
+Sub RenameCounterpartyIDToSDS()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim wsLogic As Worksheet
-    Dim wsRecBreaks As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowLogic As Long
-    Dim tradeCounterpartyIDCol As Integer
-    Dim logicSDSCol As Integer
-    Dim tradeSettleLegalEntityCol As Integer
-    Dim logicEntityCol As Integer
-    Dim i As Long
-    Dim foundCell As Range
+    Dim counterpartyIDCol As Range
     
-    ' Set worksheets
-    Set wsTrade = ThisWorkbook.Sheets("TradeData")
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable")
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
     
-    ' Create or reference "RecBreaks" sheet
-    On Error Resume Next
-    Set wsRecBreaks = ThisWorkbook.Sheets("RecBreaks")
-    On Error GoTo 0
+    ' Find "Counterparty ID" header
+    Set counterpartyIDCol = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues, LookAt:=xlWhole)
     
-    If wsRecBreaks Is Nothing Then
-        ' If "RecBreaks" sheet doesn't exist, create it
-        Set wsRecBreaks = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsRecBreaks.Name = "RecBreaks"
-    End If
-    
-    ' Set column numbers based on headers
-    tradeCounterpartyIDCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
-    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
-    tradeSettleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
-    logicEntityCol = WorksheetFunction.Match("Entity", wsLogic.Rows(1), 0)
-    
-    ' Find the last rows in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeCounterpartyIDCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
-    
-    ' Loop through TradeData sheet
-    For i = 2 To lastRowTrade
-        ' Search for Counterparty ID in SDS column of LogicTable
-        Set foundCell = wsLogic.Columns(logicSDSCol).Find(wsTrade.Cells(i, tradeCounterpartyIDCol).Value, LookIn:=xlValues, LookAt:=xlWhole)
+    ' Check if "Counterparty ID" header exists
+    If Not counterpartyIDCol Is Nothing Then
+        ' Rename the header to "SDS"
+        counterpartyIDCol.Value = "SDS"
         
-        ' If a match is found, compare Settle Legal Entity with Entity
-        If Not foundCell Is Nothing Then
-            If wsTrade.Cells(i, tradeSettleLegalEntityCol).Value <> wsLogic.Cells(foundCell.Row, logicEntityCol).Value Then
-                ' If not matching, copy the entire row to RecBreaks sheet
-                wsTrade.Rows(i).Copy Destination:=wsRecBreaks.Rows(wsRecBreaks.Cells(wsRecBreaks.Rows.Count, 1).End(xlUp).Row + 1)
-            End If
-        End If
-    Next i
+        MsgBox "Counterparty ID header amended to SDS!", vbInformation
+    Else
+        MsgBox "Counterparty ID header not found!", vbExclamation
+    End If
+
+End Sub
+
+Sub RenameCounterpartyIDToSDS()
+
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim counterpartyIDCol As Range
     
-    MsgBox "Alternative highlighting complete!", vbInformation
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
+    
+    ' Find "Counterparty ID" header
+    Set counterpartyIDCol = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues, LookAt:=xlWhole)
+    
+    ' Check if "Counterparty ID" header exists
+    If Not counterpartyIDCol Is Nothing Then
+        ' Rename the header to "SDS"
+        counterpartyIDCol.Value = "SDS"
+        
+        MsgBox "Counterparty ID header amended to SDS!", vbInformation
+    Else
+        MsgBox "Counterparty ID header not found!", vbExclamation
+    End If
 
 End Sub
