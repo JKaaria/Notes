@@ -1,47 +1,41 @@
-Sub VlookupAndAddColumn()
+Sub VLookupCounterparty()
 
     ' Define variables
     Dim wsTrade As Worksheet
     Dim wsLogic As Worksheet
     Dim lastRowTrade As Long
     Dim lastRowLogic As Long
-    Dim colunCol As Integer
-    Dim logicKeyCol As Integer
-    Dim newColumnCol As Integer
+    Dim counterpartyCol As Integer
+    Dim newColumn As Integer
     Dim i As Long
     
     ' Set worksheets
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your sheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your TradeData sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your LogicTable sheet
     
-    ' Set column numbers based on headers
-    colunCol = WorksheetFunction.Match("Colun", wsTrade.Rows(1), 0)
-    logicKeyCol = WorksheetFunction.Match("KeyColumn", wsLogic.Rows(1), 0) ' Replace "KeyColumn" with the actual header of the key column in LogicTable
-    
-    ' Add a new column in TradeData for the result
-    newColumnCol = wsTrade.Cells(1, wsTrade.Columns.Count).End(xlToLeft).Column + 1
-    wsTrade.Cells(1, newColumnCol).Value = "NewColumn"
+    ' Set column number based on header
+    counterpartyCol = WorksheetFunction.Match("Counterparty", wsTrade.Rows(1), 0)
     
     ' Find the last row in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, colunCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicKeyCol).End(xlUp).Row
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, 1).End(xlUp).Row ' Assuming counterparty data is in column A of LogicTable
     
-    ' Loop through TradeData
+    ' Add a new column next to the Counterparty column in TradeData
+    newColumn = wsTrade.Cells(1, counterpartyCol).Column + 1
+    wsTrade.Cells(1, newColumn).Value = "NewColumn" ' Replace "NewColumn" with the desired header
+    
+    ' Loop through Counterparty column in TradeData
     For i = 2 To lastRowTrade
-        ' Check if the content in Colun is numerical
-        If IsNumeric(wsTrade.Cells(i, colunCol).Value) Then
-            ' Perform VLOOKUP against LogicTable
-            Dim result As Variant
-            result = Application.VLookup(wsTrade.Cells(i, colunCol).Value, wsLogic.Range("A:B"), 2, False)
-            
-            ' Check if VLOOKUP result is not an error
-            If Not IsError(result) Then
-                ' Populate the new column in TradeData with VLOOKUP result
-                wsTrade.Cells(i, newColumnCol).Value = result
-            End If
+        ' Check if Counterparty is numerical
+        If IsNumeric(wsTrade.Cells(i, counterpartyCol).Value) Then
+            ' Perform VLOOKUP in LogicTable and store result in the new column
+            wsTrade.Cells(i, newColumn).Value = Application.VLookup(wsTrade.Cells(i, counterpartyCol).Value, wsLogic.Range("A:D"), 4, False)
+        Else
+            ' If Counterparty is not numerical, leave the new column blank
+            wsTrade.Cells(i, newColumn).Value = ""
         End If
     Next i
     
-    MsgBox "VLOOKUP and new column addition complete!", vbInformation
+    MsgBox "VLOOKUP complete!", vbInformation
 
 End Sub
