@@ -353,3 +353,19 @@ Sub SendMismatchDetailsEmail()
     MsgBox "Mismatch details email sent!", vbInformation
 
 End Sub
+
+Sub ExecuteTradeDataProcessing()
+
+    ' Phase 1: Rename "Settle Legal Entity" to "Entity"
+    RenameSettleLegalEntityToEntity
+    
+    ' Phase 2: Rename "Counterparty ID" to "SDS"
+    RenameCounterpartyIDToSDS
+    
+    ' Phase 3: Copy Matching SDS Values to ResultSheet
+    CopyMatchingSDSValues
+    
+    ' Phase 4: Send Mismatch Details Email
+    SendMismatchDetailsEmail
+
+End Sub
