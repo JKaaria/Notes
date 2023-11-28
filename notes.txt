@@ -1,9 +1,8 @@
-Sub CompareAndCopyToRecBreaks()
+Sub HighlightRecBreaks()
 
     ' Define variables
     Dim wsTrade As Worksheet
     Dim wsLogic As Worksheet
-    Dim wsRecBreaks As Worksheet
     Dim lastRowTrade As Long
     Dim lastRowLogic As Long
     Dim tradeCounterpartyIDCol As Integer
@@ -11,22 +10,11 @@ Sub CompareAndCopyToRecBreaks()
     Dim tradeSettleLegalEntityCol As Integer
     Dim logicEntityCol As Integer
     Dim i As Long, j As Long
-    Dim recBreaksRow As Long
+    Dim rngToHighlight As Range
     
     ' Set worksheets
     Set wsTrade = ThisWorkbook.Sheets("TradeData")
     Set wsLogic = ThisWorkbook.Sheets("LogicTable")
-    
-    ' Create or reference "RecBreaks" sheet
-    On Error Resume Next
-    Set wsRecBreaks = ThisWorkbook.Sheets("RecBreaks")
-    On Error GoTo 0
-    
-    If wsRecBreaks Is Nothing Then
-        ' If "RecBreaks" sheet doesn't exist, create it
-        Set wsRecBreaks = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsRecBreaks.Name = "RecBreaks"
-    End If
     
     ' Set column numbers based on headers
     tradeCounterpartyIDCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
@@ -38,8 +26,8 @@ Sub CompareAndCopyToRecBreaks()
     lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeCounterpartyIDCol).End(xlUp).Row
     lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
     
-    ' Initialize row number for "RecBreaks" sheet
-    recBreaksRow = 1
+    ' Initialize the range to highlight
+    Set rngToHighlight = Nothing
     
     ' Loop through TradeData sheet
     For i = 2 To lastRowTrade
@@ -49,15 +37,23 @@ Sub CompareAndCopyToRecBreaks()
             If wsTrade.Cells(i, tradeCounterpartyIDCol).Value = wsLogic.Cells(j, logicSDSCol).Value Then
                 ' If match, check if Settle Legal Entity matches Entity
                 If wsTrade.Cells(i, tradeSettleLegalEntityCol).Value <> wsLogic.Cells(j, logicEntityCol).Value Then
-                    ' If not matching, copy the entire row to RecBreaks sheet
-                    wsTrade.Rows(i).Copy Destination:=wsRecBreaks.Rows(recBreaksRow)
-                    recBreaksRow = recBreaksRow + 1
+                    ' If not matching, add the row to the range to highlight
+                    If rngToHighlight Is Nothing Then
+                        Set rngToHighlight = wsTrade.Rows(i)
+                    Else
+                        Set rngToHighlight = Union(rngToHighlight, wsTrade.Rows(i))
+                    End If
                 End If
                 Exit For ' Exit inner loop after matching Counterparty ID
             End If
         Next j
     Next i
     
-    MsgBox "Comparison and copying to RecBreaks complete!", vbInformation
+    ' Highlight the identified rows in red
+    If Not rngToHighlight Is Nothing Then
+        rngToHighlight.Interior.Color = RGB(255, 0, 0) ' Red color
+    End If
+    
+    MsgBox "Highlighting complete!", vbInformation
 
 End Sub
