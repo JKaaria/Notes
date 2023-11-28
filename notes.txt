@@ -293,3 +293,25 @@ Sub SendMismatchEmail()
     Set outlookApp = Nothing
 
     MsgBox "Mismatch email sent!", vb
+
+
+Sub CheckEntityMatch()
+
+    ' Define variables
+    Dim wsResult As Worksheet
+    Dim lastRowResult As Long
+    
+    ' Set worksheet
+    Set wsResult = ThisWorkbook.Sheets("ResultSheet") ' Replace "ResultSheet" with the actual name of your sheet
+    
+    ' Find the last row in ResultSheet
+    lastRowResult = wsResult.Cells(wsResult.Rows.Count, 1).End(xlUp).Row
+    
+    ' Check if the trade data entity matches the logic table entity
+    If wsResult.Cells(lastRowResult, 4).Value = wsResult.Cells(lastRowResult, 5).Value Then
+        MsgBox "Trade data entity matches logic table entity.", vbInformation
+    Else
+        MsgBox "Trade data entity does not match logic table entity.", vbExclamation
+    End If
+
+End Sub
