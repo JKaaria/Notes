@@ -356,16 +356,16 @@ End Sub
 
 Sub ExecuteTradeDataProcessing()
 
-    ' Phase 1: Rename "Settle Legal Entity" to "Entity"
-    RenameSettleLegalEntityToEntity
+    ' Phase 1: Your First Phase (e.g., RenameSettleLegalEntityToEntity)
+    One
     
-    ' Phase 2: Rename "Counterparty ID" to "SDS"
-    RenameCounterpartyIDToSDS
+    ' Phase 2: Your Second Phase (e.g., RenameCounterpartyIDToSDS)
+    Two
     
-    ' Phase 3: Copy Matching SDS Values to ResultSheet
-    CopyMatchingSDSValues
+    ' Phase 3: Your Third Phase (e.g., CopyMatchingSDSValues)
+    Three
     
-    ' Phase 4: Send Mismatch Details Email
-    SendMismatchDetailsEmail
+    ' Phase 4: Your Fourth Phase (e.g., SendMismatchDetailsEmail)
+    Four
 
 End Sub
