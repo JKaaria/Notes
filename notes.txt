@@ -1,23 +1,23 @@
-Sub RenameCounterpartyIDToSDS()
+Sub RenameSettleLegalEntityToEntity()
 
     ' Define variables
     Dim wsTrade As Worksheet
-    Dim counterpartyIDCol As Range
+    Dim settleLegalEntityCol As Range
     
     ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
     
-    ' Find "Counterparty ID" header
-    Set counterpartyIDCol = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues, LookAt:=xlWhole)
+    ' Find "Settle Legal Entity" header
+    Set settleLegalEntityCol = wsTrade.Rows(1).Find("Settle Legal Entity", LookIn:=xlValues, LookAt:=xlWhole)
     
-    ' Check if "Counterparty ID" header exists
-    If Not counterpartyIDCol Is Nothing Then
-        ' Rename the header to "SDS"
-        counterpartyIDCol.Value = "SDS"
+    ' Check if "Settle Legal Entity" header exists
+    If Not settleLegalEntityCol Is Nothing Then
+        ' Rename the header to "Entity"
+        settleLegalEntityCol.Value = "Entity"
         
-        MsgBox "Counterparty ID header amended to SDS!", vbInformation
+        MsgBox "Settle Legal Entity header amended to Entity!", vbInformation
     Else
-        MsgBox "Counterparty ID header not found!", vbExclamation
+        MsgBox "Settle Legal Entity header not found!", vbExclamation
     End If
 
 End Sub
