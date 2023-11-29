@@ -1,1 +1,68 @@
+Sub SendMismatchDetailsEmail()
 
+    ' Define variables
+    Dim wsResult As Worksheet
+    Dim wsLogic As Worksheet
+    Dim lastRowResult As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    
+    ' Set worksheets
+    Set wsResult = ThisWorkbook.Sheets("ResultSheet") ' Replace "ResultSheet" with the actual name of your sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your sheet
+    
+    ' Find the last row in ResultSheet
+    lastRowResult = wsResult.Cells(wsResult.Rows.Count, 1).End(xlUp).Row
+    
+    ' Initialize email body
+    emailBody = "Mismatching and Successful Trades Details:" & vbCrLf & vbCrLf
+    
+    ' Loop through the rows in ResultSheet to check for matching entities
+    For i = 2 To lastRowResult
+        ' Add details of each row to email body
+        emailBody = emailBody & "Row " & i & ": " & IIf(wsResult.Cells(i, 4).Value = wsResult.Cells(i, 5).Value, "Successful Trade", "Mismatching Entities") & vbCrLf & _
+                     "SDS: " & wsResult.Cells(i, 1).Value & vbCrLf & _
+                     "Account Legal Name: " & wsResult.Cells(i, 2).Value & vbCrLf & _
+                     "Trade ID: " & wsResult.Cells(i, 3).Value & vbCrLf & _
+                     "Trade Data Entity: " & wsResult.Cells(i, 4).Value & vbCrLf & _
+                     "Logic Table Entity: " & wsResult.Cells(i, 5).Value & vbCrLf & vbCrLf
+    Next i
+    
+    ' Loop through the rows in LogicTable to send successful trades to the email contacts
+    For j = 2 To wsLogic.Cells(wsLogic.Rows.Count, 1).End(xlUp).Row
+        ' Check if SDS exists in ResultSheet and there is no mismatch
+        If Not IsError(Application.Match(wsLogic.Cells(j, 1).Value, wsResult.Columns(1), 0)) Then
+            ' Get the email address from column H in LogicTable
+            Dim emailAddress As String
+            emailAddress = wsLogic.Cells(j, 8).Value
+            
+            ' Create Outlook Application
+            Set outlookApp = CreateObject("Outlook.Application")
+            
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+            
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Successful Trade Details"
+                .Body = "Successful Trade Details:" & vbCrLf & vbCrLf & emailBody & vbCrLf & "Please review and take necessary actions." & vbCrLf & vbCrLf & _
+                        "Best regards," & vbCrLf & _
+                        "Your Name"
+                
+                ' Add recipients' email address from LogicTable
+                .Recipients.Add emailAddress
+                
+                ' Send the email
+                .Send
+            End With
+            
+            ' Release Outlook objects
+            Set outlookMail = Nothing
+            Set outlookApp = Nothing
+        End If
+    Next j
+
+    MsgBox "Mismatch and successful trades details emails sent!", vbInformation
+
+End Sub
