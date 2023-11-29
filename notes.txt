@@ -24,7 +24,12 @@ Sub CheckMatchingEntities()
             ' Customize email properties
             With outlookMail
                 .Subject = "Matching Entities Detected"
-                .Body = "Row " & i & ": Entities match in ResultSheet."
+                .Body = "Row " & i & ": Entities match in ResultSheet." & vbCrLf & vbCrLf
+                
+                ' Add row contents to email body
+                For col = 1 To wsResult.Columns.Count
+                    .Body = .Body & wsResult.Cells(i, col).Value & vbCrLf
+                Next col
                 
                 ' Add recipient's email address from Column F
                 .Recipients.Add wsResult.Cells(i, 6).Value
