@@ -3,6 +3,8 @@ Sub CheckMatchingEntities()
     ' Define variables
     Dim wsResult As Worksheet
     Dim lastRowResult As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
     
     ' Set worksheet
     Set wsResult = ThisWorkbook.Sheets("ResultSheet") ' Replace "ResultSheet" with the actual name of your sheet
@@ -10,49 +12,35 @@ Sub CheckMatchingEntities()
     ' Find the last row in ResultSheet
     lastRowResult = wsResult.Cells(wsResult.Rows.Count, 1).End(xlUp).Row
     
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
     ' Loop through the rows in ResultSheet to check for matching entities
     For i = 2 To lastRowResult
         If wsResult.Cells(i, 4).Value = wsResult.Cells(i, 5).Value Then
             ' Entities match, send email
-            SendMatchingEmails wsResult.Cells(i, 3).Value ' Pass the email contact ID from TradeData sheet
+            Set outlookMail = outlookApp.CreateItem(0)
+            
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Matching Entities Detected"
+                .Body = "Row " & i & ": Entities match in ResultSheet."
+                
+                ' Add recipient's email address from Column F
+                .Recipients.Add wsResult.Cells(i, 6).Value
+                
+                ' Send the email
+                .Send
+            End With
+            
+            MsgBox "Row " & i & ": Entities match. Email sent.", vbInformation
         Else
             MsgBox "Row " & i & ": Entities do not match.", vbExclamation
         End If
     Next i
 
-End Sub
-
-Sub SendMatchingEmails(emailContactID As String)
-
-    ' Define variables
-    Dim outlookApp As Object
-    Dim outlookMail As Object
-    
-    ' Create Outlook Application
-    Set outlookApp = CreateObject("Outlook.Application")
-    
-    ' Create a new mail item
-    Set outlookMail = outlookApp.CreateItem(0)
-    
-    ' Customize email properties
-    With outlookMail
-        .Subject = "Matching Entities Detected"
-        .Body = "Dear Email Recipient," & vbCrLf & vbCrLf & _
-                "The entities in the matching rows have been detected. Please review." & vbCrLf & vbCrLf & _
-                "Best regards," & vbCrLf & _
-                "Your Name"
-        
-        ' Add recipient's email address
-        .Recipients.Add emailContactID
-        
-        ' Send the email
-        .Send
-    End With
-
     ' Release Outlook objects
     Set outlookMail = Nothing
     Set outlookApp = Nothing
-
-    MsgBox "Matching entities email sent!", vbInformation
 
 End Sub
