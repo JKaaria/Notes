@@ -1,1 +1,16 @@
+Sub RefreshDaysTrades()
+
+    ' Define variable
+    Dim wsDaysTrades As Worksheet
+    
+    ' Set worksheet
+    Set wsDaysTrades = ThisWorkbook.Sheets("Days Trades") ' Replace "Days Trades" with the actual name of your sheet
+    
+    ' Refresh all in the "Days Trades" sheet
+    wsDaysTrades.Select
+    ActiveWorkbook.RefreshAll
+    
+    MsgBox "Refresh completed successfully!", vbInformation
+
+End Sub
 
