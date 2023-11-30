@@ -1,1 +1,81 @@
 
+Sub SendEmailToSalesPerson()
+
+    ' Define variables
+    Dim wsResults As Worksheet
+    Dim wsLogic As Worksheet
+    Dim salesPersonHeader As Range
+    Dim clientContactHeader As Range
+    Dim salesPersonValue As Variant
+    Dim clientContactValue As Variant
+    Dim contactEmail As String
+    Dim ccEmail As String
+    Dim tradeDetails As String
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    
+    ' Set worksheets
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace with actual name of your logic table sheet
+    
+    ' Find "Sales Person" column header in "ResultsSheet"
+    On Error Resume Next
+    Set salesPersonHeader = wsResults.Rows(1).Find("Sales Person", LookIn:=xlValues)
+    On Error GoTo 0
+    
+    ' Check if header is found
+    If Not salesPersonHeader Is Nothing Then
+        ' Get the value in the last cell of the row for "Sales Person" in "ResultsSheet"
+        salesPersonValue = wsResults.Cells(wsResults.Rows.Count, salesPersonHeader.Column).End(xlUp).Value
+        
+        ' Find "Client Contact" column header in "ResultsSheet"
+        On Error Resume Next
+        Set clientContactHeader = wsResults.Rows(1).Find("Client Contact", LookIn:=xlValues)
+        On Error GoTo 0
+        
+        ' Check if "Client Contact" header is found
+        If Not clientContactHeader Is Nothing Then
+            ' Get the value in the last cell of the row for "Client Contact" in "ResultsSheet"
+            clientContactValue = wsResults.Cells(wsResults.Rows.Count, clientContactHeader.Column).End(xlUp).Value
+            ccEmail = clientContactValue
+        End If
+        
+        ' Find the contact's email in "LogicTable"
+        contactEmail = Application.WorksheetFunction.VLookup(salesPersonValue, wsLogic.Range("A:E"), 5, False)
+        
+        ' Check if contact email is found
+        If Not IsError(contactEmail) Then
+            ' Create the trade details string
+            tradeDetails = "Account Legal Name: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Account Legal Name").Column).End(xlUp).Value & vbCrLf & _
+                           "Settle Legal Entity: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Settle Legal Entity").Column).End(xlUp).Value & vbCrLf & _
+                           "Trade ID: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Trade ID").Column).End(xlUp).Value & vbCrLf & _
+                           "BARC Direction: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("BARC Direction").Column).End(xlUp).Value & vbCrLf & _
+                           "Quantity: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Quantity").Column).End(xlUp).Value & vbCrLf & _
+                           "Security Description: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Security Description").Column).End(xlUp).Value & vbCrLf & _
+                           "Clean Price: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Clean Price").Column).End(xlUp).Value & vbCrLf & _
+                           "Settle Date: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Settle Date").Column).End(xlUp).Value & vbCrLf & _
+                           "Mat Date: " & wsResults.Cells(wsResults.Rows.Count, wsResults.Rows(1).Find("Mat Date").Column).End(xlUp).Value
+            
+            ' Create Outlook objects
+            Set outlookApp = CreateObject("Outlook.Application")
+            Set outlookMail = outlookApp.CreateItem(0)
+            
+            ' Set email details
+            With outlookMail
+                .To = contactEmail
+                .CC = ccEmail
+                .Subject = "Trade Details"
+                .Body = tradeDetails
+                .Display ' Use .Send to send without displaying
+            End With
+            
+            ' Display a message (you can modify this part as needed)
+            MsgBox "Email sent to Sales Person: " & salesPersonValue, vbInformation
+        Else
+            MsgBox "Contact email not found in LogicTable!", vbExclamation
+        End If
+    Else
+        MsgBox "Column header 'Sales Person' not found in ResultsSheet!", vbExclamation
+    End If
+
+End Sub
