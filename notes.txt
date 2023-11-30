@@ -1,1 +1,55 @@
 
+Sub FilterAndCopyToResultsSheet()
+
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim wsResults As Worksheet
+    Dim rngCounterpartyID As Range
+    Dim counterpartyIDHeader As Range
+    Dim filterIDs As Variant
+    Dim cell As Range
+    
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    
+    ' Find "Counterparty ID" column header
+    On Error Resume Next
+    Set counterpartyIDHeader = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    On Error GoTo 0
+    
+    ' Check if header is found
+    If Not counterpartyIDHeader Is Nothing Then
+        ' Set range for "Counterparty ID" column
+        Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
+        
+        ' Define array of Counterparty IDs to filter
+        filterIDs = Array("40291842", "40081912", "10406438", "40758392", "40081908", _
+                          "40081301", "40686068", "40773056", "42306117", "40158018", _
+                          "41870488", "42009673", "42039219", "42145858", "40165750")
+        
+        ' Apply AutoFilter to "Counterparty ID" column
+        rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
+        
+        ' Check if "ResultsSheet" exists, if not create it
+        On Error Resume Next
+        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+        On Error GoTo 0
+        If wsResults Is Nothing Then
+            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+            wsResults.Name = "ResultsSheet"
+        End If
+        
+        ' Copy visible cells to "ResultsSheet"
+        wsTrade.Rows(1).EntireRow.Copy Destination:=wsResults.Rows(1)
+        wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Offset(1, 0)
+        
+        ' Turn off AutoFilter
+        wsTrade.AutoFilterMode = False
+        
+        ' Display a message (you can modify this part as needed)
+        MsgBox "Filtered results copied to 'ResultsSheet'.", vbInformation
+    Else
+        MsgBox "Column header 'Counterparty ID' not found!", vbExclamation
+    End If
+
+End Sub
