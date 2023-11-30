@@ -1,1 +1,14 @@
+Sub DeleteColumnA()
 
+    ' Define variable
+    Dim wsTrade As Worksheet
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    
+    ' Delete column A
+    wsTrade.Columns("A").Delete
+    
+    MsgBox "Column A deleted successfully!", vbInformation
+
+End Sub
