@@ -1,1 +1,68 @@
+Sub SendTradeDetailsEmail()
 
+    ' Define variables
+    Dim wsResults As Worksheet
+    Dim wsLogic As Worksheet
+    Dim counterpartyHeader As Range
+    Dim contact As String
+    Dim rngTradeDetails As Range
+    Dim tradeDetails As String
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    
+    ' Set worksheets
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable")
+    
+    ' Find "Counterparty" column header in "ResultsSheet"
+    On Error Resume Next
+    Set counterpartyHeader = wsResults.Rows(1).Find("Counterparty", LookIn:=xlValues)
+    On Error GoTo 0
+    
+    ' Check if header is found
+    If Not counterpartyHeader Is Nothing Then
+        ' Find contact in "LogicTable"
+        contact = Application.WorksheetFunction.VLookup(wsResults.Cells(2, counterpartyHeader.Column).Value, wsLogic.Range("A:B"), 2, False)
+        
+        ' Check if contact is found
+        If Not IsError(contact) Then
+            ' Set range for trade details
+            Set rngTradeDetails = wsResults.Range("A2:I2") ' Adjust as needed
+            
+            ' Create trade details string
+            tradeDetails = "Account Legal Name: " & rngTradeDetails.Cells(1, 1).Value & vbCrLf & _
+                           "Settle Legal Entity: " & rngTradeDetails.Cells(1, 2).Value & vbCrLf & _
+                           "Trade ID: " & rngTradeDetails.Cells(1, 3).Value & vbCrLf & _
+                           "BARC Direction: " & rngTradeDetails.Cells(1, 4).Value & vbCrLf & _
+                           "Quantity: " & rngTradeDetails.Cells(1, 5).Value & vbCrLf & _
+                           "Security Description: " & rngTradeDetails.Cells(1, 6).Value & vbCrLf & _
+                           "Clean Price: " & rngTradeDetails.Cells(1, 7).Value & vbCrLf & _
+                           "Settle Date: " & rngTradeDetails.Cells(1, 8).Value & vbCrLf & _
+                           "Mat Date: " & rngTradeDetails.Cells(1, 9).Value
+            
+            ' Create Outlook Application
+            Set outlookApp = CreateObject("Outlook.Application")
+            
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+            
+            ' Set email properties
+            With outlookMail
+                .To = contact
+                .Subject = "Trade Details"
+                .Body = tradeDetails
+                ' Uncomment the next line to send the email
+                '.Send
+            End With
+            
+            ' Display a message (you can modify this part as needed)
+            MsgBox "Email sent to: " & contact, vbInformation
+            
+        Else
+            MsgBox "Contact not found in LogicTable!", vbExclamation
+        End If
+    Else
+        MsgBox "Column header 'Counterparty' not found in ResultsSheet!", vbExclamation
+    End If
+
+End Sub
