@@ -1,1 +1,8 @@
+Sub ExecuteAllSubs()
+    ' Execute the subs in the desired order
+    Call ImportData
+    Call DeleteColumnA
+    Call RefreshDaysTrades
+    Call FilterAndCopySalesPersons
+End Sub
 
