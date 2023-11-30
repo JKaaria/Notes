@@ -1,1 +1,79 @@
+Sub SendEmailToLogicTableContacts()
+
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim wsLogic As Worksheet
+    Dim counterpartyIDCol As Integer
+    Dim tradeIDCol As Integer
+    Dim contactEmailCol As Integer
+    Dim lastRowTrade As Long
+    Dim lastRowLogic As Long
+    Dim i As Long
+    Dim counterpartyID As String
+    Dim tradeDetails As String
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
+    
+    ' Set column numbers based on headers
+    counterpartyIDCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
+    tradeIDCol = WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)
+    contactEmailCol = WorksheetFunction.Match("Email", wsLogic.Rows(1), 0)
+    
+    ' Find the last row in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyIDCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, counterpartyIDCol).End(xlUp).Row
+    
+    ' Create Outlook application
+    On Error Resume Next
+    Set outlookApp = CreateObject("Outlook.Application")
+    On Error GoTo 0
+    
+    ' Check if Outlook is available
+    If outlookApp Is Nothing Then
+        MsgBox "Outlook is not available. Please make sure Outlook is installed and accessible through VBA.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Loop through each trade row
+    For i = 2 To lastRowTrade
+        ' Get Counterparty ID and Trade ID
+        counterpartyID = wsTrade.Cells(i, counterpartyIDCol).Value
+        tradeID = wsTrade.Cells(i, tradeIDCol).Value
+        
+        ' Check if Counterparty ID exists in LogicTable
+        If Application.WorksheetFunction.CountIf(wsLogic.Columns(counterpartyIDCol), counterpartyID) > 0 Then
+            ' Get email from LogicTable
+            contactEmail = wsLogic.Cells(Application.WorksheetFunction.Match(counterpartyID, wsLogic.Columns(counterpartyIDCol), 0), contactEmailCol).Value
+            
+            ' Build trade details string
+            tradeDetails = "Account Legal Name: " & wsTrade.Cells(i, 2).Value & vbCrLf & _
+                           "Settle Legal Entity: " & wsTrade.Cells(i, 3).Value & vbCrLf & _
+                           "Trade ID: " & tradeID & vbCrLf & _
+                           "BARC Direction: " & wsTrade.Cells(i, 7).Value & vbCrLf & _
+                           "Quantity: " & wsTrade.Cells(i, 6).Value & vbCrLf & _
+                           "Security Description: " & wsTrade.Cells(i, 8).Value & vbCrLf & _
+                           "Clean Price: " & wsTrade.Cells(i, 9).Value & vbCrLf & _
+                           "Settle Date: " & wsTrade.Cells(i, 18).Value & vbCrLf & _
+                           "Mat Date: " & wsTrade.Cells(i, 41).Value
+           
+            ' Send email
+            Set outlookMail = outlookApp.CreateItem(0)
+            outlookMail.To = contactEmail
+            outlookMail.Subject = "Trade Details for Trade ID: " & tradeID
+            outlookMail.Body = tradeDetails
+            outlookMail.Send
+        End If
+    Next i
+    
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+    
+    MsgBox "Emails sent successfully!", vbInformation
+
+End Sub
 
