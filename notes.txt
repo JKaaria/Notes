@@ -1,7 +1,1 @@
-Sub ExecuteAllSubs()
-    ' Call each individual sub in sequence
-    ImportDataAndRename
-    DeleteColumnA
-    RefreshDaysTrades
-    FilterAndCopySalesPersons
-End Sub
+
