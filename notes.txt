@@ -1,4 +1,4 @@
-Sub SendEmailToKaaria()
+Sub SendBTSYAffirmationsEmail()
 
     ' Define variables
     Dim wsResults As Worksheet
@@ -26,7 +26,7 @@ Sub SendEmailToKaaria()
             
             ' Concatenate core details for each row
             For i = 2 To lastRow
-                coreDetails = coreDetails & vbCrLf & Join(Application.Index(rngCoreDetails.Value, i, 0), ", ")
+                coreDetails = coreDetails & "<tr><td>" & Join(Application.Index(rngCoreDetails.Value, i, 0), "</td><td>") & "</td></tr>"
             Next i
             
             ' Create Outlook application
@@ -42,9 +42,24 @@ Sub SendEmailToKaaria()
                 ' Set email properties
                 With outlookMail
                     .To = "j.kaaria@barclays.com"
-                    .Subject = "ResultsSheet Core Details"
-                    .Body = "Core Details from ResultsSheet:" & vbCrLf & coreDetails
-                    .Display ' Change to .Send to automatically send the email
+                    .Subject = "BTSY Affirmations"
+                    .HTMLBody = "<p>Core Details from ResultsSheet:</p>" & _
+                                "<table border='1' cellspacing='0' cellpadding='5'>" & _
+                                "<tr>" & _
+                                "<th>Account Legal Name</th>" & _
+                                "<th>Settle Legal Entity</th>" & _
+                                "<th>Trade ID</th>" & _
+                                "<th>BARC Direction</th>" & _
+                                "<th>Quantity</th>" & _
+                                "<th>Security Description</th>" & _
+                                "<th>Clean Price</th>" & _
+                                "<th>Settle Date</th>" & _
+                                "<th>Mat Date</th>" & _
+                                "</tr>" & _
+                                coreDetails & _
+                                "</table>"
+                    
+                    .Send ' Automatically send the email
                 End With
                 
                 ' Release Outlook objects
