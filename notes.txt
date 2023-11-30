@@ -1,1 +1,38 @@
+Sub FilterCounterpartyIDs()
+
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim rngCounterpartyID As Range
+    Dim counterpartyIDHeader As Range
+    Dim filterIDs As Variant
+    Dim cell As Range
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    
+    ' Find "Counterparty ID" column header
+    On Error Resume Next
+    Set counterpartyIDHeader = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    On Error GoTo 0
+    
+    ' Check if header is found
+    If Not counterpartyIDHeader Is Nothing Then
+        ' Set range for "Counterparty ID" column
+        Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
+        
+        ' Define array of Counterparty IDs to filter
+        filterIDs = Array("40291842", "40081912", "10406438", "40758392", "40081908", _
+                          "40081301", "40686068", "40773056", "42306117", "40158018", _
+                          "41870488", "42009673", "42039219", "42145858", "40165750")
+        
+        ' Apply AutoFilter to "Counterparty ID" column
+        rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
+        
+        ' Display a message (you can modify this part as needed)
+        MsgBox "Filtered for specified Counterparty IDs.", vbInformation
+    Else
+        MsgBox "Column header 'Counterparty ID' not found!", vbExclamation
+    End If
+
+End Sub
 
