@@ -1,1 +1,27 @@
 
+Subject: Request for Daily Report of FISS Codes
+
+Dear FISS/GLOSS and SOIT Teams,
+
+I trust this message finds you well.
+
+We are currently in the process of enhancing our reporting capabilities and would like to request a daily report of FISS codes. Specifically, we are interested in FISS codes with the following statuses:
+
+1. Active
+2. Pending
+3. In Progress
+4. On Hold
+
+This report is crucial for our ongoing initiatives, and having it on a daily basis will greatly support our workflow.
+
+Additionally, if there is an existing solution or process in place for generating this report, we would greatly appreciate any information or guidance you can provide. We want to ensure that we leverage any existing resources and solutions to streamline this request.
+
+Your prompt attention to this matter is highly appreciated. Please feel free to reach out if you need any further clarification or if there are additional details required from our end.
+
+Thank you for your cooperation.
+
+Best regards,
+
+[Your Name]
+[Your Position]
+[Your Contact Information]
