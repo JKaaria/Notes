@@ -1,74 +1,43 @@
-Sub GenerateResultsSheet()
-    Dim wsTrade As Worksheet
-    Dim wsLogic As Worksheet
-    Dim wsResults As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowResults As Long
-    Dim counterpartyIdCol As Integer
-    Dim accountLegalNameCol As Integer
-    Dim tradeIdCol As Integer
-    Dim quantityCol As Integer
-    Dim securityDescriptionCol As Integer
-    Dim settleDateCol As Integer
-    Dim settleLegalEntityCol As Integer
-    Dim logicCounterpartyIdCol As Integer
-    Dim logicSettleLegalEntityCol As Integer
-    Dim i As Long, j As Long
+Sub UpdateSettleLegalEntity()
+    Dim wsTradeData As Worksheet
+    Dim wsLogicTable As Worksheet
+    Dim logicTable As Range
+    Dim tradeDataColumn As Range
+    Dim cell As Range
     
-    ' Set worksheets
-    On Error Resume Next ' Ignore errors if sheet doesn't exist
-    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
-    On Error GoTo 0
+    ' Set references to worksheets
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsLogicTable = ThisWorkbook.Sheets("LogicTable")
     
-    ' Create ResultsSheet if not already created
-    If wsResults Is Nothing Then
-        Set wsResults = Sheets.Add(After:=Sheets(Sheets.Count))
-        wsResults.Name = "ResultsSheet"
+    ' Set reference to logic table range
+    Set logicTable = wsLogicTable.Range("A1:F1") ' Assuming the logic table is in the first row
+    
+    ' Find the column index for "Settle Legal Entity"
+    Set tradeDataColumn = wsTradeData.Rows(1).Find("Settle Legal Entity", LookIn:=xlValues, LookAt:=xlWhole)
+    
+    ' Check if the column exists
+    If Not tradeDataColumn Is Nothing Then
+        ' Loop through each cell in the "Settle Legal Entity" column starting from the second row
+        For Each cell In wsTradeData.Range(wsTradeData.Cells(2, tradeDataColumn.Column), wsTradeData.Cells(wsTradeData.Rows.Count, tradeDataColumn.Column).End(xlUp))
+            ' Check and update values based on logic table
+            Select Case cell.Value
+                Case "CAPITAL"
+                    cell.Value = "BCI"
+                Case "PLC-NY"
+                    cell.Value = "LNBR"
+                Case Else
+                    ' Check against logic table for additional replacements
+                    Dim logicCell As Range
+                    For Each logicCell In logicTable
+                        If cell.Value = logicCell.Value Then
+                            ' Replace with the value in the corresponding logic table cell
+                            cell.Value = logicCell.Offset(0, 1).Value
+                            Exit For
+                        End If
+                    Next logicCell
+            End Select
+        Next cell
+    Else
+        MsgBox "Column 'Settle Legal Entity' not found in TradeData sheet.", vbExclamation
     End If
-    
-    Set wsTrade = ThisWorkbook.Sheets("TradeData")
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable")
-    
-    ' Set column numbers based on headers in TradeData
-    counterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
-    accountLegalNameCol = WorksheetFunction.Match("Account Legal Name", wsTrade.Rows(1), 0)
-    tradeIdCol = WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)
-    quantityCol = WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)
-    securityDescriptionCol = WorksheetFunction.Match("Security Description", wsTrade.Rows(1), 0)
-    settleDateCol = WorksheetFunction.Match("Settle Date", wsTrade.Rows(1), 0)
-    settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
-    
-    ' Set column numbers based on headers in LogicTable
-    logicCounterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsLogic.Rows(1), 0)
-    logicSettleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsLogic.Rows(1), 0)
-    
-    ' Find the last row in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyIdCol).End(xlUp).Row
-    lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIdCol).End(xlUp).Row + 1
-    
-    ' Loop through each row in TradeData
-    For i = 2 To lastRowTrade
-        ' Check if Counterparty ID starts with "US912..."
-        If UCase(Left(wsTrade.Cells(i, counterpartyIdCol).Value, 6)) = "US912..." Then
-            ' Copy specified columns to ResultsSheet
-            wsTrade.Range(wsTrade.Cells(i, counterpartyIdCol), wsTrade.Cells(i, settleLegalEntityCol)).Copy _
-                Destination:=wsResults.Range("A" & lastRowResults)
-            lastRowResults = lastRowResults + 1
-        End If
-    Next i
-    
-    ' Loop through each row in ResultsSheet
-    For i = 2 To lastRowResults - 1
-        ' Loop through each row in LogicTable
-        For j = 2 To wsLogic.Cells(wsLogic.Rows.Count, logicCounterpartyIdCol).End(xlUp).Row
-            ' Check if Counterparty ID matches in LogicTable
-            If wsResults.Cells(i, 1).Value = wsLogic.Cells(j, logicCounterpartyIdCol).Value Then
-                ' Add corresponding value to ResultsSheet
-                wsResults.Cells(i, lastRowResults).Value = wsLogic.Cells(j, logicSettleLegalEntityCol).Value
-                Exit For ' Exit inner loop after matching
-            End If
-        Next j
-    Next i
-    
-    MsgBox "ResultsSheet generated successfully!", vbInformation
 End Sub
