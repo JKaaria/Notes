@@ -1,182 +1,74 @@
-Sub USTReconciliation()
-    ' Define variables
-    Dim wsTrade As Worksheet
-    Dim lastRowTrade As Long
-    Dim settleLegalEntityCol As Integer
-    Dim i As Long
-    
-    ' Set worksheet
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
-    
-    ' Set column number based on header
-    settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
-    
-    ' Find the last row
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, settleLegalEntityCol).End(xlUp).Row
-    
-    ' Loop through the "Settle Legal Entity" column
-    For i = 2 To lastRowTrade
-        Dim currentValue As String
-        currentValue = wsTrade.Cells(i, settleLegalEntityCol).Value
-        
-        ' Apply amendments
-        If InStr(1, currentValue, "CAPITAL", vbTextCompare) > 0 Then
-            ' Replace "CAPITAL" with "BCI"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "BCI"
-        ElseIf InStr(1, currentValue, "PLC-NY", vbTextCompare) > 0 Or InStr(2, currentValue, "INBR", vbTextCompare) > 0 Then
-            ' Replace "PLC-NY" or "INBR" with "INBR"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "INBR"
-        Else
-            ' If no match, replace with "PLC"
-            wsTrade.Cells(i, settleLegalEntityCol).Value = "PLC"
-        End If
-    Next i
-End Sub
-
-Sub Two()
-    ' Define variables
-    Dim wsTrade As Worksheet
-    Dim counterpartyIDCol As Range
-    
-    ' Set worksheet
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
-    
-    ' Find "Counterparty ID" header
-    Set counterpartyIDCol = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues, LookAt:=xlWhole)
-    
-    ' Check if "Counterparty ID" header exists
-    If Not counterpartyIDCol Is Nothing Then
-        ' Rename the header to "SDS"
-        counterpartyIDCol.Value = "SDS"
-    Else
-        MsgBox "Counterparty ID header not found!", vbExclamation
-    End If
-End Sub
-
-Sub Three()
-    ' Define variables
-    Dim wsTrade As Worksheet
-    Dim settleLegalEntityCol As Range
-    
-    ' Set worksheet
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
-    
-    ' Find "Settle Legal Entity" header
-    Set settleLegalEntityCol = wsTrade.Rows(1).Find("Settle Legal Entity", LookIn:=xlValues, LookAt:=xlWhole)
-    
-    ' Check if "Settle Legal Entity" header exists
-    If Not settleLegalEntityCol Is Nothing Then
-        ' Rename the header to "Entity"
-        settleLegalEntityCol.Value = "Entity"
-    Else
-        MsgBox "Settle Legal Entity header not found!", vbExclamation
-    End If
-End Sub
-
-Sub Four()
-    ' Define variables
+Sub GenerateResultsSheet()
     Dim wsTrade As Worksheet
     Dim wsLogic As Worksheet
-    Dim wsResult As Worksheet
+    Dim wsResults As Worksheet
     Dim lastRowTrade As Long
-    Dim lastRowLogic As Long
-    Dim tradeSDSCol As Integer
-    Dim logicSDSCol As Integer
-    Dim resultRow As Long
-    Dim i As Long
+    Dim lastRowResults As Long
+    Dim counterpartyIdCol As Integer
+    Dim accountLegalNameCol As Integer
+    Dim tradeIdCol As Integer
+    Dim quantityCol As Integer
+    Dim securityDescriptionCol As Integer
+    Dim settleDateCol As Integer
+    Dim settleLegalEntityCol As Integer
+    Dim logicCounterpartyIdCol As Integer
+    Dim logicSettleLegalEntityCol As Integer
+    Dim i As Long, j As Long
     
     ' Set worksheets
+    On Error Resume Next ' Ignore errors if sheet doesn't exist
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
+    
+    ' Create ResultsSheet if not already created
+    If wsResults Is Nothing Then
+        Set wsResults = Sheets.Add(After:=Sheets(Sheets.Count))
+        wsResults.Name = "ResultsSheet"
+    End If
+    
     Set wsTrade = ThisWorkbook.Sheets("TradeData")
     Set wsLogic = ThisWorkbook.Sheets("LogicTable")
     
-    ' Create or reference "ResultSheet" sheet
-    On Error Resume Next
-    Set wsResult = ThisWorkbook.Sheets("ResultSheet")
-    On Error GoTo 0
-    If wsResult Is Nothing Then
-        ' If "ResultSheet" doesn't exist, create it
-        Set wsResult = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsResult.Name = "ResultSheet"
-    End If
+    ' Set column numbers based on headers in TradeData
+    counterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
+    accountLegalNameCol = WorksheetFunction.Match("Account Legal Name", wsTrade.Rows(1), 0)
+    tradeIdCol = WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)
+    quantityCol = WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)
+    securityDescriptionCol = WorksheetFunction.Match("Security Description", wsTrade.Rows(1), 0)
+    settleDateCol = WorksheetFunction.Match("Settle Date", wsTrade.Rows(1), 0)
+    settleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsTrade.Rows(1), 0)
     
-    ' Set column numbers based on headers
-    tradeSDSCol = WorksheetFunction.Match("SDS", wsTrade.Rows(1), 0)
-    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
+    ' Set column numbers based on headers in LogicTable
+    logicCounterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsLogic.Rows(1), 0)
+    logicSettleLegalEntityCol = WorksheetFunction.Match("Settle Legal Entity", wsLogic.Rows(1), 0)
     
-    ' Find the last rows in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeSDSCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
+    ' Find the last row in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, counterpartyIdCol).End(xlUp).Row
+    lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIdCol).End(xlUp).Row + 1
     
-    ' Initialize row number for ResultSheet
-    resultRow = 1
-    
-    ' Loop through TradeData sheet
+    ' Loop through each row in TradeData
     For i = 2 To lastRowTrade
-        ' Search for SDS value in LogicTable
-        Dim foundCell As Range
-        Set foundCell = wsLogic.Columns(logicSDSCol).Find(wsTrade.Cells(i, tradeSDSCol).Value, LookIn:=xlValues, LookAt:=xlWhole)
-        
-        ' If a match is found, copy relevant information to ResultSheet
-        If Not foundCell Is Nothing Then
-            wsResult.Cells(resultRow, 1).Value = wsTrade.Cells(i, tradeSDSCol).Value ' SDS
-            wsResult.Cells(resultRow, 2).Value = wsTrade.Cells(1, WorksheetFunction.Match("Account Legal Name", wsTrade.Rows(1), 0)).Value ' Account Legal Name
-            wsResult.Cells(resultRow, 3).Value = wsTrade.Cells(1, WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)).Value ' Trade ID
-            wsResult.Cells(resultRow, 4).Value = wsTrade.Cells(1, WorksheetFunction.Match("Entity", wsTrade.Rows(1), 0)).Value ' Entity from TradeData
-            wsResult.Cells(resultRow, 5).Value = wsLogic.Cells(foundCell.Row, WorksheetFunction.Match("Entity", wsLogic.Rows(1), 0)).Value ' Entity from LogicTable
-            resultRow = resultRow + 1
-        End If
-    Next i
-End Sub
-
-Sub Five()
-    ' Define variables
-    Dim wsResult As Worksheet
-    Dim lastRowResult As Long
-    Dim outlookApp As Object
-    Dim outlookMail As Object
-    Dim emailBody As String
-    Dim i As Long
-    
-    ' Set worksheet
-    Set wsResult = ThisWorkbook.Sheets("ResultSheet") ' Replace "ResultSheet" with the actual name of your sheet
-    
-    ' Find the last row in ResultSheet
-    lastRowResult = wsResult.Cells(wsResult.Rows.Count, 1).End(xlUp).Row
-    
-    ' Initialize email body
-    emailBody = "Mismatching Entities Details:" & vbCrLf
-    
-    ' Loop through the rows in ResultSheet to check for matching entities
-    For i = 2 To lastRowResult
-        If wsResult.Cells(i, 4).Value <> wsResult.Cells(i, 5).Value Then
-            ' Add details of mismatching row to email body
-            emailBody = emailBody & "Row " & i & ": Entities do not match." & vbCrLf & _
-                         "SDS: " & wsResult.Cells(i, 1).Value & vbCrLf & _
-                         "Account Legal Name: " & wsResult.Cells(i, 2).Value & vbCrLf & _
-                         "Trade ID: " & wsResult.Cells(i, 3).Value & vbCrLf & _
-                         "Trade Data Entity: " & wsResult.Cells(i, 4).Value & vbCrLf & _
-                         "Logic Table Entity: " & wsResult.Cells(i, 5).Value & vbCrLf & vbCrLf
+        ' Check if Counterparty ID starts with "US912..."
+        If UCase(Left(wsTrade.Cells(i, counterpartyIdCol).Value, 6)) = "US912..." Then
+            ' Copy specified columns to ResultsSheet
+            wsTrade.Range(wsTrade.Cells(i, counterpartyIdCol), wsTrade.Cells(i, settleLegalEntityCol)).Copy _
+                Destination:=wsResults.Range("A" & lastRowResults)
+            lastRowResults = lastRowResults + 1
         End If
     Next i
     
-    ' Create Outlook Application
-    Set outlookApp = CreateObject("Outlook.Application")
+    ' Loop through each row in ResultsSheet
+    For i = 2 To lastRowResults - 1
+        ' Loop through each row in LogicTable
+        For j = 2 To wsLogic.Cells(wsLogic.Rows.Count, logicCounterpartyIdCol).End(xlUp).Row
+            ' Check if Counterparty ID matches in LogicTable
+            If wsResults.Cells(i, 1).Value = wsLogic.Cells(j, logicCounterpartyIdCol).Value Then
+                ' Add corresponding value to ResultsSheet
+                wsResults.Cells(i, lastRowResults).Value = wsLogic.Cells(j, logicSettleLegalEntityCol).Value
+                Exit For ' Exit inner loop after matching
+            End If
+        Next j
+    Next i
     
-    ' Create a new mail item
-    Set outlookMail = outlookApp.CreateItem(0)
-    
-    ' Customize email properties
-    With outlookMail
-        .Subject = "Mismatching Entities Detected"
-        .Body = emailBody & vbCrLf & "Please review and take necessary actions." & vbCrLf & vbCrLf & "Best regards," & vbCrLf & "Your Name"
-        ' Add recipients' email addresses
-        .Recipients.Add "jeremy.kaaria@barclays.com"
-        ' Send the email
-        .Send
-    End With
-    
-    ' Release Outlook objects
-    Set outlookMail = Nothing
-    Set outlookApp = Nothing
+    MsgBox "ResultsSheet generated successfully!", vbInformation
 End Sub
-
