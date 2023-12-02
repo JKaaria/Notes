@@ -1,60 +1,58 @@
-Sub Five()
+Sub Six()
     ' Define variables
-    Dim wsTrade As Worksheet
-    Dim wsLogic As Worksheet
-    Dim wsResult As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowLogic As Long
-    Dim tradeSDSCol As Integer
-    Dim logicSDSCol As Integer
-    Dim resultRow As Long
-    Dim i As Long
+    Dim wResult As Worksheet
+    Dim lastRowResult As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
 
-    ' Set worksheets
-    Set wsTrade = ThisWorkbook.Sheets("TradeData")
-    Set wsLogic = ThisWorkbook.Sheets("LogicTable")
+    ' Set worksheet
+    Set wResult = ThisWorkbook.Sheets("ResultSheet") ' Replace "ResultSheet" with the actual name of your sheet
 
-    ' Create or reference "ResultSheet"
-    On Error Resume Next
-    Set wsResult = ThisWorkbook.Sheets("ResultSheet")
-    On Error GoTo 0
-    If wsResult Is Nothing Then
-        ' If "ResultSheet" sheet doesn't exist, create it
-        Set wsResult = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-        wsResult.Name = "ResultSheet"
-    End If
+    ' Find the last row in ResultSheet
+    lastRowResult = wResult.Cells(wResult.Rows.Count, 1).End(xlUp).Row
 
-    ' Set column numbers based on headers
-    tradeSDSCol = WorksheetFunction.Match("SDS", wsTrade.Rows(1), 0)
-    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
+    ' Initialize email body
+    emailBody = "Mismatching Entities Details:" & vbCrLf & vbCrLf
 
-    ' Find the last rows in each sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeSDSCol).End(xlUp).Row
-    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
-
-    ' Initialize row number for ResultSheet
-    resultRow = 1
-
-    ' Loop through TradeData sheet
-    For i = 2 To lastRowTrade
-        ' Search for SDS value in LogicTable
-        Dim foundCell As Range
-        Set foundCell = wsLogic.Columns(logicSDSCol).Find(wsTrade.Cells(i, tradeSDSCol).Value, LookIn:=xlValues, LookAt:=xlWhole)
-
-        ' If a match is found, copy relevant information to ResultSheet
-        If Not foundCell Is Nothing Then
-            wsResult.Cells(resultRow, 1).Value = wsTrade.Cells(i, tradeSDSCol).Value ' SDS
-            wsResult.Cells(resultRow, 2).Value = wsTrade.Cells(i, WorksheetFunction.Match("Account Legal Name", wsTrade.Rows(1), 0)).Value ' Account Legal Name
-            wsResult.Cells(resultRow, 3).Value = wsTrade.Cells(i, WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)).Value ' Trade ID
-            wsResult.Cells(resultRow, 4).Value = wsTrade.Cells(i, WorksheetFunction.Match("Entity", wsTrade.Rows(1), 0)).Value ' Entity from TradeData
-            wsResult.Cells(resultRow, 5).Value = wsLogic.Cells(foundCell.Row, WorksheetFunction.Match("Entity", wsLogic.Rows(1), 0)).Value ' Entity from logicTable
-
-            ' Add more columns here
-            wsResult.Cells(resultRow, 6).Value = wsTrade.Cells(i, WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)).Value ' Quantity
-            wsResult.Cells(resultRow, 7).Value = wsTrade.Cells(i, WorksheetFunction.Match("Security Description", wsTrade.Rows(1), 0)).Value ' Security Description
-            wsResult.Cells(resultRow, 8).Value = wsTrade.Cells(i, WorksheetFunction.Match("Settle Date", wsTrade.Rows(1), 0)).Value ' Settle Date
-
-            resultRow = resultRow + 1
+    ' Loop through the rows in ResultSheet to check for matching entities
+    For i = 2 To lastRowResult
+        If wResult.Cells(i, 4).Value > wResult.Cells(i, 5).Value Then
+            ' Add details of mismatching row to email body
+            emailBody = emailBody & "Row " & i & ": Entities do not match." & vbCrLf & _
+                         "SDS: " & wResult.Cells(i, 1).Value & vbCrLf & _
+                         "Account Legal Name: " & wResult.Cells(i, 2).Value & vbCrLf & _
+                         "Trade ID: " & wResult.Cells(i, 3).Value & vbCrLf & _
+                         "Trade Data Entity: " & wResult.Cells(i, 4).Value & vbCrLf & _
+                         "Logic Table Entity: " & wResult.Cells(i, 5).Value & vbCrLf & _
+                         "Quantity: " & wResult.Cells(i, 6).Value & vbCrLf & _
+                         "Security Description: " & wResult.Cells(i, 7).Value & vbCrLf & _
+                         "Settle Date: " & wResult.Cells(i, 8).Value & vbCrLf & vbCrLf
         End If
     Next i
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Customize email properties
+    With outlookMail
+        .Subject = "T+0 UST Entity Matches - Regulatory/Financial Impact"
+        .Body = emailBody & vbCrLf & "Please wash today as per Logic Table Entity Stated." & vbCrLf & _
+                "Kind Regards," & vbCrLf & _
+                "Jeremy Kaaria"
+        
+        ' Add recipients' email addresses
+        .Recipients.Add "jeremy.kaaria@barclays.com"
+        .Recipients.Add "jeremy.kaaria@barclays.com"
+
+        ' Send the email
+        .Send
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
 End Sub
