@@ -1,9 +1,13 @@
 Sub ReconcileEntities()
+    On Error Resume Next ' Enable error handling
+    
     Dim tradeDataSheet As Worksheet
     Dim logicTableSheet As Worksheet
     Dim tradeDataRange As Range
     Dim logicTableRange As Range
     Dim counterpartyIDs As Variant
+    Dim tradeDataRow As Range
+    Dim entityMatch As Range
     
     ' Set references to sheets
     Set tradeDataSheet = ThisWorkbook.Sheets("TradeData")
@@ -22,20 +26,25 @@ Sub ReconcileEntities()
     
     ' Loop through each row in TradeData
     For Each tradeDataRow In tradeDataRange.Rows
-        ' Check conditions based on ISIN and Counterparty ID
-        If Left(tradeDataRow.Cells(1, "ISIN").Value, 5) = "US912" And _
+        ' Check if ISIN is not empty and Counterparty ID is in the array
+        If Not IsEmpty(tradeDataRow.Cells(1, "ISIN").Value) And _
            IsInArray(tradeDataRow.Cells(1, "Counterparty ID").Value, counterpartyIDs) Then
            
-            ' Find the corresponding row in LogicTable based on Entity
-            Set entityMatch = logicTableRange.Columns("Entity").Find(tradeDataRow.Cells(1, "Settle Legal Entity").Value)
-            
-            ' If a match is found, you can perform further actions as needed
-            If Not entityMatch Is Nothing Then
-                ' Your reconciliation logic here
-                ' For example, you might want to update a status or perform some calculations
+            ' Check if Settle Legal Entity is not empty
+            If Not IsEmpty(tradeDataRow.Cells(1, "Settle Legal Entity").Value) Then
+                ' Find the corresponding row in LogicTable based on Entity
+                Set entityMatch = logicTableRange.Columns("Entity").Find(tradeDataRow.Cells(1, "Settle Legal Entity").Value)
+                
+                ' If a match is found, you can perform further actions as needed
+                If Not entityMatch Is Nothing Then
+                    ' Your reconciliation logic here
+                    ' For example, you might want to update a status or perform some calculations
+                End If
             End If
         End If
     Next tradeDataRow
+    
+    On Error GoTo 0 ' Disable error handling
 End Sub
 
 Function IsInArray(value As Variant, arr As Variant) As Boolean
