@@ -1,1 +1,65 @@
-
+Sub FilterAndCopyToResultsSheet()
+    Dim wsTrade As Worksheet
+    Dim wsResults As Worksheet
+    Dim lastRowTrade As Long
+    Dim lastRowResults As Long
+    Dim isinCol As Integer
+    Dim counterpartyIdCol As Integer
+    Dim copyColumns As String
+    Dim counterpartyValues As Variant
+    Dim i As Long, j As Long
+    
+    ' Set worksheets
+    On Error Resume Next ' Ignore errors if sheet doesn't exist
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
+    
+    ' Create ResultsSheet or clear existing data
+    If wsResults Is Nothing Then
+        Set wsResults = Sheets.Add(After:=Sheets(Sheets.Count))
+        wsResults.Name = "ResultsSheet"
+    Else
+        wsResults.Cells.Clear
+    End If
+    
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    
+    ' Set column numbers based on headers
+    isinCol = WorksheetFunction.Match("ISIN", wsTrade.Rows(1), 0)
+    counterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
+    
+    ' Find the last row in the "TradeData" sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, isinCol).End(xlUp).Row
+    
+    ' Set columns to copy
+    copyColumns = "Status,Counterparty,Settle Legal Entity,Trade ID,Quantity,BARC Direction,Security Description,Clean Price,Settle Date"
+    
+    ' Split Counterparty values into an array
+    counterpartyValues = Split("41154150,43002923,10101678,10400868,10105032,40201510,10351848,40114353,10300694,10156783,10107349,10300737,40013551,10401036,40644161,40009160,10400910,42169389,10301042,10300558,10400695,40067364,40067356,42734506,10401031,40050448", ",")
+    
+    ' Initialize the row index for ResultsSheet
+    lastRowResults = 2
+    
+    ' Loop through each row in "TradeData"
+    For i = 2 To lastRowTrade
+        ' Filter by ISIN starting with "US912..."
+        If UCase(Left(wsTrade.Cells(i, isinCol).Value, 6)) = "US912..." Then
+            ' Loop through Counterparty values
+            For j = LBound(counterpartyValues) To UBound(counterpartyValues)
+                ' Check if Counterparty ID matches
+                If wsTrade.Cells(i, counterpartyIdCol).Value = counterpartyValues(j) Then
+                    ' Copy specified columns to ResultsSheet
+                    wsTrade.Range(wsTrade.Cells(i, 1), wsTrade.Cells(i, wsTrade.Columns.Count)).Copy _
+                        Destination:=wsResults.Range("A" & lastRowResults)
+                    lastRowResults = lastRowResults + 1
+                    Exit For ' Exit loop after matching Counterparty ID
+                End If
+            Next j
+        End If
+    Next i
+    
+    ' AutoFit columns for better visibility
+    wsResults.Columns.AutoFit
+    
+    MsgBox "Filtering and copying to ResultsSheet complete!", vbInformation
+End Sub
