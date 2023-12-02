@@ -1,12 +1,12 @@
-Sub VLOOKUPAndFilter()
+Sub MatchAndCopyToCSColumn()
     Dim wsTrade As Worksheet
     Dim wsLogicTable As Worksheet
     Dim lastRowTrade As Long
     Dim lastRowLogicTable As Long
     Dim counterpartyIDHeader As Range
     Dim rngCounterpartyID As Range
-    Dim vlookupResult As Variant
-    Dim vlookupFormula As String
+    Dim rngLogicTable As Range
+    Dim logicTableDict As Object
     Dim i As Long
 
     ' Set worksheets
@@ -23,37 +23,29 @@ Sub VLOOKUPAndFilter()
         ' Set range for "Counterparty ID" column in "TradeData" sheet
         Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
 
-        ' Insert a column to the left of "Counterparty ID" in "TradeData" sheet
-        rngCounterpartyID.EntireColumn.Insert
-
         ' Find the last row in "TradeData" sheet
-        lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, rngCounterpartyID.Column + 1).End(xlUp).Row
+        lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, rngCounterpartyID.Column).End(xlUp).Row
 
-        ' Find the last row in "LogicTable" sheet
-        lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
+        ' Set range for "LogicTable" data
+        Set rngLogicTable = wsLogicTable.Range("A:D")
+
+        ' Create a dictionary to store LogicTable values for faster lookup
+        Set logicTableDict = CreateObject("Scripting.Dictionary")
+        For i = 2 To rngLogicTable.Rows.Count
+            logicTableDict(rngLogicTable.Cells(i, 1).Value) = rngLogicTable.Cells(i, 4).Value
+        Next i
 
         ' Loop through each row in "TradeData" sheet
         For i = 2 To lastRowTrade
-            ' Create VLOOKUP formula for the current row
-            vlookupFormula = "=VLOOKUP(" & rngCounterpartyID.Cells(i, 2).Address & "," & _
-                             wsLogicTable.Range("A:D").Address & ",4,FALSE)"
-
-            ' Perform VLOOKUP for the current row
-            vlookupResult = Application.Evaluate(vlookupFormula)
-
-            ' Insert the VLOOKUP result in the newly inserted column
-            rngCounterpartyID.Cells(i, 1).Value = IIf(IsError(vlookupResult), "", vlookupResult)
+            ' Check if Counterparty ID exists in LogicTable
+            If logicTableDict.Exists(rngCounterpartyID.Cells(i, 1).Value) Then
+                ' Copy corresponding value from LogicTable to TradeData
+                wsTrade.Cells(i, "CS").Value = logicTableDict(rngCounterpartyID.Cells(i, 1).Value)
+            End If
         Next i
 
-        ' Set range for VLOOKUP results
-        Dim rngVLookupResults As Range
-        Set rngVLookupResults = rngCounterpartyID.Offset(, -1).Resize(lastRowTrade, 1)
-
-        ' Apply AutoFilter to "VLOOKUP Results" column
-        rngVLookupResults.AutoFilter Field:=1, Criteria1:="<>" & vbNullString
-
         ' Display a message (you can modify this part as needed)
-        MsgBox "VLOOKUP results filtered in 'TradeData' sheet.", vbInformation
+        MsgBox "Values copied to column CS in 'TradeData' sheet.", vbInformation
     Else
         MsgBox "Column header 'Counterparty ID' not found in 'TradeData' sheet!", vbExclamation
     End If
