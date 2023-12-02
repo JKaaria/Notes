@@ -1,27 +1,27 @@
-Sub FilterUS_Treasury()
+Sub FilterISIN_US912()
     Dim wsTrade As Worksheet
-    Dim issuerAbbrevHeader As Range
-    Dim rngIssuerAbbrev As Range
+    Dim isinHeader As Range
+    Dim rngISIN As Range
 
     ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
 
-    ' Find "Issuer Abbrev" column header
+    ' Find "ISIN" column header
     On Error Resume Next
-    Set issuerAbbrevHeader = wsTrade.Rows(1).Find("Issuer Abbrev", LookIn:=xlValues)
+    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
     On Error GoTo 0
 
     ' Check if header is found
-    If Not issuerAbbrevHeader Is Nothing Then
-        ' Set range for "Issuer Abbrev" column
-        Set rngIssuerAbbrev = wsTrade.Columns(issuerAbbrevHeader.Column)
+    If Not isinHeader Is Nothing Then
+        ' Set range for "ISIN" column
+        Set rngISIN = wsTrade.Columns(isinHeader.Column)
 
-        ' Apply AutoFilter to "Issuer Abbrev" column for records containing "US Treasury"
-        rngIssuerAbbrev.AutoFilter Field:=1, Criteria1:="=*US Treasury*"
+        ' Apply AutoFilter to "ISIN" column
+        rngISIN.AutoFilter Field:=1, Criteria1:="US912*"
 
         ' Display a message (you can modify this part as needed)
-        MsgBox "Issuer Abbrev column filtered for records containing 'US Treasury'.", vbInformation
+        MsgBox "ISIN column filtered for values beginning with 'US912...'.", vbInformation
     Else
-        MsgBox "Column header 'Issuer Abbrev' not found!", vbExclamation
+        MsgBox "Column header 'ISIN' not found!", vbExclamation
     End If
 End Sub
