@@ -1,1 +1,45 @@
+' Define variables
+Dim wTradeData As Worksheet
+Dim lastRowTradeData As Long
+Dim outlookApp As Object
+Dim outlookMail As Object
+Dim emailBody As String
 
+' Set worksheet
+Set wTradeData = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your sheet
+
+' Find the last row in TradeData
+lastRowTradeData = wTradeData.Cells(wTradeData.Rows.Count, 1).End(xlUp).Row
+
+' Initialize email body
+emailBody = "Details of Every Row:" & vbCrLf
+
+' Loop through the rows in TradeData
+For i = 2 To lastRowTradeData
+    ' Add details of each row to email body
+    emailBody = emailBody & "Row " & i & ":" & vbCrLf & _
+                 "SDS: " & wTradeData.Cells(i, 1).Value & vbCrLf & _
+                 "Account Legal Name: " & wTradeData.Cells(i, 2).Value & vbCrLf & _
+                 "Trade ID: " & wTradeData.Cells(i, 3).Value & vbCrLf & _
+                 "Quantity: " & wTradeData.Cells(i, 6).Value & vbCrLf & _
+                 "Security Description: " & wTradeData.Cells(i, 7).Value & vbCrLf & _
+                 "Settle Date: " & wTradeData.Cells(i, 8).Value & vbCrLf & vbCrLf
+Next i
+
+' Create Outlook Application
+Set outlookApp = CreateObject("Outlook.Application")
+
+' Create a new mail item
+Set outlookMail = outlookApp.CreateItem(0)
+
+' Customize email properties
+With outlookMail
+    .Subject = "Trade Data Details"
+    .Body = emailBody & vbCrLf & "Kind Regards," & vbCrLf & "Your Name" ' Replace "Your Name" with the appropriate name
+    .Recipients.Add "recipient@example.com" ' Replace with the actual recipient's email address
+    .Send
+End With
+
+' Release Outlook objects
+Set outlookMail = Nothing
+Set outlookApp = Nothing
