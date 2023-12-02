@@ -5,8 +5,9 @@ Sub VLOOKUPAndFilter()
     Dim lastRowLogicTable As Long
     Dim counterpartyIDHeader As Range
     Dim rngCounterpartyID As Range
-    Dim rngVLookupResults As Range
+    Dim vlookupResult As Variant
     Dim vlookupFormula As String
+    Dim i As Long
 
     ' Set worksheets
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
@@ -31,18 +32,21 @@ Sub VLOOKUPAndFilter()
         ' Find the last row in "LogicTable" sheet
         lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
 
-        ' Create VLOOKUP formula
-        vlookupFormula = "=VLOOKUP(" & rngCounterpartyID.Cells(2, 1).Address & "," & _
-                         wsLogicTable.Range("A:D").Address & ",4,FALSE)"
+        ' Loop through each row in "TradeData" sheet
+        For i = 2 To lastRowTrade
+            ' Create VLOOKUP formula for the current row
+            vlookupFormula = "=VLOOKUP(" & rngCounterpartyID.Cells(i, 1).Address & "," & _
+                             wsLogicTable.Range("A:D").Address & ",4,FALSE)"
 
-        ' Apply VLOOKUP formula to the newly inserted column in "TradeData" sheet
-        rngCounterpartyID.Offset(, 1).Resize(lastRowTrade, 1).Formula = vlookupFormula
+            ' Perform VLOOKUP for the current row
+            vlookupResult = Application.Evaluate(vlookupFormula)
 
-        ' Convert formulas to values
-        rngCounterpartyID.Offset(, 1).Resize(lastRowTrade, 1).Value = _
-            rngCounterpartyID.Offset(, 1).Resize(lastRowTrade, 1).Value
+            ' Insert the VLOOKUP result in the newly inserted column
+            rngCounterpartyID.Cells(i, 2).Value = IIf(IsError(vlookupResult), "", vlookupResult)
+        Next i
 
         ' Set range for VLOOKUP results
+        Dim rngVLookupResults As Range
         Set rngVLookupResults = rngCounterpartyID.Offset(, 1).Resize(lastRowTrade, 1)
 
         ' Apply AutoFilter to "VLOOKUP Results" column
