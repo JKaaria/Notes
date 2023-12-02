@@ -14,15 +14,15 @@ Sub FilterAndDelete()
     Set filterRange = ws.Range("AW1:AW" & lastRow)
     
     ' Apply the filter for entries beginning with "US912"
-    filterRange.AutoFilter Field:=1, Criteria1:="=US912*", Operator:=xlFilterValues
+    filterRange.AutoFilter Field:=1, Criteria1:="<>US912*", Operator:=xlFilterValues
     
-    ' Loop through each cell in the filtered range
-    For Each cell In filterRange.SpecialCells(xlCellTypeVisible)
-        ' If the cell doesn't start with "US912," delete the entire row
-        If Not cell.Value Like "US912*" Then
-            cell.EntireRow.Delete
+    ' Loop through each visible cell in the filtered range in reverse order
+    For i = lastRow To 2 Step -1
+        If ws.Rows(i).EntireRow.Hidden Then
+            ' If the row is hidden (doesn't start with "US912"), delete the entire row
+            ws.Rows(i).EntireRow.Delete
         End If
-    Next cell
+    Next i
     
     ' Turn off the AutoFilter
     ws.AutoFilterMode = False
