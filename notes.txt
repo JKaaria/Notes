@@ -3,8 +3,8 @@ Sub FilterAndCopyToResultsSheet()
     Dim wsResults As Worksheet
     Dim lastRowTrade As Long
     Dim lastRowResults As Long
-    Dim isinCol As Integer
-    Dim counterpartyIdCol As Integer
+    Dim isinCol As Variant
+    Dim counterpartyIdCol As Variant
     Dim copyColumns As String
     Dim counterpartyValues As Variant
     Dim i As Long, j As Long
@@ -24,9 +24,15 @@ Sub FilterAndCopyToResultsSheet()
     
     Set wsTrade = ThisWorkbook.Sheets("TradeData")
     
-    ' Set column numbers based on headers
-    isinCol = WorksheetFunction.Match("ISIN", wsTrade.Rows(1), 0)
-    counterpartyIdCol = WorksheetFunction.Match("Counterparty ID", wsTrade.Rows(1), 0)
+    ' Find column numbers based on headers
+    isinCol = GetColumnNumber(wsTrade, "ISIN")
+    counterpartyIdCol = GetColumnNumber(wsTrade, "Counterparty ID")
+    
+    ' Check if column headers were found
+    If IsError(isinCol) Or IsError(counterpartyIdCol) Then
+        MsgBox "Column headers not found. Please check the sheet.", vbExclamation
+        Exit Sub
+    End If
     
     ' Find the last row in the "TradeData" sheet
     lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, isinCol).End(xlUp).Row
@@ -63,3 +69,15 @@ Sub FilterAndCopyToResultsSheet()
     
     MsgBox "Filtering and copying to ResultsSheet complete!", vbInformation
 End Sub
+
+Function GetColumnNumber(ws As Worksheet, header As String) As Variant
+    Dim headerRange As Range
+    On Error Resume Next
+    Set headerRange = ws.Rows(1).Find(header, LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+    If headerRange Is Nothing Then
+        GetColumnNumber = CVErr(xlErrNA)
+    Else
+        GetColumnNumber = headerRange.Column
+    End If
+End Function
