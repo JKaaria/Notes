@@ -1,49 +1,27 @@
-Sub CopyFilteredResultsToResultsSheet()
+Sub FilterISIN_US912()
     Dim wsTrade As Worksheet
-    Dim wsResults As Worksheet
-    Dim visibleRange As Range
-    Dim copyColumns As String
-    Dim lastRowResults As Long
+    Dim isinHeader As Range
+    Dim rngISIN As Range
 
-    ' Set worksheets
+    ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
 
-    ' Check if AutoFilter is applied
-    If wsTrade.AutoFilterMode Then
-        ' Set visible range after filtering
-        On Error Resume Next
-        Set visibleRange = wsTrade.AutoFilter.Range.Offset(1, 0).Resize(wsTrade.AutoFilter.Range.Rows.Count - 1).SpecialCells(xlCellTypeVisible)
-        On Error GoTo 0
-    End If
+    ' Find "ISIN" column header
+    On Error Resume Next
+    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
+    On Error GoTo 0
 
-    ' Check if visibleRange is set
-    If Not visibleRange Is Nothing Then
-        ' Check if "ResultsSheet" exists, if not create it
-        On Error Resume Next
-        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
-        On Error GoTo 0
-        If wsResults Is Nothing Then
-            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-            wsResults.Name = "ResultsSheet"
-        Else
-            ' Clear existing data in ResultsSheet
-            wsResults.Cells.Clear
-        End If
+    ' Check if header is found
+    If Not isinHeader Is Nothing Then
+        ' Set range for "ISIN" column
+        Set rngISIN = wsTrade.Columns(isinHeader.Column)
 
-        ' Set columns to copy
-        copyColumns = "Counterparty,Settle Legal Entity,Trade ID,Quantity,BARC Direction,Security Description,Dirty Price,Settle Date,Counterparty ID"
-
-        ' Copy visible columns to ResultsSheet
-        wsTrade.Rows(1).EntireRow.Copy Destination:=wsResults.Rows(1)
-        visibleRange.Columns(Application.Transpose(Split(copyColumns, ","))).Copy Destination:=wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Offset(1, 0)
-
-        ' AutoFit columns for better visibility
-        wsResults.Columns.AutoFit
+        ' Apply AutoFilter to "ISIN" column with specific text criteria
+        rngISIN.AutoFilter Field:=1, Criteria1:="=US912*"
 
         ' Display a message (you can modify this part as needed)
-        MsgBox "Filtered values copied to 'ResultsSheet'.", vbInformation
+        MsgBox "ISIN column filtered for values beginning with 'US912...'.", vbInformation
     Else
-        MsgBox "No filtered values to copy.", vbExclamation
+        MsgBox "Column header 'ISIN' not found!", vbExclamation
     End If
 End Sub
-
