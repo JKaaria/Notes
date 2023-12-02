@@ -1,1 +1,49 @@
+Sub CopyFilteredResultsToResultsSheet()
+    Dim wsTrade As Worksheet
+    Dim wsResults As Worksheet
+    Dim visibleRange As Range
+    Dim copyColumns As String
+    Dim lastRowResults As Long
+
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+
+    ' Check if AutoFilter is applied
+    If wsTrade.AutoFilterMode Then
+        ' Set visible range after filtering
+        On Error Resume Next
+        Set visibleRange = wsTrade.AutoFilter.Range.Offset(1, 0).Resize(wsTrade.AutoFilter.Range.Rows.Count - 1).SpecialCells(xlCellTypeVisible)
+        On Error GoTo 0
+    End If
+
+    ' Check if visibleRange is set
+    If Not visibleRange Is Nothing Then
+        ' Check if "ResultsSheet" exists, if not create it
+        On Error Resume Next
+        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+        On Error GoTo 0
+        If wsResults Is Nothing Then
+            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+            wsResults.Name = "ResultsSheet"
+        Else
+            ' Clear existing data in ResultsSheet
+            wsResults.Cells.Clear
+        End If
+
+        ' Set columns to copy
+        copyColumns = "Counterparty,Settle Legal Entity,Trade ID,Quantity,BARC Direction,Security Description,Dirty Price,Settle Date,Counterparty ID"
+
+        ' Copy visible columns to ResultsSheet
+        wsTrade.Rows(1).EntireRow.Copy Destination:=wsResults.Rows(1)
+        visibleRange.Columns(Application.Transpose(Split(copyColumns, ","))).Copy Destination:=wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Offset(1, 0)
+
+        ' AutoFit columns for better visibility
+        wsResults.Columns.AutoFit
+
+        ' Display a message (you can modify this part as needed)
+        MsgBox "Filtered values copied to 'ResultsSheet'.", vbInformation
+    Else
+        MsgBox "No filtered values to copy.", vbExclamation
+    End If
+End Sub
 
