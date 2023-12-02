@@ -1,50 +1,29 @@
-Sub FilterAndCopyData()
-    Dim wsTradeData As Worksheet
-    Dim wsResults As Worksheet
+Sub FilterAndDelete()
+    Dim ws As Worksheet
     Dim lastRow As Long
-    Dim i As Long
-    Dim tradeId As String
-    Dim criteriaArray As Variant
-
-    ' Set the worksheets
-    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
-    Set wsResults = ThisWorkbook.Sheets.Add
-    wsResults.Name = "ResultsSheet"
-
-    ' Set the criteria array for column D
-    criteriaArray = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
-                          "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
-                          "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
-                          "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
-                          "10401031", "40050448")
-
-    ' Filter and copy based on column AW
-    lastRow = wsTradeData.Cells(wsTradeData.Rows.Count, "AW").End(xlUp).Row
-
-    For i = lastRow To 2 Step -1
-        If Not Left(wsTradeData.Cells(i, "AW").Value, 5) = "US912" Then
-            wsTradeData.Rows(i).Delete
+    Dim filterRange As Range
+    Dim cell As Range
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your actual sheet name
+    
+    ' Find the last row in column AW
+    lastRow = ws.Cells(ws.Rows.Count, "AW").End(xlUp).Row
+    
+    ' Set the filter range
+    Set filterRange = ws.Range("AW1:AW" & lastRow)
+    
+    ' Apply the filter for entries beginning with "US912"
+    filterRange.AutoFilter Field:=1, Criteria1:="=US912*", Operator:=xlFilterValues
+    
+    ' Loop through each cell in the filtered range
+    For Each cell In filterRange.SpecialCells(xlCellTypeVisible)
+        ' If the cell doesn't start with "US912," delete the entire row
+        If Not cell.Value Like "US912*" Then
+            cell.EntireRow.Delete
         End If
-    Next i
-
-    ' Copy rows based on column D criteria to ResultsSheet
-    lastRow = wsTradeData.Cells(wsTradeData.Rows.Count, "D").End(xlUp).Row
-
-    For i = 2 To lastRow
-        tradeId = wsTradeData.Cells(i, "D").Value
-        If IsInArray(tradeId, criteriaArray) Then
-            wsTradeData.Rows(i).Copy Destination:=wsResults.Rows(wsResults.Cells(wsResults.Rows.Count, "A").End(xlUp).Row + 1)
-        End If
-    Next i
+    Next cell
+    
+    ' Turn off the AutoFilter
+    ws.AutoFilterMode = False
 End Sub
-
-Function IsInArray(value As String, arr As Variant) As Boolean
-    Dim element As Variant
-    For Each element In arr
-        If value = element Then
-            IsInArray = True
-            Exit Function
-        End If
-    Next element
-    IsInArray = False
-End Function
