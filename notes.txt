@@ -1,1 +1,37 @@
 
+Sub FilterAndDeleteColumnG()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim filterColumn As Range
+    Dim cell As Range
+    Dim namesToKeep As Variant
+    Dim name As Variant
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your actual sheet name
+    
+    ' Find the last row in column G
+    lastRow = ws.Cells(ws.Rows.Count, "G").End(xlUp).Row
+    
+    ' Set the filter range for column G
+    Set filterColumn = ws.Range("G1:G" & lastRow)
+    
+    ' Names to keep
+    namesToKeep = Array("Bru, Jerome", "Cochrane, Noel", "Kadiri, Zainab", "Kitano, Maho", "Patel, Shivani", "Poopalarajah, Punitha", "Taswala, Manthan")
+    
+    ' Apply the filter for specified names
+    filterColumn.AutoFilter Field:=1, Criteria1:=namesToKeep, Operator:=xlFilterValues
+    
+    ' Loop through each cell in column G in reverse order
+    For i = lastRow To 2 Step -1
+        Set cell = filterColumn.Cells(i, 1)
+        
+        ' If the cell does not match any of the specified names, delete the entire row
+        If IsError(Application.Match(cell.Value, namesToKeep, 0)) Then
+            cell.EntireRow.Delete
+        End If
+    Next i
+    
+    ' Turn off the AutoFilter
+    ws.AutoFilterMode = False
+End Sub
