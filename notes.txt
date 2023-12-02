@@ -1,7 +1,7 @@
 Sub FilterAndDelete()
     Dim ws As Worksheet
     Dim lastRow As Long
-    Dim filterRange As Range
+    Dim filterColumn As Range
     Dim cell As Range
     
     ' Set the worksheet
@@ -10,20 +10,15 @@ Sub FilterAndDelete()
     ' Find the last row in column AW
     lastRow = ws.Cells(ws.Rows.Count, "AW").End(xlUp).Row
     
-    ' Set the filter range
-    Set filterRange = ws.Range("AW1:AW" & lastRow)
+    ' Set the filter range for column AW
+    Set filterColumn = ws.Range("AW1:AW" & lastRow)
     
-    ' Apply the filter for entries beginning with "US912"
-    filterRange.AutoFilter Field:=1, Criteria1:="<>US912*", Operator:=xlFilterValues
-    
-    ' Loop through each visible cell in the filtered range in reverse order
+    ' Loop through each cell in column AW in reverse order
     For i = lastRow To 2 Step -1
-        If ws.Rows(i).EntireRow.Hidden Then
-            ' If the row is hidden (doesn't start with "US912"), delete the entire row
-            ws.Rows(i).EntireRow.Delete
+        Set cell = filterColumn.Cells(i, 1)
+        ' If the cell doesn't start with "US912," delete the entire row
+        If Left(cell.Value, 5) <> "US912" Then
+            cell.EntireRow.Delete
         End If
     Next i
-    
-    ' Turn off the AutoFilter
-    ws.AutoFilterMode = False
 End Sub
