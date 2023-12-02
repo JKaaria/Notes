@@ -1,34 +1,51 @@
-Sub DeleteRowsNotStartingWithUS912()
-    Dim wsTrade As Worksheet
-    Dim isinHeader As Range
-    Dim rngISIN As Range
-    Dim cell As Range
-
-    ' Set worksheet
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
-
-    ' Find "ISIN" column header
-    On Error Resume Next
-    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
-    On Error GoTo 0
-
-    ' Check if header is found
-    If Not isinHeader Is Nothing Then
-        ' Set range for "ISIN" column
-        Set rngISIN = wsTrade.Columns(isinHeader.Column)
-
-        ' Loop through each cell in the "ISIN" column
-        For Each cell In rngISIN.Offset(1, 0).Resize(wsTrade.Rows.Count - 1, 1)
-            ' Check if ISIN does not begin with "US912"
-            If UCase(Left(cell.Value, 6)) <> "US912" Then
-                ' Delete entire row
-                cell.EntireRow.Delete
+Sub ReconcileEntities()
+    Dim tradeDataSheet As Worksheet
+    Dim logicTableSheet As Worksheet
+    Dim tradeDataRange As Range
+    Dim logicTableRange As Range
+    Dim counterpartyIDs As Variant
+    
+    ' Set references to sheets
+    Set tradeDataSheet = ThisWorkbook.Sheets("TradeData")
+    Set logicTableSheet = ThisWorkbook.Sheets("LogicTable")
+    
+    ' Set the range for TradeData and LogicTable
+    Set tradeDataRange = tradeDataSheet.UsedRange
+    Set logicTableRange = logicTableSheet.UsedRange
+    
+    ' Define Counterparty IDs
+    counterpartyIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
+                            "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
+                            "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                            "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
+                            "10401031", "40050448")
+    
+    ' Loop through each row in TradeData
+    For Each tradeDataRow In tradeDataRange.Rows
+        ' Check conditions based on ISIN and Counterparty ID
+        If Left(tradeDataRow.Cells(1, "ISIN").Value, 5) = "US912" And _
+           IsInArray(tradeDataRow.Cells(1, "Counterparty ID").Value, counterpartyIDs) Then
+           
+            ' Find the corresponding row in LogicTable based on Entity
+            Set entityMatch = logicTableRange.Columns("Entity").Find(tradeDataRow.Cells(1, "Settle Legal Entity").Value)
+            
+            ' If a match is found, you can perform further actions as needed
+            If Not entityMatch Is Nothing Then
+                ' Your reconciliation logic here
+                ' For example, you might want to update a status or perform some calculations
             End If
-        Next cell
-
-        ' Display a message (you can modify this part as needed)
-        MsgBox "Rows deleted where ISIN does not begin with 'US912'.", vbInformation
-    Else
-        MsgBox "Column header 'ISIN' not found!", vbExclamation
-    End If
+        End If
+    Next tradeDataRow
 End Sub
+
+Function IsInArray(value As Variant, arr As Variant) As Boolean
+    ' Check if a value is in the array
+    Dim element As Variant
+    For Each element In arr
+        If value = element Then
+            IsInArray = True
+            Exit Function
+        End If
+    Next element
+    IsInArray = False
+End Function
