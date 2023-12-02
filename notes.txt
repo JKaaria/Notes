@@ -39,11 +39,11 @@ Sub VLookupAndAddToResultsSheet()
 
             ' Check if VLOOKUP result is found
             If Not IsError(vlookupResult) Then
-                ' Add the result to the end of the "ResultsSheet" table in Column E (or next available column)
-                wsResults.Cells(i, wsResults.UsedRange.Columns.Count + 1).Value = vlookupResult
+                ' Add the result to Column CS of the "ResultsSheet"
+                wsResults.Cells(i, "CS").Value = vlookupResult
             Else
                 ' Handle the case when no match is found (you can modify this part as needed)
-                ' Example: wsResults.Cells(i, wsResults.UsedRange.Columns.Count + 1).Value = "No Match Found"
+                ' Example: wsResults.Cells(i, "CS").Value = "No Match Found"
             End If
         Next i
 
@@ -53,4 +53,3 @@ Sub VLookupAndAddToResultsSheet()
         MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
     End If
 End Sub
-
