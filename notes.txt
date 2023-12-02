@@ -1,8 +1,13 @@
-Sub VLookupAndAddToResultsSheet()
+Sub VLookupAndFilterToResultsSheet()
+    Dim wsTrade As Worksheet
     Dim wsResults As Worksheet
     Dim wsLogicTable As Worksheet
+    Dim isinHeader As Range
+    Dim rngISIN As Range
     Dim counterpartyIDHeader As Range
     Dim rngCounterpartyID As Range
+    Dim filterIDs As Variant
+    Dim copyColumns As String
     Dim lastRowResults As Long
     Dim lastRowLogicTable As Long
     Dim counterpartyID As Variant
@@ -10,46 +15,85 @@ Sub VLookupAndAddToResultsSheet()
     Dim i As Long
 
     ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
     Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
     Set wsLogicTable = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
 
-    ' Find "Counterparty ID" column header in "ResultsSheet"
+    ' Find "ISIN" column header in "TradeData" sheet
     On Error Resume Next
-    Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
     On Error GoTo 0
 
-    ' Check if header is found in "ResultsSheet"
-    If Not counterpartyIDHeader Is Nothing Then
-        ' Set range for "Counterparty ID" column in "ResultsSheet"
-        Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
+    ' Check if header is found in "TradeData" sheet
+    If Not isinHeader Is Nothing Then
+        ' Set range for "ISIN" column in "TradeData" sheet
+        Set rngISIN = wsTrade.Columns(isinHeader.Column)
 
-        ' Find the last row in "ResultsSheet"
-        lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIDHeader.Column).End(xlUp).Row
+        ' Apply AutoFilter to "ISIN" column in "TradeData" sheet
+        rngISIN.AutoFilter Field:=1, Criteria1:="US912*"
 
-        ' Find the last row in "LogicTable" sheet
-        lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
+        ' Check if "ResultsSheet" exists, if not create it
+        On Error Resume Next
+        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+        On Error GoTo 0
+        If wsResults Is Nothing Then
+            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+            wsResults.Name = "ResultsSheet"
+        Else
+            ' Clear existing data in ResultsSheet
+            wsResults.Cells.Clear
+        End If
 
-        ' Loop through each cell in Column CS of "ResultsSheet"
-        For i = 2 To lastRowResults
-            ' Get Counterparty ID from "ResultsSheet"
-            counterpartyID = rngCounterpartyID.Cells(i).Value
+        ' Copy visible cells to "ResultsSheet"
+        wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsResults.Cells(1, 1)
 
-            ' Perform VLOOKUP in "LogicTable" (Column A) to get the result from Column D
-            vlookupResult = Application.VLookup(counterpartyID, wsLogicTable.Range("A2:D" & lastRowLogicTable), 4, False)
+        ' Find "Counterparty ID" column header in "ResultsSheet"
+        On Error Resume Next
+        Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+        On Error GoTo 0
 
-            ' Check if VLOOKUP result is found
-            If Not IsError(vlookupResult) Then
-                ' Add the result to the corresponding cell in Column CS of the "ResultsSheet"
-                wsResults.Cells(i, "CS").Value = vlookupResult
-            Else
-                ' Handle the case when no match is found (you can modify this part as needed)
-                ' Example: wsResults.Cells(i, "CS").Value = "No Match Found"
-            End If
-        Next i
+        ' Check if header is found in "ResultsSheet"
+        If Not counterpartyIDHeader Is Nothing Then
+            ' Set range for "Counterparty ID" column in "ResultsSheet"
+            Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
 
-        ' Display a message (you can modify this part as needed)
-        MsgBox "VLOOKUP and addition of results complete!", vbInformation
+            ' Find the last row in "ResultsSheet"
+            lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIDHeader.Column).End(xlUp).Row
+
+            ' Find the last row in "LogicTable" sheet
+            lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
+
+            ' Define array of Counterparty IDs to filter
+            filterIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
+                              "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
+                              "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                              "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
+                              "10401031", "40050448")
+
+            ' Loop through each cell in "Counterparty ID" column in "ResultsSheet"
+            For i = 2 To lastRowResults
+                ' Get Counterparty ID from "ResultsSheet"
+                counterpartyID = rngCounterpartyID.Cells(i).Value
+
+                ' Perform VLOOKUP in "LogicTable" (Column A) to get the result from Column D
+                vlookupResult = Application.VLookup(counterpartyID, wsLogicTable.Range("A2:D" & lastRowLogicTable), 4, False)
+
+                ' Check if VLOOKUP result is found
+                If Not IsError(vlookupResult) Then
+                    ' Add the result to the corresponding cell in Column CS of the "ResultsSheet"
+                    wsResults.Cells(i, "CS").Value = vlookupResult
+                Else
+                    ' Handle the case when no match is found (you can modify this part as needed)
+                    ' Example: wsResults.Cells(i, "CS").Value = "No Match Found"
+                End If
+            Next i
+
+            ' Display a message (you can modify this part as needed)
+            MsgBox "VLOOKUP, filtering, and addition of results complete!", vbInformation
+        Else
+            MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
+        End If
     Else
-        MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
+        MsgBox "Column header 'ISIN' not found in 'TradeData' sheet!", vbExclamation
     End If
 End Sub
