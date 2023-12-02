@@ -1,52 +1,34 @@
-Sub MatchAndCopyToCSColumn()
+Sub DeleteRowsNotStartingWithUS912()
     Dim wsTrade As Worksheet
-    Dim wsLogicTable As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowLogicTable As Long
-    Dim counterpartyIDHeader As Range
-    Dim rngCounterpartyID As Range
-    Dim rngLogicTable As Range
-    Dim logicTableDict As Object
-    Dim i As Long
+    Dim isinHeader As Range
+    Dim rngISIN As Range
+    Dim cell As Range
 
-    ' Set worksheets
+    ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
-    Set wsLogicTable = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
 
-    ' Find "Counterparty ID" column header in "TradeData" sheet
+    ' Find "ISIN" column header
     On Error Resume Next
-    Set counterpartyIDHeader = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
     On Error GoTo 0
 
-    ' Check if header is found in "TradeData" sheet
-    If Not counterpartyIDHeader Is Nothing Then
-        ' Set range for "Counterparty ID" column in "TradeData" sheet
-        Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
+    ' Check if header is found
+    If Not isinHeader Is Nothing Then
+        ' Set range for "ISIN" column
+        Set rngISIN = wsTrade.Columns(isinHeader.Column)
 
-        ' Find the last row in "TradeData" sheet
-        lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, rngCounterpartyID.Column).End(xlUp).Row
-
-        ' Set range for "LogicTable" data
-        Set rngLogicTable = wsLogicTable.Range("A:D")
-
-        ' Create a dictionary to store LogicTable values for faster lookup
-        Set logicTableDict = CreateObject("Scripting.Dictionary")
-        For i = 2 To rngLogicTable.Rows.Count
-            logicTableDict(rngLogicTable.Cells(i, 1).Value) = rngLogicTable.Cells(i, 4).Value
-        Next i
-
-        ' Loop through each row in "TradeData" sheet
-        For i = 2 To lastRowTrade
-            ' Check if Counterparty ID exists in LogicTable
-            If logicTableDict.Exists(rngCounterpartyID.Cells(i, 1).Value) Then
-                ' Copy corresponding value from LogicTable to TradeData
-                wsTrade.Cells(i, "CS").Value = logicTableDict(rngCounterpartyID.Cells(i, 1).Value)
+        ' Loop through each cell in the "ISIN" column
+        For Each cell In rngISIN.Offset(1, 0).Resize(wsTrade.Rows.Count - 1, 1)
+            ' Check if ISIN does not begin with "US912"
+            If UCase(Left(cell.Value, 6)) <> "US912" Then
+                ' Delete entire row
+                cell.EntireRow.Delete
             End If
-        Next i
+        Next cell
 
         ' Display a message (you can modify this part as needed)
-        MsgBox "Values copied to column CS in 'TradeData' sheet.", vbInformation
+        MsgBox "Rows deleted where ISIN does not begin with 'US912'.", vbInformation
     Else
-        MsgBox "Column header 'Counterparty ID' not found in 'TradeData' sheet!", vbExclamation
+        MsgBox "Column header 'ISIN' not found!", vbExclamation
     End If
 End Sub
