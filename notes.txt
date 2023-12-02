@@ -1,71 +1,94 @@
-Sub CopyAndFilterToResultsSheet()
-    Dim wsTrade As Worksheet
+Sub CompareAndAddEntity()
     Dim wsResults As Worksheet
-    Dim isinHeader As Range
-    Dim rngISIN As Range
+    Dim wsLogicTable As Worksheet
     Dim counterpartyIDHeader As Range
+    Dim settleLegalEntityHeader As Range
+    Dim entityHeader As Range
     Dim rngCounterpartyID As Range
-    Dim filterIDs As Variant
-    Dim copyColumns As String
+    Dim rngSettleLegalEntity As Range
+    Dim rngEntity As Range
     Dim lastRowResults As Long
+    Dim lastRowLogicTable As Long
+    Dim counterpartyID As Variant
+    Dim entity As Variant
+    Dim i As Long
+    Dim matchFound As Boolean
 
     ' Set worksheets
-    Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    Set wsLogicTable = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
 
-    ' Find "ISIN" column header
+    ' Find "Counterparty ID" column header in "ResultsSheet"
     On Error Resume Next
-    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
+    Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
     On Error GoTo 0
 
-    ' Check if header is found
-    If Not isinHeader Is Nothing Then
-        ' Set range for "ISIN" column
-        Set rngISIN = wsTrade.Columns(isinHeader.Column)
+    ' Check if header is found in "ResultsSheet"
+    If Not counterpartyIDHeader Is Nothing Then
+        ' Set range for "Counterparty ID" column in "ResultsSheet"
+        Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
 
-        ' Apply AutoFilter to "ISIN" column
-        rngISIN.AutoFilter Field:=1, Criteria1:="US912*"
-
-        ' Check if "ResultsSheet" exists, if not create it
+        ' Find "Settle Legal Entity" column header in "ResultsSheet"
         On Error Resume Next
-        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
-        On Error GoTo 0
-        If wsResults Is Nothing Then
-            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-            wsResults.Name = "ResultsSheet"
-        Else
-            ' Clear existing data in ResultsSheet
-            wsResults.Cells.Clear
-        End If
-
-        ' Copy visible cells to "ResultsSheet"
-        wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsResults.Cells(1, 1)
-
-        ' Find "Counterparty ID" column header in "ResultsSheet"
-        On Error Resume Next
-        Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+        Set settleLegalEntityHeader = wsResults.Rows(1).Find("Settle Legal Entity", LookIn:=xlValues)
         On Error GoTo 0
 
         ' Check if header is found in "ResultsSheet"
-        If Not counterpartyIDHeader Is Nothing Then
-            ' Set range for "Counterparty ID" column in "ResultsSheet"
-            Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
+        If Not settleLegalEntityHeader Is Nothing Then
+            ' Set range for "Settle Legal Entity" column in "ResultsSheet"
+            Set rngSettleLegalEntity = wsResults.Columns(settleLegalEntityHeader.Column)
 
-            ' Define array of Counterparty IDs to filter
-            filterIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
-                              "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
-                              "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
-                              "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
-                              "10401031", "40050448")
+            ' Find "Entity" column header in "LogicTable" sheet
+            On Error Resume Next
+            Set entityHeader = wsLogicTable.Rows(1).Find("Entity", LookIn:=xlValues)
+            On Error GoTo 0
 
-            ' Apply AutoFilter to "Counterparty ID" column in "ResultsSheet"
-            rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
+            ' Check if header is found in "LogicTable" sheet
+            If Not entityHeader Is Nothing Then
+                ' Set range for "Entity" column in "LogicTable" sheet
+                Set rngEntity = wsLogicTable.Columns(entityHeader.Column)
 
-            ' Display a message (you can modify this part as needed)
-            MsgBox "Filtered US912 values copied to 'ResultsSheet'.", vbInformation
+                ' Find the last row in "ResultsSheet"
+                lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIDHeader.Column).End(xlUp).Row
+
+                ' Find the last row in "LogicTable" sheet
+                lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, entityHeader.Column).End(xlUp).Row
+
+                ' Loop through each row in "ResultsSheet"
+                For i = 2 To lastRowResults
+                    ' Get Counterparty ID from "ResultsSheet"
+                    counterpartyID = rngCounterpartyID.Cells(i).Value
+
+                    ' Reset matchFound flag for each iteration
+                    matchFound = False
+
+                    ' Loop through each row in "LogicTable" sheet
+                    For Each entity In rngEntity.Cells
+                        ' Compare Counterparty ID in "ResultsSheet" with "Entity" in "LogicTable"
+                        If entity.Value = counterpartyID Then
+                            ' Add corresponding "Entity" value to "ResultsSheet"
+                            rngSettleLegalEntity.Cells(i).Value = entity.Offset(0, 1).Value
+                            matchFound = True
+                            Exit For ' Exit loop after matching Counterparty ID
+                        End If
+                    Next entity
+
+                    ' Check if no match was found
+                    If Not matchFound Then
+                        ' Handle the case when no match is found (you can modify this part as needed)
+                        ' Example: rngSettleLegalEntity.Cells(i).Value = "No Match Found"
+                    End If
+                Next i
+
+                ' Display a message (you can modify this part as needed)
+                MsgBox "Comparison and addition of 'Entity' values complete!", vbInformation
+            Else
+                MsgBox "Column header 'Entity' not found in 'LogicTable' sheet!", vbExclamation
+            End If
         Else
-            MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
+            MsgBox "Column header 'Settle Legal Entity' not found in 'ResultsSheet'!", vbExclamation
         End If
     Else
-        MsgBox "Column header 'ISIN' not found!", vbExclamation
+        MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
     End If
 End Sub
