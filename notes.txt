@@ -1,9 +1,15 @@
-Sub FilterISIN_US912()
+Sub CopyAndFilterToResultsSheet()
     Dim wsTrade As Worksheet
+    Dim wsResults As Worksheet
     Dim isinHeader As Range
     Dim rngISIN As Range
+    Dim counterpartyIDHeader As Range
+    Dim rngCounterpartyID As Range
+    Dim filterIDs As Variant
+    Dim copyColumns As String
+    Dim lastRowResults As Long
 
-    ' Set worksheet
+    ' Set worksheets
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
 
     ' Find "ISIN" column header
@@ -19,8 +25,46 @@ Sub FilterISIN_US912()
         ' Apply AutoFilter to "ISIN" column
         rngISIN.AutoFilter Field:=1, Criteria1:="US912*"
 
-        ' Display a message (you can modify this part as needed)
-        MsgBox "ISIN column filtered for values beginning with 'US912...'.", vbInformation
+        ' Check if "ResultsSheet" exists, if not create it
+        On Error Resume Next
+        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+        On Error GoTo 0
+        If wsResults Is Nothing Then
+            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+            wsResults.Name = "ResultsSheet"
+        Else
+            ' Clear existing data in ResultsSheet
+            wsResults.Cells.Clear
+        End If
+
+        ' Copy visible cells to "ResultsSheet"
+        wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsResults.Cells(1, 1)
+
+        ' Find "Counterparty ID" column header in "ResultsSheet"
+        On Error Resume Next
+        Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+        On Error GoTo 0
+
+        ' Check if header is found in "ResultsSheet"
+        If Not counterpartyIDHeader Is Nothing Then
+            ' Set range for "Counterparty ID" column in "ResultsSheet"
+            Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
+
+            ' Define array of Counterparty IDs to filter
+            filterIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
+                              "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
+                              "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                              "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
+                              "10401031", "40050448")
+
+            ' Apply AutoFilter to "Counterparty ID" column in "ResultsSheet"
+            rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
+
+            ' Display a message (you can modify this part as needed)
+            MsgBox "Filtered US912 values copied to 'ResultsSheet'.", vbInformation
+        Else
+            MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
+        End If
     Else
         MsgBox "Column header 'ISIN' not found!", vbExclamation
     End If
