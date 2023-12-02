@@ -1,42 +1,60 @@
-Sub FilterAndDeleteColumnD()
-    Dim ws As Worksheet
-    Dim lastRow As Long
-    Dim filterColumn As Range
-    Dim cell As Range
-    Dim codesToKeep As Variant
-    Dim code As Variant
-    
-    ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your actual sheet name
-    
-    ' Find the last row in column D
-    lastRow = ws.Cells(ws.Rows.Count, "D").End(xlUp).Row
-    
-    ' Set the filter range for column D
-    Set filterColumn = ws.Range("D1:D" & lastRow)
-    
-    ' Codes to keep
-    codesToKeep = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", "10351848", "40114353", "10300694", _
-                        "10156783", "10107349", "10300737", "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
-                        "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", "10401031", "40050448")
-    
-    ' Loop through each cell in column D in reverse order
-    For i = lastRow To 2 Step -1
-        Set cell = filterColumn.Cells(i, 1)
-        
-        ' Check if the cell contains any of the specified codes
-        Dim containsCode As Boolean
-        containsCode = False
-        For Each code In codesToKeep
-            If InStr(1, cell.Value, code) > 0 Then
-                containsCode = True
-                Exit For
-            End If
-        Next code
-        
-        ' If the cell does not contain any of the specified codes, delete the entire row
-        If Not containsCode Then
-            cell.EntireRow.Delete
+Sub Five()
+    ' Define variables
+    Dim wsTrade As Worksheet
+    Dim wsLogic As Worksheet
+    Dim wsResult As Worksheet
+    Dim lastRowTrade As Long
+    Dim lastRowLogic As Long
+    Dim tradeSDSCol As Integer
+    Dim logicSDSCol As Integer
+    Dim resultRow As Long
+    Dim i As Long
+
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    Set wsLogic = ThisWorkbook.Sheets("LogicTable")
+
+    ' Create or reference "ResultSheet"
+    On Error Resume Next
+    Set wsResult = ThisWorkbook.Sheets("ResultSheet")
+    On Error GoTo 0
+    If wsResult Is Nothing Then
+        ' If "ResultSheet" sheet doesn't exist, create it
+        Set wsResult = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsResult.Name = "ResultSheet"
+    End If
+
+    ' Set column numbers based on headers
+    tradeSDSCol = WorksheetFunction.Match("SDS", wsTrade.Rows(1), 0)
+    logicSDSCol = WorksheetFunction.Match("SDS", wsLogic.Rows(1), 0)
+
+    ' Find the last rows in each sheet
+    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, tradeSDSCol).End(xlUp).Row
+    lastRowLogic = wsLogic.Cells(wsLogic.Rows.Count, logicSDSCol).End(xlUp).Row
+
+    ' Initialize row number for ResultSheet
+    resultRow = 1
+
+    ' Loop through TradeData sheet
+    For i = 2 To lastRowTrade
+        ' Search for SDS value in LogicTable
+        Dim foundCell As Range
+        Set foundCell = wsLogic.Columns(logicSDSCol).Find(wsTrade.Cells(i, tradeSDSCol).Value, LookIn:=xlValues, LookAt:=xlWhole)
+
+        ' If a match is found, copy relevant information to ResultSheet
+        If Not foundCell Is Nothing Then
+            wsResult.Cells(resultRow, 1).Value = wsTrade.Cells(i, tradeSDSCol).Value ' SDS
+            wsResult.Cells(resultRow, 2).Value = wsTrade.Cells(i, WorksheetFunction.Match("Account Legal Name", wsTrade.Rows(1), 0)).Value ' Account Legal Name
+            wsResult.Cells(resultRow, 3).Value = wsTrade.Cells(i, WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)).Value ' Trade ID
+            wsResult.Cells(resultRow, 4).Value = wsTrade.Cells(i, WorksheetFunction.Match("Entity", wsTrade.Rows(1), 0)).Value ' Entity from TradeData
+            wsResult.Cells(resultRow, 5).Value = wsLogic.Cells(foundCell.Row, WorksheetFunction.Match("Entity", wsLogic.Rows(1), 0)).Value ' Entity from logicTable
+
+            ' Add more columns here
+            wsResult.Cells(resultRow, 6).Value = wsTrade.Cells(i, WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)).Value ' Quantity
+            wsResult.Cells(resultRow, 7).Value = wsTrade.Cells(i, WorksheetFunction.Match("Security Description", wsTrade.Rows(1), 0)).Value ' Security Description
+            wsResult.Cells(resultRow, 8).Value = wsTrade.Cells(i, WorksheetFunction.Match("Settle Date", wsTrade.Rows(1), 0)).Value ' Settle Date
+
+            resultRow = resultRow + 1
         End If
     Next i
 End Sub
