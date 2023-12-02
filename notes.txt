@@ -7,9 +7,9 @@ Sub FilterByIssuerAbbrev()
     ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
 
-    ' Define array of Issuer Abbrev values to filter
-    filterValues = Array("US Treasury Bill", "US Treasury Bond", "US Treasury Floating Rate Note", _
-                         "US Treasury Inflation-Indexed Security", "US Treasury Note", "US Treasury Strip")
+    ' Define array of partial Issuer Abbrev values to filter
+    filterValues = Array("US Treasury Bill*", "US Treasury Bond*", "US Treasury Floating Rate Note*", _
+                         "US Treasury Inflation-Indexed Security*", "US Treasury Note*", "US Treasury Strip*")
 
     ' Find "Issuer Abbrev" column header
     On Error Resume Next
@@ -21,7 +21,7 @@ Sub FilterByIssuerAbbrev()
         ' Set range for "Issuer Abbrev" column
         Set rngIssuerAbbrev = wsTrade.Columns(issuerAbbrevHeader.Column)
 
-        ' Apply AutoFilter to "Issuer Abbrev" column with specific values
+        ' Apply AutoFilter to "Issuer Abbrev" column with wildcard criteria
         rngIssuerAbbrev.AutoFilter Field:=1, Criteria1:=filterValues, Operator:=xlFilterValues
 
         ' Display a message (you can modify this part as needed)
