@@ -1,23 +1,41 @@
-Sub FilterAndDelete()
+Sub FilterAndDeleteColumnD()
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim filterColumn As Range
     Dim cell As Range
+    Dim codesToKeep As Variant
+    Dim code As Variant
     
     ' Set the worksheet
     Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your actual sheet name
     
-    ' Find the last row in column AW
-    lastRow = ws.Cells(ws.Rows.Count, "AW").End(xlUp).Row
+    ' Find the last row in column D
+    lastRow = ws.Cells(ws.Rows.Count, "D").End(xlUp).Row
     
-    ' Set the filter range for column AW
-    Set filterColumn = ws.Range("AW1:AW" & lastRow)
+    ' Set the filter range for column D
+    Set filterColumn = ws.Range("D1:D" & lastRow)
     
-    ' Loop through each cell in column AW in reverse order
+    ' Codes to keep
+    codesToKeep = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", "10351848", "40114353", "10300694", _
+                        "10156783", "10107349", "10300737", "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                        "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", "10401031", "40050448")
+    
+    ' Loop through each cell in column D in reverse order
     For i = lastRow To 2 Step -1
         Set cell = filterColumn.Cells(i, 1)
-        ' If the cell doesn't start with "US912," delete the entire row
-        If Left(cell.Value, 5) <> "US912" Then
+        
+        ' Check if the cell contains any of the specified codes
+        Dim containsCode As Boolean
+        containsCode = False
+        For Each code In codesToKeep
+            If InStr(1, cell.Value, code) > 0 Then
+                containsCode = True
+                Exit For
+            End If
+        Next code
+        
+        ' If the cell does not contain any of the specified codes, delete the entire row
+        If Not containsCode Then
             cell.EntireRow.Delete
         End If
     Next i
