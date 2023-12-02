@@ -29,7 +29,7 @@ Sub VLookupAndAddToResultsSheet()
         ' Find the last row in "LogicTable" sheet
         lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
 
-        ' Loop through each row in "ResultsSheet"
+        ' Loop through each cell in Column CS of "ResultsSheet"
         For i = 2 To lastRowResults
             ' Get Counterparty ID from "ResultsSheet"
             counterpartyID = rngCounterpartyID.Cells(i).Value
@@ -39,7 +39,7 @@ Sub VLookupAndAddToResultsSheet()
 
             ' Check if VLOOKUP result is found
             If Not IsError(vlookupResult) Then
-                ' Add the result to Column CS of the "ResultsSheet"
+                ' Add the result to the corresponding cell in Column CS of the "ResultsSheet"
                 wsResults.Cells(i, "CS").Value = vlookupResult
             Else
                 ' Handle the case when no match is found (you can modify this part as needed)
