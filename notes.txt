@@ -1,83 +1,75 @@
 Sub FilterAndCopyToResultsSheet()
+    ' Define variables
     Dim wsTrade As Worksheet
     Dim wsResults As Worksheet
-    Dim lastRowTrade As Long
-    Dim lastRowResults As Long
-    Dim isinCol As Variant
-    Dim counterpartyIdCol As Variant
+    Dim rngISIN As Range
+    Dim rngCounterpartyID As Range
+    Dim isinHeader As Range
+    Dim counterpartyIDHeader As Range
+    Dim filterIDs As Variant
     Dim copyColumns As String
-    Dim counterpartyValues As Variant
-    Dim i As Long, j As Long
-    
+    Dim lastRowResults As Long
+
     ' Set worksheets
-    On Error Resume Next ' Ignore errors if sheet doesn't exist
-    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
-    On Error GoTo 0
-    
-    ' Create ResultsSheet or clear existing data
-    If wsResults Is Nothing Then
-        Set wsResults = Sheets.Add(After:=Sheets(Sheets.Count))
-        wsResults.Name = "ResultsSheet"
-    Else
-        wsResults.Cells.Clear
-    End If
-    
     Set wsTrade = ThisWorkbook.Sheets("TradeData")
     
-    ' Find column numbers based on headers
-    isinCol = GetColumnNumber(wsTrade, "ISIN")
-    counterpartyIdCol = GetColumnNumber(wsTrade, "Counterparty ID")
-    
-    ' Check if column headers were found
-    If IsError(isinCol) Or IsError(counterpartyIdCol) Then
-        MsgBox "Column headers not found. Please check the sheet.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Find the last row in the "TradeData" sheet
-    lastRowTrade = wsTrade.Cells(wsTrade.Rows.Count, isinCol).End(xlUp).Row
-    
-    ' Set columns to copy
-    copyColumns = "Status,Counterparty,Settle Legal Entity,Trade ID,Quantity,BARC Direction,Security Description,Clean Price,Settle Date"
-    
-    ' Split Counterparty values into an array
-    counterpartyValues = Split("41154150,43002923,10101678,10400868,10105032,40201510,10351848,40114353,10300694,10156783,10107349,10300737,40013551,10401036,40644161,40009160,10400910,42169389,10301042,10300558,10400695,40067364,40067356,42734506,10401031,40050448", ",")
-    
-    ' Initialize the row index for ResultsSheet
-    lastRowResults = 2
-    
-    ' Loop through each row in "TradeData"
-    For i = 2 To lastRowTrade
-        ' Filter by ISIN starting with "US912..."
-        If UCase(Left(wsTrade.Cells(i, isinCol).Value, 6)) = "US912..." Then
-            ' Loop through Counterparty values
-            For j = LBound(counterpartyValues) To UBound(counterpartyValues)
-                ' Check if Counterparty ID matches
-                If wsTrade.Cells(i, counterpartyIdCol).Value = counterpartyValues(j) Then
-                    ' Copy specified columns to ResultsSheet
-                    wsTrade.Range(wsTrade.Cells(i, 1), wsTrade.Cells(i, wsTrade.Columns.Count)).Copy _
-                        Destination:=wsResults.Range("A" & lastRowResults)
-                    lastRowResults = lastRowResults + 1
-                    Exit For ' Exit loop after matching Counterparty ID
-                End If
-            Next j
-        End If
-    Next i
-    
-    ' AutoFit columns for better visibility
-    wsResults.Columns.AutoFit
-    
-    MsgBox "Filtering and copying to ResultsSheet complete!", vbInformation
-End Sub
-
-Function GetColumnNumber(ws As Worksheet, header As String) As Variant
-    Dim headerRange As Range
+    ' Find "ISIN" column header
     On Error Resume Next
-    Set headerRange = ws.Rows(1).Find(header, LookIn:=xlValues, LookAt:=xlWhole)
+    Set isinHeader = wsTrade.Rows(1).Find("ISIN", LookIn:=xlValues)
     On Error GoTo 0
-    If headerRange Is Nothing Then
-        GetColumnNumber = CVErr(xlErrNA)
+    
+    ' Find "Counterparty ID" column header
+    On Error Resume Next
+    Set counterpartyIDHeader = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    On Error GoTo 0
+    
+    ' Check if headers are found
+    If Not isinHeader Is Nothing And Not counterpartyIDHeader Is Nothing Then
+        ' Set range for "ISIN" and "Counterparty ID" columns
+        Set rngISIN = wsTrade.Columns(isinHeader.Column)
+        Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
+        
+        ' Define array of Counterparty IDs to filter
+        filterIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
+                          "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
+                          "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                          "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
+                          "10401031", "40050448")
+        
+        ' Set columns to copy
+        copyColumns = "Status,Counterparty,Settle Legal Entity,Trade ID,Quantity,BARC Direction,Security Description,Clean Price,Settle Date"
+        
+        ' Check if "ResultsSheet" exists, if not create it
+        On Error Resume Next
+        Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+        On Error GoTo 0
+        If wsResults Is Nothing Then
+            Set wsResults = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+            wsResults.Name = "ResultsSheet"
+        Else
+            ' Clear existing data in ResultsSheet
+            wsResults.Cells.Clear
+        End If
+        
+        ' Apply AutoFilter to "ISIN" column
+        rngISIN.AutoFilter Field:=1, Criteria1:="US912*"
+        
+        ' Apply AutoFilter to "Counterparty ID" column
+        rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
+        
+        ' Copy visible cells to "ResultsSheet"
+        wsTrade.Rows(1).EntireRow.Copy Destination:=wsResults.Rows(1)
+        wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Offset(1, 0)
+        
+        ' Turn off AutoFilter
+        wsTrade.AutoFilterMode = False
+        
+        ' AutoFit columns for better visibility
+        wsResults.Columns.AutoFit
+        
+        ' Display a message (you can modify this part as needed)
+        MsgBox "Filtered results copied to 'ResultsSheet'.", vbInformation
     Else
-        GetColumnNumber = headerRange.Column
+        MsgBox "Column headers 'ISIN' or 'Counterparty ID' not found!", vbExclamation
     End If
-End Function
+End Sub
