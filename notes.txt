@@ -1,1 +1,56 @@
+Sub VLookupAndAddToResultsSheet()
+    Dim wsResults As Worksheet
+    Dim wsLogicTable As Worksheet
+    Dim counterpartyIDHeader As Range
+    Dim rngCounterpartyID As Range
+    Dim lastRowResults As Long
+    Dim lastRowLogicTable As Long
+    Dim counterpartyID As Variant
+    Dim vlookupResult As Variant
+    Dim i As Long
+
+    ' Set worksheets
+    Set wsResults = ThisWorkbook.Sheets("ResultsSheet")
+    Set wsLogicTable = ThisWorkbook.Sheets("LogicTable") ' Replace "LogicTable" with the actual name of your logic table sheet
+
+    ' Find "Counterparty ID" column header in "ResultsSheet"
+    On Error Resume Next
+    Set counterpartyIDHeader = wsResults.Rows(1).Find("Counterparty ID", LookIn:=xlValues)
+    On Error GoTo 0
+
+    ' Check if header is found in "ResultsSheet"
+    If Not counterpartyIDHeader Is Nothing Then
+        ' Set range for "Counterparty ID" column in "ResultsSheet"
+        Set rngCounterpartyID = wsResults.Columns(counterpartyIDHeader.Column)
+
+        ' Find the last row in "ResultsSheet"
+        lastRowResults = wsResults.Cells(wsResults.Rows.Count, counterpartyIDHeader.Column).End(xlUp).Row
+
+        ' Find the last row in "LogicTable" sheet
+        lastRowLogicTable = wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp).Row
+
+        ' Loop through each row in "ResultsSheet"
+        For i = 2 To lastRowResults
+            ' Get Counterparty ID from "ResultsSheet"
+            counterpartyID = rngCounterpartyID.Cells(i).Value
+
+            ' Perform VLOOKUP in "LogicTable" (Column A) to get the result from Column D
+            vlookupResult = Application.VLookup(counterpartyID, wsLogicTable.Range("A2:D" & lastRowLogicTable), 4, False)
+
+            ' Check if VLOOKUP result is found
+            If Not IsError(vlookupResult) Then
+                ' Add the result to the end of the "ResultsSheet" table in Column E (or next available column)
+                wsResults.Cells(i, wsResults.UsedRange.Columns.Count + 1).Value = vlookupResult
+            Else
+                ' Handle the case when no match is found (you can modify this part as needed)
+                ' Example: wsResults.Cells(i, wsResults.UsedRange.Columns.Count + 1).Value = "No Match Found"
+            End If
+        Next i
+
+        ' Display a message (you can modify this part as needed)
+        MsgBox "VLOOKUP and addition of results complete!", vbInformation
+    Else
+        MsgBox "Column header 'Counterparty ID' not found in 'ResultsSheet'!", vbExclamation
+    End If
+End Sub
 
