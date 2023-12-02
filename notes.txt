@@ -2,12 +2,17 @@ Sub FilterCounterpartyIDs()
     Dim wsTrade As Worksheet
     Dim counterpartyIDHeader As Range
     Dim rngCounterpartyID As Range
-    Dim counterpartyValues As Variant
-    Dim filteredRows As Range
-    Dim cell As Range
+    Dim filterIDs As Variant
 
     ' Set worksheet
     Set wsTrade = ThisWorkbook.Sheets("TradeData") ' Replace "TradeData" with the actual name of your trade data sheet
+
+    ' Define array of Counterparty IDs to filter
+    filterIDs = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
+                      "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
+                      "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
+                      "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
+                      "10401031", "40050448", "10455109")
 
     ' Find "Counterparty ID" column header
     On Error Resume Next
@@ -19,42 +24,12 @@ Sub FilterCounterpartyIDs()
         ' Set range for "Counterparty ID" column
         Set rngCounterpartyID = wsTrade.Columns(counterpartyIDHeader.Column)
 
-        ' Define array of Counterparty IDs to filter
-        counterpartyValues = Array("41154150", "43002923", "10101678", "10400868", "10105032", "40201510", _
-                                   "10351848", "40114353", "10300694", "10156783", "10107349", "10300737", _
-                                   "40013551", "10401036", "40644161", "40009160", "10400910", "42169389", _
-                                   "10301042", "10300558", "10400695", "40067364", "40067356", "42734506", _
-                                   "10401031", "40050448")
+        ' Apply AutoFilter to "Counterparty ID" column
+        rngCounterpartyID.AutoFilter Field:=1, Criteria1:=filterIDs, Operator:=xlFilterValues
 
-        ' Loop through each cell in the "Counterparty ID" column
-        For Each cell In rngCounterpartyID
-            ' Check if Counterparty ID is in the specified array
-            If IsInArray(cell.Value, counterpartyValues) Then
-                ' Add the entire row to the filteredRows range
-                If filteredRows Is Nothing Then
-                    Set filteredRows = wsTrade.Rows(cell.Row)
-                Else
-                    Set filteredRows = Union(filteredRows, wsTrade.Rows(cell.Row))
-                End If
-            End If
-        Next cell
-
-        ' Copy filteredRows to a new sheet or range as needed
-        If Not filteredRows Is Nothing Then
-            filteredRows.Copy ' You can modify this part based on your requirements
-            MsgBox "Rows with specified Counterparty IDs copied or processed.", vbInformation
-        Else
-            MsgBox "No rows found with specified Counterparty IDs.", vbInformation
-        End If
+        ' Display a message (you can modify this part as needed)
+        MsgBox "Counterparty ID column filtered for specified values.", vbInformation
     Else
         MsgBox "Column header 'Counterparty ID' not found!", vbExclamation
     End If
 End Sub
-
-Function IsInArray(valToBeFound As Variant, arr As Variant) As Boolean
-    ' Function to check if a value is in an array
-    Dim element As Variant
-    On Error Resume Next
-    IsInArray = (UBound(Filter(arr, valToBeFound)) > -1)
-    On Error GoTo 0
-End Function
