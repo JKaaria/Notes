@@ -1,1 +1,36 @@
+Sub ImportDataFromSourceFolder()
+    Dim mainWorkbook As Workbook
+    Dim tradeDataSheet As Worksheet
+    Dim sourceFilePath As String
+    Dim sourceFileName As String
+    
+    ' Set the main workbook
+    Set mainWorkbook = ThisWorkbook
+    
+    ' Set the TradeData sheet
+    Set tradeDataSheet = mainWorkbook.Sheets("TradeData")
+    
+    ' Specify the path to the "SWS_Source_File" folder
+    sourceFilePath = mainWorkbook.Path & "\SWS_Source_File\"
+    
+    ' Find the only file in the source folder
+    sourceFileName = Dir(sourceFilePath & "*.xls", vbNormal)
+    
+    If sourceFileName <> "" Then
+        ' Form the full path of the source file
+        sourceFileName = sourceFilePath & sourceFileName
+        
+        ' Clear existing data in TradeData sheet
+        tradeDataSheet.Cells.Clear
+        
+        ' Import data from the source file
+        Workbooks.Open sourceFileName
+        ActiveWorkbook.Sheets(1).UsedRange.Copy tradeDataSheet.Range("A1")
+        
+        ' Close the source workbook without saving changes
+        ActiveWorkbook.Close False
+    Else
+        MsgBox "No source file found in the folder.", vbExclamation
+    End If
+End Sub
 
