@@ -1,1 +1,31 @@
+Sub SendWorkbookAsAttachment()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim fileName As String
+
+    ' Set the filename to the current workbook
+    fileName = ThisWorkbook.FullName
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Customize email properties
+    With outlookMail
+        .To = "j.kaaria@barclays.com"
+        .Subject = "T+0 Central Bank UST Bookings"
+        .Body = "Please find the attached workbook."
+        .Attachments.Add fileName
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
 
