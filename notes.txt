@@ -1,5 +1,1 @@
-' Concatenate core details for each row
-For i = 2 To lastRow
-    coreDetails = coreDetails & "<tr><td>" & Join(Application.Index(rngCoreDetails, i, 0), "</td><td>") & "</td></tr>"
-Next i
 
