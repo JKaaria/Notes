@@ -25,36 +25,26 @@ Sub CopyLDNResultsToResultsSheet()
 
     ' Loop through each sheet
     For Each ws In Array(wsBBI, wsPLC, wsBCIN, wsLNBR)
-        ' Find last row in the sheet
-        lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-
-        ' Initialize resultRow for ResultsSheet
-        resultRow = wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Row + 1
-
         ' Check if the sheet has tables
         If ws.ListObjects.Count > 0 Then
             ' Loop through each table in the sheet
             For Each tbl In ws.ListObjects
                 ' Loop through each row in the table
-                For i = 1 To tbl.ListRows.Count
-                    ' Check if the first column contains a string and is not "N/A"
-                    If VarType(tbl.ListRows(i).Range.Cells(1, 1).Value) = vbString And tbl.ListRows(i).Range.Cells(1, 1).Value <> "N/A" Then
-                        ' Copy the entire row to ResultsSheet
-                        tbl.ListRows(i).Range.Copy Destination:=wsResults.Cells(resultRow, 1)
-                        resultRow = resultRow + 1
+                For i = tbl.ListRows.Count To 1 Step -1
+                    ' Check if the first column contains "#N/A" (with a hash sign)
+                    If InStr(1, tbl.ListRows(i).Range.Cells(1, 1).Formula, "#N/A", vbTextCompare) > 0 Then
+                        ' Delete the entire row
+                        tbl.ListRows(i).Delete
                     End If
                 Next i
             Next tbl
-        Else
-            ' If the sheet doesn't have tables, loop through each row in the sheet
-            For i = 1 To lastRow
-                ' Check if the first column contains a string and is not "N/A"
-                If VarType(ws.Cells(i, 1).Value) = vbString And ws.Cells(i, 1).Value <> "N/A" Then
-                    ' Copy the entire row to ResultsSheet
-                    ws.Rows(i).Copy Destination:=wsResults.Cells(resultRow, 1)
-                    resultRow = resultRow + 1
-                End If
-            Next i
+
+            ' Copy the remaining results to ResultsSheet
+            For Each tbl In ws.ListObjects
+                For i = 1 To tbl.ListRows.Count
+                    tbl.ListRows(i).Range.Copy Destination:=wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Offset(1, 0)
+                Next i
+            Next tbl
         End If
     Next ws
 End Sub
