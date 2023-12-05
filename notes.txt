@@ -1,1 +1,72 @@
 
+Sub Two()
+    ' Define variables
+    Dim wResults As Worksheet
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim rngCoreDetails As Range
+    Dim lastRow As Long
+    Dim coreDetails As String
+    Dim i As Long
+
+    ' Set worksheet
+    On Error Resume Next
+    Set wResults = ThisWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
+
+    ' Check if "ResultsSheet" exists
+    If Not wResults Is Nothing Then
+        ' Find the last row in the sheet
+        lastRow = wResults.Cells(wResults.Rows.Count, 1).End(xlUp).Row
+
+        ' Check if there are any results to send
+        If lastRow > 1 Then
+            ' Set range for core details columns
+            Set rngCoreDetails = wResults.Range("A1:I" & lastRow)
+
+            ' Concatenate core details for each row
+            For i = 2 To lastRow
+                coreDetails = coreDetails & "<tr>" & Join(Application.Index(rngCoreDetails.Value, i, 0), "<td>") & "</td></tr>"
+            Next i
+
+            ' Create Outlook application
+            On Error Resume Next
+            Set outlookApp = CreateObject("Outlook.Application")
+            On Error GoTo 0
+
+            ' Check if Outlook is available
+            If Not outlookApp Is Nothing Then
+                ' Create a new email
+                Set outlookMail = outlookApp.CreateItem(0)
+
+                ' Set email properties
+                With outlookMail
+                    .To = "j.kaaria@barclays.com"
+                    .Subject = "BTSY Affirmations"
+                    .HTMLBody = "<p>Core Details from ResultsSheet:</p>" & _
+                                "<table border='1' cellspacing='0' cellpadding='5'>" & _
+                                "<tr><th>Account Legal Name</th><th>Settle Legal Entity</th>" & _
+                                "<th>Trade ID</th><th>BARC Direction</th><th>Quantity</th>" & _
+                                "<th>Security Description</th><th>Clean Price</th>" & _
+                                "<th>Settle Date</th><th>Mat Date</th></tr>" & _
+                                coreDetails & _
+                                "</table>"
+                    ' Uncomment the line below if you want to display the email before sending
+                    '.Display
+                    ' Comment out the line above and uncomment the line below to send the email directly
+                    '.Send
+                End With
+
+                ' Release Outlook objects
+                Set outlookMail = Nothing
+                Set outlookApp = Nothing
+            Else
+                MsgBox "Outlook is not available.", vbExclamation
+            End If
+        Else
+            MsgBox "No results to send.", vbInformation
+        End If
+    Else
+        MsgBox "Sheet 'ResultsSheet' not found.", vbExclamation
+    End If
+End Sub
