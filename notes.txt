@@ -36,29 +36,23 @@ Sub CopyLDNResultsToResultsSheet()
             ' Loop through each table in the sheet
             For Each tbl In ws.ListObjects
                 ' Loop through each row in the table
-                For i = tbl.ListRows.Count To 1 Step -1
-                    ' Check if the first column contains a string and is "LDN"
-                    If IsNumeric(tbl.ListRows(i).Range.Cells(1, 1).Value) = False And tbl.ListRows(i).Range.Cells(1, 1).Value = "LDN" Then
+                For i = 1 To tbl.ListRows.Count
+                    ' Check if the VLOOKUP result is "N/A" or "LDN"
+                    If tbl.ListRows(i).Range.Cells(1, 1).Formula = "N/A" Or tbl.ListRows(i).Range.Cells(1, 1).Formula = "LDN" Then
                         ' Copy the entire row to ResultsSheet
                         tbl.ListRows(i).Range.Copy Destination:=wsResults.Cells(resultRow, 1)
                         resultRow = resultRow + 1
-                    Else
-                        ' Delete the row when the condition is not met
-                        tbl.ListRows(i).Delete
                     End If
                 Next i
             Next tbl
         Else
             ' If the sheet doesn't have tables, loop through each row in the sheet
-            For i = lastRow To 1 Step -1
-                ' Check if the first column contains a string and is "LDN"
-                If IsNumeric(ws.Cells(i, 1).Value) = False And ws.Cells(i, 1).Value = "LDN" Then
+            For i = 1 To lastRow
+                ' Check if the VLOOKUP result is "N/A" or "LDN"
+                If ws.Cells(i, 1).Formula = "N/A" Or ws.Cells(i, 1).Formula = "LDN" Then
                     ' Copy the entire row to ResultsSheet
                     ws.Rows(i).Copy Destination:=wsResults.Cells(resultRow, 1)
                     resultRow = resultRow + 1
-                Else
-                    ' Delete the row when the condition is not met
-                    ws.Rows(i).Delete
                 End If
             Next i
         End If
