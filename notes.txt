@@ -1,1 +1,61 @@
 
+Sub CopyLDNResultsToResultsSheet()
+    Dim wsWorkbook As Workbook
+    Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsLNBR As Worksheet
+    Dim wsResults As Worksheet
+    Dim lastRow As Long, resultRow As Long
+    Dim table1 As ListObject, table2 As ListObject
+    Dim i As Long
+
+    ' Set workbook and sheets
+    Set wsWorkbook = ThisWorkbook
+    Set wsBBI = wsWorkbook.Sheets("BBI")
+    Set wsPLC = wsWorkbook.Sheets("PLC")
+    Set wsBCIN = wsWorkbook.Sheets("BCIN")
+    Set wsLNBR = wsWorkbook.Sheets("LNBR")
+
+    ' Create or reference "ResultsSheet"
+    On Error Resume Next
+    Set wsResults = wsWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
+    If wsResults Is Nothing Then
+        ' If "ResultsSheet" sheet doesn't exist, create it
+        Set wsResults = wsWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsResults.Name = "ResultsSheet"
+    End If
+
+    ' Loop through each sheet
+    For Each ws In Array(wsBBI, wsPLC, wsBCIN, wsLNBR)
+        ' Find last row in the sheet
+        lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+        ' Initialize resultRow for ResultsSheet
+        resultRow = wsResults.Cells(wsResults.Rows.Count, 1).End(xlUp).Row + 1
+
+        ' Check if the sheet has tables
+        If ws.ListObjects.Count > 0 Then
+            ' Loop through each table in the sheet
+            For Each tbl In ws.ListObjects
+                ' Loop through each row in the table
+                For i = 1 To tbl.ListRows.Count
+                    ' Check if the first column returns "LDN" instead of "N/A" VLOOKUP value
+                    If tbl.ListRows(i).Range.Cells(1, 1).Value = "LDN" Then
+                        ' Copy the entire row to ResultsSheet
+                        tbl.ListRows(i).Range.EntireRow.Copy Destination:=wsResults.Cells(resultRow, 1)
+                        resultRow = resultRow + 1
+                    End If
+                Next i
+            Next tbl
+        Else
+            ' If the sheet doesn't have tables, loop through each row in the sheet
+            For i = 1 To lastRow
+                ' Check if the first column returns "LDN" instead of "N/A" VLOOKUP value
+                If ws.Cells(i, 1).Value = "LDN" Then
+                    ' Copy the entire row to ResultsSheet
+                    ws.Rows(i).Copy Destination:=wsResults.Cells(resultRow, 1)
+                    resultRow = resultRow + 1
+                End If
+            Next i
+        End If
+    Next ws
+End Sub
