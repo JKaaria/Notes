@@ -37,8 +37,8 @@ Sub CopyLDNResultsToResultsSheet()
             For Each tbl In ws.ListObjects
                 ' Loop through each row in the table
                 For i = 1 To tbl.ListRows.Count
-                    ' Check if the first column contains a string and is "LDN"
-                    If VarType(tbl.ListRows(i).Range.Cells(1, 1).Value) = vbString And tbl.ListRows(i).Range.Cells(1, 1).Value = "LDN" Then
+                    ' Check if the first column contains a string and is not "N/A"
+                    If VarType(tbl.ListRows(i).Range.Cells(1, 1).Value) = vbString And tbl.ListRows(i).Range.Cells(1, 1).Value <> "N/A" Then
                         ' Copy the entire row to ResultsSheet
                         tbl.ListRows(i).Range.Copy Destination:=wsResults.Cells(resultRow, 1)
                         resultRow = resultRow + 1
@@ -48,8 +48,8 @@ Sub CopyLDNResultsToResultsSheet()
         Else
             ' If the sheet doesn't have tables, loop through each row in the sheet
             For i = 1 To lastRow
-                ' Check if the first column contains a string and is "LDN"
-                If VarType(ws.Cells(i, 1).Value) = vbString And ws.Cells(i, 1).Value = "LDN" Then
+                ' Check if the first column contains a string and is not "N/A"
+                If VarType(ws.Cells(i, 1).Value) = vbString And ws.Cells(i, 1).Value <> "N/A" Then
                     ' Copy the entire row to ResultsSheet
                     ws.Rows(i).Copy Destination:=wsResults.Cells(resultRow, 1)
                     resultRow = resultRow + 1
@@ -58,4 +58,3 @@ Sub CopyLDNResultsToResultsSheet()
         End If
     Next ws
 End Sub
-
