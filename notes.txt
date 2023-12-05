@@ -1,4 +1,3 @@
-
 Sub DeleteRowsNotLDN()
     Dim wsWorkbook As Workbook
     Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsLNBR As Worksheet
@@ -22,7 +21,7 @@ Sub DeleteRowsNotLDN()
             ' Check if column A does not contain "LDN"
             If UCase(ws.Cells(i, 1).Value) <> "LDN" Then
                 ' Delete the entire row
-                ws.Rows(i).Delete
+                ws.Rows(i).EntireRow.Delete
             End If
         Next i
     Next ws
