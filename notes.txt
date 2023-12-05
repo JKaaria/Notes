@@ -1,16 +1,1 @@
-Sub DeleteFirstRowInResultsSheet()
-    Dim wResults As Worksheet
-    
-    ' Set worksheet
-    On Error Resume Next
-    Set wResults = ThisWorkbook.Sheets("ResultsSheet")
-    On Error GoTo 0
-    
-    ' Check if "ResultsSheet" exists
-    If Not wResults Is Nothing Then
-        ' Delete the first row (Row A)
-        wResults.Rows(1).Delete
-    Else
-        MsgBox "Sheet 'ResultsSheet' not found.", vbExclamation
-    End If
-End Sub
+
