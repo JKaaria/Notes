@@ -1,40 +1,100 @@
-Sub GenerateAmendmentsSheet()
-    Dim wsSearch As Worksheet
-    Dim wsRecent As Worksheet
-    Dim wsAmendments As Worksheet
-    Dim colSearch As Integer
-    Dim colRecent As Integer
-    Dim amendmentRow As Integer
+Sub SendWorkbookAsAttachmentWithTable()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim fileName As String
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim tableRange As Range
+    Dim colHeader As String
     
-    ' Set references to the sheets
-    Set wsSearch = ThisWorkbook.Sheets("Search")
-    Set wsRecent = ThisWorkbook.Sheets("Recent")
+    ' Set the filename to the current workbook
+    fileName = ThisWorkbook.FullName
     
-    ' Add a new sheet for amendments
-    Set wsAmendments = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-    wsAmendments.Name = "Amendments"
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your actual sheet name
     
-    amendmentRow = 1 ' Initialize row for amendments
+    ' Find the last row in column G
+    lastRow = ws.Cells(ws.Rows.Count, "G").End(xlUp).Row
     
-    ' Loop through columns in "Search" sheet
-    For colSearch = 1 To wsSearch.UsedRange.Columns.Count
-        ' Check if column header matches in "Recent" sheet
-        If wsSearch.Cells(1, colSearch).Value <> wsRecent.Cells(1, colSearch).Value Then
-            ' If not, list the amendment in the "Amendments" sheet
-            wsAmendments.Cells(amendmentRow, 1).Value = "Column " & colSearch
-            wsAmendments.Cells(amendmentRow, 2).Value = "Change to: " & wsSearch.Cells(1, colSearch).Value
-            amendmentRow = amendmentRow + 1
-        End If
-    Next colSearch
+    ' Set the range for the table (change column headers as needed)
+    Set tableRange = ws.Range("F1:G" & lastRow)
     
-    ' If there are amendments
-    If amendmentRow > 1 Then
-        MsgBox "Amendments generated. Check the 'Amendments' sheet.", vbInformation
-    Else
-        MsgBox "Column headers match!", vbInformation
-        ' Delete the empty "Amendments" sheet
-        Application.DisplayAlerts = False
-        wsAmendments.Delete
-        Application.DisplayAlerts = True
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
     End If
+
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Customize email properties
+    With outlookMail
+        .To = "j.kaaria@barclays.com"
+        .Subject = "T+0 Central Bank UST Bookings"
+        .HTMLBody = "<p>Please find the attached workbook. Below is the table from the TradeData sheet:</p>" & _
+                    RangetoHTML(tableRange)
+        .Attachments.Add fileName
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
 End Sub
+
+Function RangetoHTML(rng As Range)
+    Dim fso As Object
+    Dim ts As Object
+    Dim TempFile As String
+    Dim TempWB As Workbook
+
+    TempFile = Environ$("temp") & "\" & Format(Now, "dd-mm-yy h-mm-ss") & ".htm"
+
+    ' Copy the range and create a new workbook to paste the data
+    rng.Copy
+    Set TempWB = Workbooks.Add(1)
+    With TempWB.Sheets(1)
+        .Cells(1).PasteSpecial Paste:=8
+        .Cells(1).PasteSpecial xlPasteValues, , False, False
+        .Cells(1).PasteSpecial xlPasteFormats, , False, False
+        .Cells(1).Select
+        Application.CutCopyMode = False
+        On Error Resume Next
+        .DrawingObjects.Visible = True
+        .DrawingObjects.Delete
+        On Error GoTo 0
+    End With
+
+    ' Publish the sheet to an HTML file
+    With TempWB.PublishObjects.Add( _
+         SourceType:=xlSourceRange, _
+         Filename:=TempFile, _
+         Sheet:=TempWB.Sheets(1).Name, _
+         Source:=TempWB.Sheets(1).UsedRange.Address, _
+         HtmlType:=xlHtmlStatic)
+        .Publish (True)
+    End With
+
+    ' Read all data from the HTML file into RangetoHTML
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set ts = fso.GetFile(TempFile).OpenAsTextStream(1, -2)
+    RangetoHTML = ts.ReadAll
+    ts.Close
+    RangetoHTML = Replace(RangetoHTML, "align=center x:publishsource=", _
+                          "align=left x:publishsource=")
+
+    ' Close and delete the temporary workbook and HTML file
+    TempWB.Close SaveChanges:=False
+    Kill TempFile
+
+    Set ts = Nothing
+    Set fso = Nothing
+    Set TempWB = Nothing
+End Function
