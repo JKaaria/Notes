@@ -1,1 +1,22 @@
-
+Sub CompareColumnHeaders()
+    Dim wsSearch As Worksheet
+    Dim wsRecent As Worksheet
+    Dim colSearch As Integer
+    Dim colRecent As Integer
+    
+    ' Set references to the sheets
+    Set wsSearch = ThisWorkbook.Sheets("Search")
+    Set wsRecent = ThisWorkbook.Sheets("Recent")
+    
+    ' Loop through columns in "Search" sheet
+    For colSearch = 1 To wsSearch.UsedRange.Columns.Count
+        ' Check if column header matches in "Recent" sheet
+        If wsSearch.Cells(1, colSearch).Value <> wsRecent.Cells(1, colSearch).Value Then
+            MsgBox "Column header mismatch in column " & colSearch, vbExclamation
+            Exit Sub
+        End If
+    Next colSearch
+    
+    ' If all headers match
+    MsgBox "Column headers match!", vbInformation
+End Sub
