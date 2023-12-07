@@ -1,22 +1,40 @@
-Sub CompareColumnHeaders()
+Sub GenerateAmendmentsSheet()
     Dim wsSearch As Worksheet
     Dim wsRecent As Worksheet
+    Dim wsAmendments As Worksheet
     Dim colSearch As Integer
     Dim colRecent As Integer
+    Dim amendmentRow As Integer
     
     ' Set references to the sheets
     Set wsSearch = ThisWorkbook.Sheets("Search")
     Set wsRecent = ThisWorkbook.Sheets("Recent")
     
+    ' Add a new sheet for amendments
+    Set wsAmendments = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    wsAmendments.Name = "Amendments"
+    
+    amendmentRow = 1 ' Initialize row for amendments
+    
     ' Loop through columns in "Search" sheet
     For colSearch = 1 To wsSearch.UsedRange.Columns.Count
         ' Check if column header matches in "Recent" sheet
         If wsSearch.Cells(1, colSearch).Value <> wsRecent.Cells(1, colSearch).Value Then
-            MsgBox "Column header mismatch in column " & colSearch, vbExclamation
-            Exit Sub
+            ' If not, list the amendment in the "Amendments" sheet
+            wsAmendments.Cells(amendmentRow, 1).Value = "Column " & colSearch
+            wsAmendments.Cells(amendmentRow, 2).Value = "Change to: " & wsSearch.Cells(1, colSearch).Value
+            amendmentRow = amendmentRow + 1
         End If
     Next colSearch
     
-    ' If all headers match
-    MsgBox "Column headers match!", vbInformation
+    ' If there are amendments
+    If amendmentRow > 1 Then
+        MsgBox "Amendments generated. Check the 'Amendments' sheet.", vbInformation
+    Else
+        MsgBox "Column headers match!", vbInformation
+        ' Delete the empty "Amendments" sheet
+        Application.DisplayAlerts = False
+        wsAmendments.Delete
+        Application.DisplayAlerts = True
+    End If
 End Sub
