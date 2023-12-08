@@ -1,0 +1,18 @@
+Subject: Confirmation of Barclays UST Booking Details
+
+Dear [Client's Name],
+
+I trust this message finds you well.
+
+As part of our ongoing commitment to streamline processes, we are reaching out for your confirmation on the Settlement Standing Instruction (SSI) details associated with Barclays U.S. Treasury (UST) bookings. Your response, quoting the SSI you have on record for Barclays in UST, is crucial in validating our automated T+0 reconciliation logic.
+
+Please take a moment to review the information and respond with the SSI details you are aware of for Barclays UST. Your timely confirmation by [insert deadline] ensures the accuracy of our records and the success of our UST booking process.
+
+Thank you for your cooperation, and we appreciate your contribution to this vital initiative.
+
+Best regards,
+
+[Your Name]
+[Your Position]
+Barclays [Your Division/Department]
+[Your Contact Information]
