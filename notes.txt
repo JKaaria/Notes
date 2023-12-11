@@ -1,0 +1,26 @@
+Sub FilterAndSort()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to the actual sheet name
+
+    ' Find the last row with data
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+
+    ' Apply AutoFilter to filter column J
+    ws.Range("A1:J" & lastRow).AutoFilter Field:=10, Criteria1:="FI TCS UK SA"
+
+    ' Sort the visible rows by column A in ascending order
+    With ws.Sort
+        .SetRange ws.Range("A1:J" & lastRow)
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+
+    ' Turn off the AutoFilter
+    ws.AutoFilterMode = False
+End Sub
