@@ -24,3 +24,27 @@ Sub FilterAndSort()
     ' Turn off the AutoFilter
     ws.AutoFilterMode = False
 End Sub
+
+Certainly, let's delve into potential negatives and insights based on the provided data:
+
+1. **Days To Resolve (Average):**
+   - **Negative:** While the average days to resolve are consistent, aiming for a lower average would indicate quicker issue resolution, which could enhance operational efficiency.
+
+2. **Volume / Settlement Trend:**
+   - **Insight:** Peaks in settlement volume might strain the capacity of the settlements department. It's crucial to assess whether the department is adequately staffed and equipped to handle high-volume periods.
+
+3. **Volume / Fail Trend:**
+   - **Insight:** Correlation between settlement volume and fails suggests that increased workload may lead to a higher chance of settlement failures. Identifying and addressing the root causes of these failures is crucial.
+
+4. **All Fails Daily Average:**
+   - **Negative:** A relatively stable but elevated daily average of fails could indicate persistent challenges in the settlements process. Reducing the daily average should be a priority.
+
+5. **>7D, >15D, >30D Fails Daily Average:**
+   - **Negative:** Increasing daily averages for fails as settlement ages (>15D and >30D) point to challenges in resolving aged issues. Reducing the number of aged fails is critical for efficient operations.
+
+**Overall Insights:**
+   - Aiming for a lower average in days to resolve and fails can contribute to improved efficiency.
+   - Periods of high settlement volume may necessitate additional resources or process optimizations to prevent a corresponding increase in fails.
+   - Investigating and addressing the root causes of aged settlement issues (>15D and >30D) is crucial for reducing overall operational risk.
+
+Addressing these areas can lead to a more robust and efficient fixed income operations and settlements department. Regular reviews and improvements in response to insights gained from data analysis are key to maintaining a high standard of performance.
