@@ -1,1 +1,14 @@
+Sub Four()
+    ' Clear contents of BBI, PLC, BCIN, LNBR sheets
+    wsBBI.Cells.ClearContents
+    wsPLC.Cells.ClearContents
+    wsBCIN.Cells.ClearContents
+    wsLNBR.Cells.ClearContents
 
+    ' Delete ResultsSheet
+    Application.DisplayAlerts = False
+    On Error Resume Next
+    wResults.Delete
+    On Error GoTo 0
+    Application.DisplayAlerts = True
+End Sub
