@@ -1,0 +1,36 @@
+Sub ImportDataFromSourceFile()
+    Dim sourceFolderPath As String
+    Dim sourceFileName As String
+    Dim sourceFilePath As String
+    Dim wsSource As Worksheet
+    Dim wsTarget As Worksheet
+
+    ' Define the source folder path
+    sourceFolderPath = ThisWorkbook.Path & "\SWS_ISourceFile\"
+
+    ' Define the source file name (you can adjust the file name as needed)
+    sourceFileName = "SWS_ISource_File.xls" ' Change to the actual file name
+
+    ' Construct the full path to the source file
+    sourceFilePath = sourceFolderPath & sourceFileName
+
+    ' Check if the source file exists
+    If Dir(sourceFilePath) = "" Then
+        MsgBox "Source file not found.", vbExclamation
+    Else
+        ' Set the source worksheet
+        Workbooks.Open sourceFilePath
+        Set wsSource = ActiveWorkbook.Sheets(1)
+
+        ' Set the target worksheet in the active workbook (adjust the sheet index as needed)
+        Set wsTarget = ThisWorkbook.Sheets(1)
+
+        ' Copy data from source to target
+        wsSource.UsedRange.Copy Destination:=wsTarget.Range("A1")
+
+        ' Close the source workbook without saving changes
+        ActiveWorkbook.Close SaveChanges:=False
+
+        MsgBox "Data imported successfully!", vbInformation
+    End If
+End Sub
