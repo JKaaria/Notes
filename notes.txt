@@ -1,34 +1,35 @@
 Sub ImportDataFromSourceFile()
-    ' Static folder path
     Dim sourceFolderPath As String
-    sourceFolderPath = "C:\Your\Static\Folder\Path\" ' Replace with your actual static folder path
-
-    ' Define the source file name (you can adjust the file name as needed)
     Dim sourceFileName As String
-    sourceFileName = "SWS_ISource_File.xls" ' Change to the actual file name
+    Dim sourceFilePath As String
+    Dim wsSource As Worksheet
+    Dim wsTarget As Worksheet
+
+    ' Define the source folder path
+    sourceFolderPath = ThisWorkbook.Path & "\SWS_ISourceFile\"
+
+    ' Define the source file name pattern
+    sourceFileName = "sstemp*.*" ' This assumes the file extension can be anything
 
     ' Construct the full path to the source file
-    Dim sourceFilePath As String
-    sourceFilePath = sourceFolderPath & sourceFileName
+    sourceFilePath = Dir(sourceFolderPath & sourceFileName)
 
-    ' Use error handling to check if the file exists
-    Dim wsSource As Worksheet
-    On Error Resume Next
-    Set wsSource = Workbooks.Open(sourceFilePath).Sheets(1)
-    On Error GoTo 0
-
-    If wsSource Is Nothing Then
+    ' Check if the source file exists
+    If sourceFilePath = "" Then
         MsgBox "Source file not found.", vbExclamation
     Else
+        ' Set the source worksheet
+        Workbooks.Open sourceFolderPath & sourceFilePath
+        Set wsSource = ActiveWorkbook.Sheets(1)
+
         ' Set the target worksheet in the active workbook (adjust the sheet index as needed)
-        Dim wsTarget As Worksheet
         Set wsTarget = ThisWorkbook.Sheets(1)
 
         ' Copy data from source to target
         wsSource.UsedRange.Copy Destination:=wsTarget.Range("A1")
 
         ' Close the source workbook without saving changes
-        wsSource.Parent.Close SaveChanges:=False
+        ActiveWorkbook.Close SaveChanges:=False
 
         MsgBox "Data imported successfully!", vbInformation
     End If
