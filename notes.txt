@@ -1,1 +1,101 @@
+Sub Four()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim wsWorkbook As Workbook
+    Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsLNBR As Worksheet
+    Dim i As Long
+    Dim isBCINLNBR As Boolean
+    
+    ' Set workbook and sheets
+    Set wsWorkbook = ThisWorkbook
+    Set wsBBI = wsWorkbook.Sheets("BBI")
+    Set wsPLC = wsWorkbook.Sheets("PLC")
+    Set wsBCIN = wsWorkbook.Sheets("BCIN")
+    Set wsLNBR = wsWorkbook.Sheets("LNBR")
+
+    ' Initialize emailBody
+    emailBody = "Please find the details below:" & vbCrLf & vbCrLf
+    
+    ' Add BBI data to emailBody
+    emailBody = emailBody & "BBI Data:" & vbCrLf
+    emailBody = emailBody & GetTableData(wsBBI)
+    
+    ' Add PLC data to emailBody
+    emailBody = emailBody & vbCrLf & "PLC Data:" & vbCrLf
+    emailBody = emailBody & GetTableData(wsPLC)
+    
+    ' Add BCIN data to emailBody
+    emailBody = emailBody & vbCrLf & "BCIN Data:" & vbCrLf
+    emailBody = emailBody & GetTableData(wsBCIN)
+    
+    ' Add LNBR data to emailBody
+    emailBody = emailBody & vbCrLf & "LNBR Data:" & vbCrLf
+    emailBody = emailBody & GetTableData(wsLNBR)
+
+    ' Clear contents of column A
+    Columns("A:A").ClearContents
+
+    ' Set cell A1 with the formula
+    Range("A1").FormulaR1C1 = "MO Action Required"
+
+    ' AutoFit the entire column
+    Cells.EntireColumn.AutoFit
+
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
+
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Customize email properties
+    With outlookMail
+        .To = "usfailsmanagement@barclayscorp.com"
+        .CC = "ukratessalessupport@barclays.com"
+        .Subject = "LDN UST DKs - PIs MO Action Points"
+        .Body = emailBody
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
+
+Function GetTableData(ws As Worksheet) As String
+    Dim lastRow As Long
+    Dim i As Long
+    Dim tableData As String
+    Dim isLDN As Boolean
+
+    ' Find the last row in the sheet
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    ' Initialize tableData
+    tableData = ""
+
+    ' Loop through each row in the sheet
+    For i = 1 To lastRow
+        ' Check if the first column returns "LDN" instead of "N/A" VLOOKUP value
+        isLDN = (ws.Cells(i, 1).Value = "LDN")
+
+        ' If it's LDN, add the entire row to tableData
+        If isLDN Then
+            ' Copy the entire row to tableData
+            tableData = tableData & Join(Application.Transpose(Application.Transpose(ws.Rows(i).Value)), vbTab) & vbCrLf
+        End If
+    Next i
+
+    ' Return the tableData
+    GetTableData = tableData
+End Function
 
