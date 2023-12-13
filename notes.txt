@@ -1,7 +1,6 @@
 Sub Three()
     Dim outlookApp As Object
     Dim outlookMail As Object
-    Dim fileName As String
     Dim emailBody As String
     Dim wResults As Worksheet
     Dim cell As Range
@@ -35,12 +34,6 @@ Sub Three()
     ' AutoFit the entire column
     Cells.EntireColumn.AutoFit
     
-    ' Save the workbook
-    ThisWorkbook.Save
-    
-    ' Set the filename to the current workbook
-    fileName = ThisWorkbook.FullName
-    
     ' Create Outlook Application
     On Error Resume Next
     Set outlookApp = GetObject(, "Outlook.Application")
@@ -58,9 +51,7 @@ Sub Three()
         .To = "usfailsmanagement@barclayscorp.com"
         .CC = "ukratessalessupport@barclays.com"
         .Subject = "LDN UST DKs - PIs MO Action Points"
-        .Body = "Please find the attached workbook containing IDN UST DK's + Client Contacts." & vbCrLf & vbCrLf & emailBody
-        ' Attach the workbook
-        .Attachments.Add fileName
+        .Body = "Please find the details below:" & vbCrLf & vbCrLf & emailBody
         ' Uncomment the line below if you want to display the email before sending
         '.Display
         ' Comment out the line above and uncomment the line below to send the email directly
