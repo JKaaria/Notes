@@ -14,14 +14,14 @@ Sub ImportDataFromSourceFile()
     ' Construct the full path to the source file
     sourceFilePath = sourceFolderPath & sourceFileName
 
-    ' Check if the source file exists
-    If Dir(sourceFilePath) = "" Then
+    ' Use error handling to check if the file exists
+    On Error Resume Next
+    Set wsSource = Workbooks.Open(sourceFilePath).Sheets(1)
+    On Error GoTo 0
+
+    If wsSource Is Nothing Then
         MsgBox "Source file not found.", vbExclamation
     Else
-        ' Set the source worksheet
-        Workbooks.Open sourceFilePath
-        Set wsSource = ActiveWorkbook.Sheets(1)
-
         ' Set the target worksheet in the active workbook (adjust the sheet index as needed)
         Set wsTarget = ThisWorkbook.Sheets(1)
 
@@ -29,7 +29,7 @@ Sub ImportDataFromSourceFile()
         wsSource.UsedRange.Copy Destination:=wsTarget.Range("A1")
 
         ' Close the source workbook without saving changes
-        ActiveWorkbook.Close SaveChanges:=False
+        wsSource.Parent.Close SaveChanges:=False
 
         MsgBox "Data imported successfully!", vbInformation
     End If
