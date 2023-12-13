@@ -51,7 +51,8 @@ Sub Three()
         .To = "usfailsmanagement@barclayscorp.com"
         .CC = "ukratessalessupport@barclays.com"
         .Subject = "LDN UST DKs - PIs MO Action Points"
-        .Body = "Please find the details below:" & vbCrLf & vbCrLf & emailBody
+        .Body = "Please find the details below:" & vbCrLf & vbCrLf & "<table>" & emailBody & "</table>"
+        .HTMLBody = "<table border='1'>" & emailBody & "</table>" ' Set as HTML to format as a table
         ' Uncomment the line below if you want to display the email before sending
         '.Display
         ' Comment out the line above and uncomment the line below to send the email directly
