@@ -4,6 +4,7 @@ Sub Three()
     Dim fileName As String
     Dim emailBody As String
     Dim wResults As Worksheet
+    Dim cell As Range
 
     ' Set workbook and ResultsSheet
     Set wsWorkbook = ThisWorkbook
@@ -18,8 +19,10 @@ Sub Three()
         wResults.Name = "ResultsSheet"
     End If
 
-    ' Copy the contents of ResultsSheet to emailBody
-    emailBody = wResults.UsedRange.Value
+    ' Concatenate the contents of ResultsSheet to emailBody
+    For Each cell In wResults.UsedRange
+        emailBody = emailBody & cell.Value & vbCrLf
+    Next cell
 
     ' Clear contents of column A
     Columns("A:A").Select
