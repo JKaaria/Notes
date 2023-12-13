@@ -1,25 +1,36 @@
-Sub TransposeRowToColumn()
+Sub AutomateWorkflow()
     Dim ws As Worksheet
-    Dim lastColumn As Long
-    Dim sourceRange As Range, targetRange As Range
+    Dim lastRow As Long
+    Dim filterCriteria As Variant
+    Dim delphiRange As Range
 
     ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to the actual sheet name
+    Set ws = ThisWorkbook.Sheets("Delphi") ' Change "Delphi" to the actual sheet name
 
-    ' Find the last column with data in row 1
-    lastColumn = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    ' Find the last row with data
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
 
-    ' Set the source range (row 1)
-    Set sourceRange = ws.Range(ws.Cells(1, 1), ws.Cells(1, lastColumn))
+    ' Set the filter criteria for column A
+    filterCriteria = Array("Open", "#N/A")
 
-    ' Set the target range (column A starting from row 2)
-    Set targetRange = ws.Cells(2, 1)
+    ' Apply AutoFilter to column A
+    ws.AutoFilterMode = False
+    ws.Range("A1:A" & lastRow).AutoFilter Field:=1, Criteria1:=filterCriteria, Operator:=xlFilterValues
 
-    ' Transpose the data
-    sourceRange.Copy
-    targetRange.PasteSpecial Paste:=xlPasteAll, Operation:=xlNone, SkipBlanks:=False, Transpose:=True
+    ' Remove rows with "Not For Us" in column B
+    On Error Resume Next
+    ws.Range("B2:B" & lastRow).SpecialCells(xlCellTypeVisible).EntireRow.Delete
+    On Error GoTo 0
 
-    ' Clear the original row
-    sourceRange.ClearContents
+    ' Clear existing grouping
+    On Error Resume Next
+    ws.Outline.ShowLevels RowLevels:=0, ColumnLevels:=0
+    On Error GoTo 0
+
+    ' Group by Source Status (Column O)
+    Set delphiRange = ws.Range("A1:O" & lastRow)
+    delphiRange.Columns("O").EntireColumn.Group
+
+    ' Turn off AutoFilter
+    ws.AutoFilterMode = False
 End Sub
-
