@@ -1,1 +1,25 @@
+Sub TransposeRowToColumn()
+    Dim ws As Worksheet
+    Dim lastColumn As Long
+    Dim sourceRange As Range, targetRange As Range
+
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to the actual sheet name
+
+    ' Find the last column with data in row 1
+    lastColumn = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+
+    ' Set the source range (row 1)
+    Set sourceRange = ws.Range(ws.Cells(1, 1), ws.Cells(1, lastColumn))
+
+    ' Set the target range (column A starting from row 2)
+    Set targetRange = ws.Cells(2, 1)
+
+    ' Transpose the data
+    sourceRange.Copy
+    targetRange.PasteSpecial Paste:=xlPasteAll, Operation:=xlNone, SkipBlanks:=False, Transpose:=True
+
+    ' Clear the original row
+    sourceRange.ClearContents
+End Sub
 
