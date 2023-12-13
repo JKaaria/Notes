@@ -3,7 +3,21 @@ Sub Three()
     Dim outlookMail As Object
     Dim fileName As String
     Dim emailBody As String
+    Dim wResults As Worksheet
+
+    ' Set workbook and ResultsSheet
+    Set wsWorkbook = ThisWorkbook
+    On Error Resume Next
+    Set wResults = wsWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
     
+    ' Check if ResultsSheet exists
+    If wResults Is Nothing Then
+        ' If ResultsSheet doesn't exist, create it
+        Set wResults = wsWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wResults.Name = "ResultsSheet"
+    End If
+
     ' Copy the contents of ResultsSheet to emailBody
     emailBody = wResults.UsedRange.Value
 
@@ -61,4 +75,3 @@ Sub Three()
     On Error GoTo 0
     Application.DisplayAlerts = True
 End Sub
-
