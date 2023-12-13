@@ -6,7 +6,7 @@ Sub ImportDataFromSourceFile()
     Dim wsTarget As Worksheet
 
     ' Define the source folder path
-    sourceFolderPath = ThisWorkbook.Path & "\SWS_ISourceFile\"
+    sourceFolderPath = ThisWorkbook.Path & "\"
 
     ' Define the source file name pattern
     sourceFileName = "sstemp*.*" ' This assumes the file extension can be anything
