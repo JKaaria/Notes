@@ -1,1 +1,43 @@
 
+Sub One()
+    Dim wsWorkbook As Workbook
+    Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsLNBR As Worksheet
+    Dim tbl As ListObject
+    Dim lastRow As Long, i As Long
+    Dim ws As Worksheet
+    
+    ' Set workbook and sheets
+    Set wsWorkbook = ThisWorkbook
+    Set wsBBI = wsWorkbook.Sheets("BBI")
+    Set wsPLC = wsWorkbook.Sheets("PLC")
+    Set wsBCIN = wsWorkbook.Sheets("BCIN")
+    Set wsLNBR = wsWorkbook.Sheets("LNBR") ' Corrected from INBR
+
+    ' Loop through each sheet
+    For Each ws In Array(wsBBI, wsPLC, wsBCIN, wsLNBR) ' Corrected from INBR
+        ' Check if the sheet has tables
+        If ws.ListObjects.Count > 0 Then
+            ' Loop through each table in the sheet
+            For Each tbl In ws.ListObjects
+                ' Loop through each row in the table
+                For i = tbl.ListRows.Count To 1 Step -1
+                    ' Check if the first column returns "#N/A" in VLOOKUP value
+                    If IsError(Application.VLookup(tbl.ListRows(i).Range.Cells(1, 1).Value, ws.Range("A:B"), 2, False)) Then
+                        ' Preserve VLOOKUP formula in column A and clear other columns
+                        tbl.ListRows(i).Range.Offset(0, 1).Resize(, tbl.ListRows(i).Range.Columns.Count - 1).ClearContents
+                    End If
+                Next i
+            Next tbl
+        Else
+            ' If the sheet doesn't have tables, loop through each row in the sheet
+            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+            For i = lastRow To 1 Step -1
+                ' Check if the first column returns "#N/A" in VLOOKUP value
+                If IsError(Application.VLookup(ws.Cells(i, 1).Value, ws.Range("A:B"), 2, False)) Then
+                    ' Preserve VLOOKUP formula in column A and clear other columns
+                    ws.Rows(i).Offset(0, 1).Resize(, ws.Rows(i).Columns.Count - 1).ClearContents
+                End If
+            Next i
+        End If
+    Next ws
+End Sub
