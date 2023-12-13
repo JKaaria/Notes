@@ -1,1 +1,159 @@
 
+can you update this script so that after all operations are run, the file clears the contents of the BBI, PLC, BCIN and LNBR sheets, as well as deletes the results sheet?:
+
+Sub One()
+    Dim wsWorkbook As Workbook
+    Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsINBR As Worksheet
+    Dim tbl As ListObject
+    Dim lastRow As Long, i As Long
+    Dim ws As Worksheet
+    
+    ' Set workbook and sheets
+    Set wsWorkbook = ThisWorkbook
+    Set wsBBI = wsWorkbook.Sheets("BBI")
+    Set wsPLC = wsWorkbook.Sheets("PLC")
+    Set wsBCIN = wsWorkbook.Sheets("BCIN")
+    Set wsINBR = wsWorkbook.Sheets("INBR")
+
+    ' Loop through each sheet
+    For Each ws In Array(wsBBI, wsPLC, wsBCIN, wsINBR)
+        ' Check if the sheet has tables
+        If ws.ListObjects.Count > 0 Then
+            ' Loop through each table in the sheet
+            For Each tbl In ws.ListObjects
+                ' Loop through each row in the table
+                For i = tbl.ListRows.Count To 1 Step -1
+                    ' Check if the first column returns "#N/A" in VLOOKUP value
+                    If IsError(Application.VLookup(tbl.ListRows(i).Range.Cells(1, 1).Value, ws.Range("A:B"), 2, False)) Then
+                        ' Delete the entire row
+                        tbl.ListRows(i).Delete
+                    End If
+                Next i
+            Next tbl
+        Else
+            ' If the sheet doesn't have tables, loop through each row in the sheet
+            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+            For i = lastRow To 1 Step -1
+                ' Check if the first column returns "#N/A" in VLOOKUP value
+                If IsError(Application.VLookup(ws.Cells(i, 1).Value, ws.Range("A:B"), 2, False)) Then
+                    ' Delete the entire row
+                    ws.Rows(i).Delete
+                End If
+            Next i
+        End If
+    Next ws
+End Sub
+
+Sub Two()
+    Dim wsWorkbook As Workbook
+    Dim wsBBI As Worksheet, wsPLC As Worksheet, wsBCIN As Worksheet, wsLNBR As Worksheet
+    Dim wResults As Worksheet
+    Dim lastRow As Long, resultRow As Long
+    Dim tbl As ListObject
+    Dim i As Long
+    
+    ' Set workbook and sheets
+    Set wsWorkbook = ThisWorkbook
+    Set wsBBI = wsWorkbook.Sheets("BBI")
+    Set wsPLC = wsWorkbook.Sheets("PLC")
+    Set wsBCIN = wsWorkbook.Sheets("BCIN")
+    Set wsLNBR = wsWorkbook.Sheets("LNBR")
+    
+    ' Create or reference "ResultsSheet"
+    On Error Resume Next
+    Set wResults = wsWorkbook.Sheets("ResultsSheet")
+    On Error GoTo 0
+    
+    If wResults Is Nothing Then
+        ' If "ResultsSheet" sheet doesn't exist, create it
+        Set wResults = wsWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wResults.Name = "ResultsSheet"
+    End If
+    
+    ' Loop through each sheet
+    For Each ws In Array(wsBBI, wsPLC, wsBCIN, wsLNBR)
+        ' Find last row in the sheet
+        lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        
+        ' Initialize resultRow for ResultsSheet
+        resultRow = wResults.Cells(wResults.Rows.Count, 1).End(xlUp).Row + 1
+        
+        ' Check if the sheet has tables
+        If ws.ListObjects.Count > 0 Then
+            ' Loop through each table in the sheet
+            For Each tbl In ws.ListObjects
+                ' Loop through each row in the table
+                For i = 1 To tbl.ListRows.Count
+                    ' Check if the first column returns "LDN" instead of "N/A" VLOOKUP value
+                    If tbl.ListRows(i).Range.Cells(1, 1).Value = "LDN" Then
+                        ' Copy the entire row to ResultsSheet
+                        tbl.ListRows(i).Range.EntireRow.Copy Destination:=wResults.Cells(resultRow, 1)
+                        resultRow = resultRow + 1
+                    End If
+                Next i
+            Next tbl
+        Else
+            ' If the sheet doesn't have tables, loop through each row in the sheet
+            For i = 1 To lastRow
+                ' Check if the first column returns "LDN" instead of "N/A" VLOOKUP value
+                If ws.Cells(i, 1).Value = "LDN" Then
+                    ' Copy the entire row to ResultsSheet
+                    ws.Rows(i).Copy Destination:=wResults.Cells(resultRow, 1)
+                    resultRow = resultRow + 1
+                End If
+            Next i
+        End If
+    Next ws
+End Sub
+
+Sub Three()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim fileName As String
+    
+    ' Clear contents of column A
+    Columns("A:A").Select
+    Selection.ClearContents
+    
+    ' Set cell A1 with the formula
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "MO Action Required"
+    
+    ' AutoFit the entire column
+    Cells.EntireColumn.AutoFit
+    
+    ' Save the workbook
+    ThisWorkbook.Save
+    
+    ' Set the filename to the current workbook
+    fileName = ThisWorkbook.FullName
+    
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+    
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
+    
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+    
+    ' Customize email properties
+    With outlookMail
+        .To = "jeremy.kaaria@barclays.com"
+        .Subject = "LDN UST DKs - PIs MO Action Points"
+        .Body = "Please find the attached workbook containing IDN UST DK's + Client Contacts."
+        ' Attach the workbook
+        .Attachments.Add fileName
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+    
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
