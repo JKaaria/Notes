@@ -1,1 +1,64 @@
+Sub Three()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim fileName As String
+    Dim emailBody As String
+    
+    ' Copy the contents of ResultsSheet to emailBody
+    emailBody = wResults.UsedRange.Value
+
+    ' Clear contents of column A
+    Columns("A:A").Select
+    Selection.ClearContents
+    
+    ' Set cell A1 with the formula
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "MO Action Required"
+    
+    ' AutoFit the entire column
+    Cells.EntireColumn.AutoFit
+    
+    ' Save the workbook
+    ThisWorkbook.Save
+    
+    ' Set the filename to the current workbook
+    fileName = ThisWorkbook.FullName
+    
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+    
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
+    
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+    
+    ' Customize email properties
+    With outlookMail
+        .To = "usfailsmanagement@barclayscorp.com"
+        .CC = "ukratessalessupport@barclays.com"
+        .Subject = "LDN UST DKs - PIs MO Action Points"
+        .Body = "Please find the attached workbook containing IDN UST DK's + Client Contacts." & vbCrLf & vbCrLf & emailBody
+        ' Attach the workbook
+        .Attachments.Add fileName
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+    
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+
+    ' Delete ResultsSheet
+    Application.DisplayAlerts = False
+    On Error Resume Next
+    wResults.Delete
+    On Error GoTo 0
+    Application.DisplayAlerts = True
+End Sub
 
