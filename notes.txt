@@ -1,24 +1,104 @@
-Function GetRecipientEmail(logicTable As Worksheet, value1 As Variant, value2 As Variant) As String
-    Dim lastRow As Long
-    Dim foundRowX As Range
-    Dim foundRowY As Range
+Sub EmailWithTableAndHeaders()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim bodyText As String
+    Dim ws As Worksheet
+    Dim logicTable As Worksheet
+    Dim columnArray As Variant
+    Dim col As Variant
+    Dim cellValue As String
+    Dim headerValue As String
     Dim recipientEmail As String
     
+    ' Set the active worksheet
+    Set ws = ActiveSheet
+    
+    ' Set the LogicTable worksheet
+    Set logicTable = ThisWorkbook.Sheets("LogicTable")
+
+    ' Set columns to copy
+    columnArray = Array("C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "V", "AA")
+
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
+
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Get recipient email from LogicTable based on matching criteria
+    recipientEmail = GetRecipientEmail(logicTable, ws.Range("M2").Value, ws.Range("O2").Value)
+
+    ' Customize email properties
+    With outlookMail
+        .To = recipientEmail ' Set "To" field to the recipient email from LogicTable
+        .Subject = ws.Range("O2").Value ' Set subject to the contents of cell O2
+
+        ' Construct the email body with headers and selected columns in table format
+        bodyText = "<html><body><p>Here are the selected columns:</p><table border='1' style='border-collapse: collapse;'>"
+
+        ' Add header row to the email body
+        bodyText = bodyText & "<tr>"
+        For Each col In columnArray
+            ' Get header value from the worksheet
+            headerValue = ws.Range(col & "1").Value
+            bodyText = bodyText & "<th>" & headerValue & "</th>"
+        Next col
+        bodyText = bodyText & "</tr>"
+
+        ' Loop through each row in the worksheet
+        For i = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row ' Assuming headers are in row 1
+            ' Append selected columns to the email body as a table row
+            bodyText = bodyText & "<tr>"
+            For Each col In columnArray
+                ' Convert cell value to string before appending to the body
+                cellValue = CStr(ws.Range(col & i).Value)
+                bodyText = bodyText & "<td>" & cellValue & "</td>"
+            Next col
+            bodyText = bodyText & "</tr>"
+        Next i
+
+        ' Close the table and body tags
+        bodyText = bodyText & "</table></body></html>"
+
+        ' Set the email body as HTML
+        .HTMLBody = bodyText
+
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
+
+Function GetRecipientEmail(logicTable As Worksheet, value1 As Variant, value2 As Variant) As String
+    Dim lastRow As Long
+    Dim lastColumn As Long
+    Dim emailColumn As Long
+    Dim foundRow As Range
+    Dim foundColumn As Range
+
     ' Find matching row based on value1 in LogicTable
     lastRow = logicTable.Cells(logicTable.Rows.Count, 1).End(xlUp).Row
-    Set foundRowX = logicTable.Range("A1:A" & lastRow).Find(What:=value1)
-    
-    ' Check if a match is found
-    If Not foundRowX Is Nothing Then
-        ' Find matching row based on value2 in LogicTable
-        Set foundRowY = logicTable.Rows(1).Find(What:=value2, LookIn:=xlValues, LookAt:=xlWhole)
-        
-        ' Check if a match is found
-        If Not foundRowY Is Nothing Then
-            ' Return the email address from the intersection of the respective x/y axis
-            recipientEmail = logicTable.Cells(foundRowX.Row, foundRowY.Column).Value
-        End If
+    Set foundRow = logicTable.Range("A1:A" & lastRow).Find(What:=value1)
+
+    ' Find matching column based on value2 in LogicTable
+    lastColumn = logicTable.Cells(1, logicTable.Columns.Count).End(xlToLeft).Column
+    Set foundColumn = logicTable.Range("A1").Resize(1, lastColumn).Find(What:=value2)
+
+    ' Check if both matching row and column are found
+    If Not foundRow Is Nothing And Not foundColumn Is Nothing Then
+        ' Get the email address from the intersection of matching row and column
+        GetRecipientEmail = logicTable.Cells(foundRow.Row, foundColumn.Column).Value
     End If
-    
-    GetRecipientEmail = recipientEmail
 End Function
