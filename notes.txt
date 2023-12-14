@@ -1,78 +1,52 @@
-Sub GroupAndEmailWithTable()
+Sub EmailWithTable()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim bodyText As String
     Dim ws As Worksheet
-    Dim lastRow As Long, i As Long
-    Dim dict As Object
-    Dim key As Variant
     
     ' Set the active worksheet
     Set ws = ActiveSheet
 
-    ' Find the last row in column O
-    lastRow = ws.Cells(ws.Rows.Count, "O").End(xlUp).Row
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
 
-    ' Create a dictionary to store groups
-    Set dict = CreateObject("Scripting.Dictionary")
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
 
-    ' Loop through each row in column O
-    For i = 2 To lastRow ' Assuming headers are in row 1
-        ' Check if the key (value in column O) already exists in the dictionary
-        If Not dict.Exists(ws.Cells(i, 15).Value) Then ' Assuming column O is column 15
-            ' If not, add a new key
-            dict.Add ws.Cells(i, 15).Value, New Collection
-        End If
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
 
-        ' Add the entire row to the collection under the corresponding key
-        dict(ws.Cells(i, 15).Value).Add ws.Rows(i).Value
-    Next i
+    ' Customize email properties
+    With outlookMail
+        .To = "recipient@example.com" ' Change to the actual recipient's email address
+        .Subject = ws.Range("O1").Value ' Set subject to the contents of cell O1
+        
+        ' Construct the email body with selected columns in table format
+        bodyText = "<html><body><p>Here are the selected columns:</p><table border='1' style='border-collapse: collapse;'>"
 
-    ' Loop through each group in the dictionary
-    For Each key In dict.keys
-        ' Create a new email for each group
-        Dim outlookApp As Object
-        Dim outlookMail As Object
-        Dim bodyText As String
+        ' Loop through each row in the worksheet
+        For i = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row ' Assuming headers are in row 1
+            ' Append selected columns to the email body as a table row
+            bodyText = bodyText & "<tr><td>" & ws.Cells(i, 1).Value & "</td><td>" & ws.Cells(i, 2).Value & "</td><td>" & ws.Cells(i, 6).Value & "</td></tr>"
+        Next i
 
-        ' Create Outlook Application
-        On Error Resume Next
-        Set outlookApp = GetObject(, "Outlook.Application")
-        On Error GoTo 0
+        ' Close the table and body tags
+        bodyText = bodyText & "</table></body></html>"
 
-        If outlookApp Is Nothing Then
-            Set outlookApp = CreateObject("Outlook.Application")
-        End If
+        ' Set the email body as HTML
+        .HTMLBody = bodyText
 
-        ' Create a new mail item
-        Set outlookMail = outlookApp.CreateItem(0)
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
 
-        ' Customize email properties
-        With outlookMail
-            .To = "recipient@example.com" ' Change to the actual recipient's email address
-            .Subject = key ' Set subject to the key (contents of column O)
-            
-            ' Construct the email body with grouped rows in table format
-            bodyText = "<html><body><p>Here are the grouped rows:</p><table border='1' style='border-collapse: collapse;'>"
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
 
-            ' Loop through rows in the collection under the current key
-            For Each rowItem In dict(key)
-                ' Append each row to the email body as a table row
-                bodyText = bodyText & "<tr><td>" & Join(Application.Index(rowItem, 1, 0), "</td><td>") & "</td></tr>"
-            Next rowItem
-
-            ' Close the table and body tags
-            bodyText = bodyText & "</table></body></html>"
-
-            ' Set the email body as HTML
-            .HTMLBody = bodyText
-
-            ' Uncomment the line below if you want to display the email before sending
-            '.Display
-
-            ' Comment out the line above and uncomment the line below to send the email directly
-            '.Send
-        End With
-
-        ' Release Outlook objects
-        Set outlookMail = Nothing
-        Set outlookApp = Nothing
-    Next key
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
 End Sub
