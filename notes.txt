@@ -5,8 +5,8 @@ Function GetRecipientEmail(logicTable As Worksheet, value1 As Variant, value2 As
     Dim recipientEmail As String
     
     ' Define ranges for x and y axis
-    Set xRange = logicTable.Rows(1).Find(What:=value1, LookIn:=xlValues, LookAt:=xlWhole)
-    Set yRange = logicTable.Columns(1).Find(What:=value2, LookIn:=xlValues, LookAt:=xlWhole)
+    Set xRange = logicTable.Rows(1).Find(What:=value2, LookIn:=xlValues, LookAt:=xlWhole)
+    Set yRange = logicTable.Columns(1).Find(What:=value1, LookIn:=xlValues, LookAt:=xlWhole)
     
     ' Check if both x and y values are found
     If Not xRange Is Nothing And Not yRange Is Nothing Then
