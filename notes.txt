@@ -1,25 +1,24 @@
 Function GetRecipientEmail(logicTable As Worksheet, value1 As Variant, value2 As Variant) As String
-    Dim xRange As Range
-    Dim yRange As Range
-    Dim rowIndex As Long
-    Dim columnIndex As Long
+    Dim lastRow As Long
+    Dim foundRowX As Range
+    Dim foundRowY As Range
+    Dim recipientEmail As String
     
-    ' Find the column index in LogicTable for value2
-    Set xRange = logicTable.Rows(1).Find(What:=value2, LookIn:=xlValues, LookAt:=xlWhole)
+    ' Find matching row based on value1 in LogicTable
+    lastRow = logicTable.Cells(logicTable.Rows.Count, 1).End(xlUp).Row
+    Set foundRowX = logicTable.Range("A1:A" & lastRow).Find(What:=value1)
     
-    ' Find the row index in LogicTable for value1
-    Set yRange = logicTable.Columns(1).Find(What:=value1, LookIn:=xlValues, LookAt:=xlWhole)
-    
-    ' Check if both x and y values are found
-    If Not xRange Is Nothing And Not yRange Is Nothing Then
-        ' Get the row and column indices
-        rowIndex = yRange.Row
-        columnIndex = xRange.Column
+    ' Check if a match is found
+    If Not foundRowX Is Nothing Then
+        ' Find matching row based on value2 in LogicTable
+        Set foundRowY = logicTable.Rows(1).Find(What:=value2, LookIn:=xlValues, LookAt:=xlWhole)
         
-        ' Return the email address from the intersection of x and y values
-        GetRecipientEmail = logicTable.Cells(rowIndex, columnIndex).Value
-    Else
-        ' Return an empty string if values are not found
-        GetRecipientEmail = ""
+        ' Check if a match is found
+        If Not foundRowY Is Nothing Then
+            ' Return the email address from the intersection of the respective x/y axis
+            recipientEmail = logicTable.Cells(foundRowX.Row, foundRowY.Column).Value
+        End If
     End If
+    
+    GetRecipientEmail = recipientEmail
 End Function
