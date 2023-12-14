@@ -1,1 +1,71 @@
+Sub ImportFormulas()
+    Dim wsFormula As Worksheet
+    Dim wsDelphi As Worksheet
+    Dim formulaA As Range
+    Dim formulaB As Range
 
+    ' Set worksheets
+    Set wsFormula = ThisWorkbook.Sheets("Formula") ' Change "Formula" to the actual sheet name
+    Set wsDelphi = ThisWorkbook.Sheets("Delphi") ' Change "Delphi" to the actual sheet name
+
+    ' Clear existing formulas in columns A and B of Delphi sheet
+    wsDelphi.Columns("A:B").ClearContents
+
+    ' Set the ranges for formulas in cells A1 and B1 of the Formula sheet
+    Set formulaA = wsFormula.Range("A1")
+    Set formulaB = wsFormula.Range("B1")
+
+    ' Copy and paste the formulas into entire columns A and B of Delphi sheet
+    formulaA.Copy Destination:=wsDelphi.Range("A:A")
+    formulaB.Copy Destination:=wsDelphi.Range("B:B")
+End Sub
+
+Sub DeleteColumnsFISS()
+    Dim wsFISS As Worksheet
+    
+    ' Set worksheet
+    Set wsFISS = ThisWorkbook.Sheets("FISS") ' Change "FISS" to the actual sheet name
+
+    ' Delete columns A to J
+    wsFISS.Columns("A:J").Delete
+End Sub
+
+Sub DeleteRowsDelphi()
+    Dim wsDelphi As Worksheet
+    Dim lastRow As Long, i As Long
+    
+    ' Set worksheet
+    Set wsDelphi = ThisWorkbook.Sheets("Delphi") ' Change "Delphi" to the actual sheet name
+
+    ' Find the last row in column A
+    lastRow = wsDelphi.Cells(wsDelphi.Rows.Count, "A").End(xlUp).Row
+
+    ' Loop through each row in column A
+    For i = lastRow To 1 Step -1
+        ' Check if column A value is not "#N/A" or "Open"
+        If wsDelphi.Cells(i, 1).Value <> "#N/A" And wsDelphi.Cells(i, 1).Value <> "Open" Then
+            ' Delete the entire row
+            wsDelphi.Rows(i).Delete
+        End If
+    Next i
+End Sub
+
+Sub DeleteRowsNotForUs()
+    Dim wsDelphi As Worksheet
+    Dim lastRow As Long, i As Long
+    
+    ' Set worksheet
+    Set wsDelphi = ThisWorkbook.Sheets("Delphi") ' Change "Delphi" to the actual sheet name
+
+    ' Find the last row in column B
+    lastRow = wsDelphi.Cells(wsDelphi.Rows.Count, "B").End(xlUp).Row
+
+    ' Loop through each row in column B
+    For i = lastRow To 1 Step -1
+        ' Check if column B value is "Not For Us"
+        If wsDelphi.Cells(i, 2).Value = "Not For Us" Then
+            ' Delete the entire row
+            wsDelphi.Rows(i).Delete
+        End If
+    Next i
+End Sub
