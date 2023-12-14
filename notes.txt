@@ -3,9 +3,15 @@ Sub EmailWithTable()
     Dim outlookMail As Object
     Dim bodyText As String
     Dim ws As Worksheet
-    
+    Dim columnArray As Variant
+    Dim col As Variant
+    Dim cellValue As String
+
     ' Set the active worksheet
     Set ws = ActiveSheet
+
+    ' Set columns to copy
+    columnArray = Array("C", "D", "F", "G", "H", "I", "J", "K", "AA")
 
     ' Create Outlook Application
     On Error Resume Next
@@ -23,14 +29,20 @@ Sub EmailWithTable()
     With outlookMail
         .To = "recipient@example.com" ' Change to the actual recipient's email address
         .Subject = ws.Range("O1").Value ' Set subject to the contents of cell O1
-        
+
         ' Construct the email body with selected columns in table format
         bodyText = "<html><body><p>Here are the selected columns:</p><table border='1' style='border-collapse: collapse;'>"
 
         ' Loop through each row in the worksheet
         For i = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row ' Assuming headers are in row 1
             ' Append selected columns to the email body as a table row
-            bodyText = bodyText & "<tr><td>" & ws.Cells(i, 1).Value & "</td><td>" & ws.Cells(i, 2).Value & "</td><td>" & ws.Cells(i, 6).Value & "</td></tr>"
+            bodyText = bodyText & "<tr>"
+            For Each col In columnArray
+                ' Convert cell value to string before appending to the body
+                cellValue = CStr(ws.Range(col & i).Value)
+                bodyText = bodyText & "<td>" & cellValue & "</td>"
+            Next col
+            bodyText = bodyText & "</tr>"
         Next i
 
         ' Close the table and body tags
