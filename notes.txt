@@ -3,13 +3,18 @@ Sub EmailWithTableAndHeaders()
     Dim outlookMail As Object
     Dim bodyText As String
     Dim ws As Worksheet
+    Dim logicTable As Worksheet
     Dim columnArray As Variant
     Dim col As Variant
     Dim cellValue As String
     Dim headerValue As String
-
+    Dim recipientEmail As String
+    
     ' Set the active worksheet
     Set ws = ActiveSheet
+    
+    ' Set the LogicTable worksheet
+    Set logicTable = ThisWorkbook.Sheets("LogicTable")
 
     ' Set columns to copy
     columnArray = Array("C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "V", "AA")
@@ -26,9 +31,12 @@ Sub EmailWithTableAndHeaders()
     ' Create a new mail item
     Set outlookMail = outlookApp.CreateItem(0)
 
+    ' Get recipient email from LogicTable based on matching criteria
+    recipientEmail = GetRecipientEmail(logicTable, ws.Range("M2").Value, ws.Range("O2").Value)
+
     ' Customize email properties
     With outlookMail
-        .To = "recipient@example.com" ' Change to the actual recipient's email address
+        .To = recipientEmail ' Set "To" field to the recipient email from LogicTable
         .Subject = ws.Range("O2").Value ' Set subject to the contents of cell O2
 
         ' Construct the email body with headers and selected columns in table format
@@ -72,3 +80,21 @@ Sub EmailWithTableAndHeaders()
     Set outlookMail = Nothing
     Set outlookApp = Nothing
 End Sub
+
+Function GetRecipientEmail(logicTable As Worksheet, value1 As Variant, value2 As Variant) As String
+    Dim lastRow As Long
+    Dim foundRow As Range
+
+    ' Find matching row based on values in LogicTable
+    lastRow = logicTable.Cells(logicTable.Rows.Count, 1).End(xlUp).Row
+    Set foundRow = logicTable.Range("A1:A" & lastRow).Find(What:=value1)
+    
+    ' Check if a match is found
+    If Not foundRow Is Nothing Then
+        ' Check if the corresponding cell in the same row matches value2
+        If logicTable.Cells(foundRow.Row, 2).Value = value2 Then
+            ' Return the email address from column C
+            GetRecipientEmail = logicTable.Cells(foundRow.Row, 3).Value
+        End If
+    End If
+End Function
