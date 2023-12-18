@@ -1,19 +1,1 @@
-Subject: Exploring Opportunities for Repo Desk Optimization
 
-Hi Kevin,
-
-I trust this email finds you well. Following my recent discussion with Dave and the repo trading team, I am eager to delve deeper into understanding the intricacies of the repo desk's funding responsibilities and potential pain points. I believe my project experiences, including:
-
-- **Swaptions Reconciliation at Goldman Sachs:** Implemented a Python solution to address discrepancies in a high-volume swap trading business, automating affirmation processes and significantly improving accuracy and operational efficiency.
-- **EB vs Treasury AutoReconciliation at Barclays:** Developed a macro-driven solution to streamline complex reconciliation processes, reducing confusion caused by multiple EB and BTSY SDS.
-- **Central Bank UST Entity AutoReconciliation:** Successfully mitigated UST Booking entity mismatches with top clients by building a tailored booking logic matrix and automating the reconciliation process.
-- **UST DK Workflow Optimization:** Implemented a macro to consolidate UST DK reports, establishing an efficient workflow, prioritizing risk management, and reducing delays.
-
-Risk Management Enhancements: Implement checks, validations, or algorithms to identify and mitigate risks associated with funding operations.
-
-These experiences have equipped me with insights and skills that I believe could contribute to optimizing funding processes on the repo desk. I would greatly appreciate the opportunity to discuss this further and explore potential areas for collaboration.
-
-Best regards,
-
-Jeremy Kaaria
-[Your Contact Information]
