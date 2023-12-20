@@ -1,1 +1,20 @@
+Sub RemoveLeadingSpaces()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("YourSheetName") ' Replace "YourSheetName" with the actual sheet name
+    
+    ' Find the last row in column B
+    lastRow = ws.Cells(ws.Rows.Count, "B").End(xlUp).Row
+    
+    ' Loop through each cell in column B starting from the second row
+    For i = 2 To lastRow
+        ' Remove leading spaces using the Trim function
+        ws.Cells(i, "B").Value = Trim(ws.Cells(i, "B").Value)
+    Next i
+    
+    MsgBox "Leading spaces removed successfully!", vbInformation
+End Sub
 
