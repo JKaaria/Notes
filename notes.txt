@@ -1,0 +1,54 @@
+Sub Three()
+    Dim wsTrade As Worksheet
+    Dim lastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim quantityCol As Integer
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+
+    ' Set column numbers based on headers
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    quantityCol = WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)
+
+    ' Find the last row in the sheet
+    lastRow = wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Loop through each row in "Issuer Abbrev" column
+    For i = 2 To lastRow
+        ' Check if the value begins with "US Treasury WI" and Quantity is greater than or equal to 100000000
+        If Left(wsTrade.Cells(i, issuerAbbrevCol).Value, 14) = "US Treasury WI" And wsTrade.Cells(i, quantityCol).Value >= 100000000 Then
+            ' Generate HTML-formatted email body
+            emailBody = "<html><body>"
+            emailBody = emailBody & "<p><strong>Trade ID:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)).Value & "</p>"
+            emailBody = emailBody & "<p><strong>Quantity:</strong> " & wsTrade.Cells(i, quantityCol).Value & "</p>"
+            emailBody = emailBody & "<p><strong>BARC Direction:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("BARC Direction", wsTrade.Rows(1), 0)).Value & "</p>"
+            ' ... (rest of the email body generation)
+            emailBody = emailBody & "</body></html>"
+
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Trade Details for US Treasury WI"
+                .HTMLBody = emailBody
+                .Recipients.Add "recipient@example.com" ' Add recipient's email address
+                .Display
+            End With
+
+            ' Release Outlook mail object
+            Set outlookMail = Nothing
+        End If
+    Next i
+
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
