@@ -1,36 +1,4 @@
-Sub ImportDataFromSourceFile()
-    Dim sourceFolderPath As String
-    Dim sourceFileName As String
-    Dim sourceFilePath As String
-    Dim wsSource As Worksheet
-    Dim wsTarget As Worksheet
+Notice: Download Rates Automation Folder
+Download the "Rates_Automation" folder!
 
-    ' Define the source folder path
-    sourceFolderPath = ThisWorkbook.Path & "\"
-
-    ' Define the source file name pattern
-    sourceFileName = "sstemp*.*" ' This assumes the file extension can be anything
-
-    ' Construct the full path to the source file
-    sourceFilePath = Dir(sourceFolderPath & sourceFileName)
-
-    ' Check if the source file exists
-    If sourceFilePath = "" Then
-        MsgBox "Source file not found.", vbExclamation
-    Else
-        ' Set the source worksheet
-        Workbooks.Open sourceFolderPath & sourceFilePath
-        Set wsSource = ActiveWorkbook.Sheets(1)
-
-        ' Set the target worksheet in the active workbook (adjust the sheet index as needed)
-        Set wsTarget = ThisWorkbook.Sheets(1)
-
-        ' Copy data from source to target
-        wsSource.UsedRange.Copy Destination:=wsTarget.Range("A1")
-
-        ' Close the source workbook without saving changes
-        ActiveWorkbook.Close SaveChanges:=False
-
-        MsgBox "Data imported successfully!", vbInformation
-    End If
-End Sub
+Before running any script, make sure you've downloaded the "Rates_Automation" folder. It must contain both the script workbook and the required source file. Without this folder in the same directory, the scripts won't work.
