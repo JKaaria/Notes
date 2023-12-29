@@ -1,1 +1,69 @@
+# User Guide for Data Management and Email Notification
 
+## Introduction
+
+This user guide provides instructions on how to use the Data Management and Email Notification script. The script is designed to perform various data management operations on a workbook, including data extraction, filtering, formula application, and email notification.
+
+## Prerequisites
+
+Before using the script, ensure you have the following:
+
+- Microsoft Excel installed on your machine.
+- A workbook with data saved in the relevant sheets (e.g., "Delphi," "EISS," "Formula," "FISS," "LogicTable").
+- Specific sheets named according to the script requirements.
+
+## Script Overview
+
+The script consists of five main subroutines and a supporting function:
+
+1. **Sub One**
+   - Copies data from a source workbook (matching a specified pattern) to the "Delphi" sheet in the active workbook.
+
+2. **Sub Two**
+   - Copies data from a source workbook (matching a specified pattern) to the "EISS" sheet in the active workbook.
+
+3. **Sub Three**
+   - Applies specific formulas to columns A and B in the "Delphi" sheet based on predefined formulas in the "Formula" sheet.
+
+4. **Sub Four**
+   - Deletes columns A to J in the "FISS" sheet.
+
+5. **Sub EmailWithTableAndHeaders**
+   - Sends an email notification with a specific table range and headers based on selected columns from the active sheet.
+
+6. **Function RangetoHTML**
+   - A supporting function that converts a range to HTML format for inclusion in the email body.
+
+## Running the Script
+
+1. **Open Workbook:**
+   - Open the workbook containing the data and the script.
+
+2. **Enable Macros:**
+   - Ensure that macros are enabled in Excel.
+
+3. **Run Sub One to Sub EmailWithTableAndHeaders:**
+   - Press `Alt + F8`, select the desired subroutine, and click `Run` to execute the specific operation.
+
+## Important Notes
+
+- **Sheet Names:**
+  - If your sheets have different names, adjust the sheet names in the script accordingly.
+
+- **Source File Patterns:**
+  - In Sub One and Sub Two, the source files are selected based on patterns. Adjust the `sourceFileName` patterns as needed.
+
+- **Formula Application:**
+  - In Sub Three, formulas are applied to columns A and B in the "Delphi" sheet based on predefined formulas in the "Formula" sheet.
+
+- **Column Deletion:**
+  - In Sub Four, columns A to J are deleted in the "FISS" sheet.
+
+- **Email Composition:**
+  - In Sub EmailWithTableAndHeaders, an email is composed with a specific table range and headers. The recipient email address and subject are dynamically set based on data in the active sheet.
+
+## Support
+
+For any issues or questions, please contact [support@example.com](mailto:support@example.com).
+
+*Note: This documentation assumes basic familiarity with Excel and macro execution.*
