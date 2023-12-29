@@ -1,1 +1,73 @@
+# User Guide for Trade Data Filtering and Email Generation
 
+## Introduction
+
+This user guide provides instructions on how to use the Trade Data Filtering and Email Generation script. The script is designed to filter trade data based on Counterparty IDs and generate emails with core details for specific rows.
+
+## Prerequisites
+
+Before using the script, make sure you have the following:
+
+- Microsoft Excel installed on your machine.
+- A workbook with trade data saved in the sheet named "TradeData" (or the actual name of your trade data sheet).
+
+## Script Overview
+
+The script consists of four main subroutines:
+
+1. **Sub One**
+   - Filters trade data based on specified Counterparty IDs.
+   - Copies the filtered results to a sheet named "ResultsSheet."
+
+2. **Sub Two**
+   - Similar to Sub One.
+   - Filters trade data based on Counterparty IDs.
+   - Copies the filtered results to "ResultsSheet."
+
+3. **Sub Three**
+   - Deletes the first row in "ResultsSheet" to remove headers.
+
+4. **Sub Four**
+   - Sends an email with core details from "ResultsSheet" using Microsoft Outlook.
+   - Email subject: "EB vs Treasury Affirmations - Pls book as to face our Settle Legal Entity SDS."
+   - Recipient: bondtradesupportldn@barclays.com (can be modified).
+
+## Running the Script
+
+1. **Open Workbook:**
+   - Open the workbook containing the trade data and the script.
+
+2. **Enable Macros:**
+   - Ensure that macros are enabled in Excel.
+
+3. **Run Sub One or Sub Two:**
+   - Press `Alt + F8`, select `One` or `Two`, and click `Run` to filter data.
+
+4. **Run Sub Three:**
+   - Press `Alt + F8`, select `Three`, and click `Run` to remove headers from "ResultsSheet."
+
+5. **Run Sub Four:**
+   - Press `Alt + F8`, select `Four`, and click `Run` to send emails.
+
+## Important Notes
+
+- **Sheet Names:**
+  - If your sheets have different names, adjust the sheet names in the script accordingly.
+
+- **Counterparty IDs:**
+  - Adjust the `filterIDs` array in the script with the desired Counterparty IDs.
+
+- **Recipient Email:**
+  - In Sub Four, replace `"bondtradesupportldn@barclays.com"` with the actual recipient's email address.
+
+- **Outlook Access:**
+  - Ensure you have access to Microsoft Outlook for sending emails.
+
+- **Modify Email Subject:**
+  - You can modify the subject of the email in Sub Four if needed.
+
+## Support
+
+For any issues or questions, please contact [support@example.com](mailto:support@example.com).
+
+*Note: This documentation assumes basic familiarity with Excel and macro execution.*
