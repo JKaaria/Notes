@@ -1,4 +1,1 @@
-Notice: Download Rates Automation Folder
-Download the "Rates_Automation" folder!
 
-Before running any script, make sure you've downloaded the "Rates_Automation" folder. It must contain both the script workbook and the required source file. Without this folder in the same directory, the scripts won't work.
