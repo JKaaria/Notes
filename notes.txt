@@ -1,1 +1,69 @@
+# User Guide for Trade Data Processing
 
+## Introduction
+
+This user guide provides instructions on how to use the Trade Data Processing script. The script is designed to automate the process of importing, filtering, and generating emails based on trade data in Microsoft Excel.
+
+## Prerequisites
+
+Before using the script, make sure you have the following:
+
+- Microsoft Excel installed on your machine.
+- A workbook with the trade data saved in the same directory as the script file.
+- Access to Microsoft Outlook for sending emails.
+
+## Script Overview
+
+The script consists of three main subroutines:
+
+1. **Sub One**
+   - Imports data from a source file (`sstemp*.*`) into a target sheet (`TradeData`).
+   - Assumes the file extension can be anything.
+
+2. **Sub Two**
+   - Filters the imported data in the `TradeData` sheet.
+   - Removes rows where the "Issuer Abbrev" column does not begin with "US Treasury WI."
+
+3. **Sub Three**
+   - Generates and sends HTML-formatted emails for trades meeting specific criteria.
+   - Criteria: "Issuer Abbrev" begins with "US Treasury WI" and "Quantity" is greater than or equal to 100,000,000.
+
+## Running the Script
+
+1. **Open Workbook:**
+   - Open the workbook containing the trade data and the script.
+
+2. **Enable Macros:**
+   - Ensure that macros are enabled in Excel.
+
+3. **Run Sub One:**
+   - Press `Alt + F8`, select `One`, and click `Run` to import data.
+
+4. **Run Sub Two:**
+   - Press `Alt + F8`, select `Two`, and click `Run` to filter data.
+
+5. **Run Sub Three:**
+   - Press `Alt + F8`, select `Three`, and click `Run` to send emails.
+
+## Important Notes
+
+- **Data Security:**
+  - Before sending emails (Sub Three), the script will display the generated emails, allowing the user to input the "To" address manually. This ensures data security.
+
+- **Directory Structure:**
+  - The script assumes that the source file (`sstemp*.*`) is located in the same directory as the script file. Ensure that both files are in the correct directory.
+
+- **Recipient Email:**
+  - In Sub Three, replace `"recipient@example.com"` with the actual recipient's email address.
+
+- **Outlook Access:**
+  - Ensure you have access to Microsoft Outlook for sending emails.
+
+- **Adjustment of Sheet Names:**
+  - If your sheets have different names, adjust the sheet names in the script accordingly.
+
+## Support
+
+For any issues or questions, please contact [support@example.com](mailto:support@example.com).
+
+*Note: This documentation assumes basic familiarity with Excel and macro execution.*
