@@ -1,1 +1,66 @@
+# User Guide for Workbook Operations and Email Notification
 
+## Introduction
+
+This user guide provides instructions on how to use the Workbook Operations and Email Notification script. The script is designed to perform various operations on a workbook, including data extraction, filtering, and emailing a specific table range.
+
+## Prerequisites
+
+Before using the script, ensure you have the following:
+
+- Microsoft Excel installed on your machine.
+- A workbook with data saved in the sheet named "TradeData" (or the actual name of your data sheet).
+- Specific sheets named "TradeData" and "LogicTable" for certain operations.
+
+## Script Overview
+
+The script consists of four main subroutines and a supporting function:
+
+1. **Sub One**
+   - Copies data from a source workbook (matching a specified pattern) to the "TradeData" sheet in the active workbook.
+
+2. **Sub Two**
+   - Deletes rows from the "TradeData" sheet where the value in column AW does not start with "US912."
+
+3. **Sub Three**
+   - Filters and cleans the "TradeData" sheet based on specific criteria, including keeping rows with specific names and deleting unnecessary columns.
+
+4. **Sub Four**
+   - Sends an email notification with an attached workbook to a specified recipient, including a specific table range.
+
+5. **Function RangetoHTML**
+   - A supporting function that converts a range to HTML format for inclusion in the email body.
+
+## Running the Script
+
+1. **Open Workbook:**
+   - Open the workbook containing the data and the script.
+
+2. **Enable Macros:**
+   - Ensure that macros are enabled in Excel.
+
+3. **Run Sub One to Sub Four:**
+   - Press `Alt + F8`, select the desired subroutine (One to Four), and click `Run` to execute the specific operation.
+
+## Important Notes
+
+- **Sheet Names:**
+  - If your sheets have different names, adjust the sheet names in the script accordingly.
+
+- **Source File Pattern:**
+  - In Sub One, the source file is selected based on a pattern. Adjust the `sourceFileName` pattern as needed.
+
+- **Recipient Email:**
+  - In Sub Four, replace the email address in the `.To` property with the actual recipient email address.
+
+- **Outlook Access:**
+  - Ensure you have access to Microsoft Outlook for sending emails.
+
+- **Modify Email Subject:**
+  - You can modify the subject of the email in Sub Four if needed.
+
+## Support
+
+For any issues or questions, please contact [support@example.com](mailto:support@example.com).
+
+*Note: This documentation assumes basic familiarity with Excel and macro execution.*
