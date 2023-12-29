@@ -1,1 +1,36 @@
+Subject: Clear Summary of Open Queue Discrepancies - Rates vs. Credit Systems
 
+Hi James,
+
+I hope this email finds you well. I appreciate your attention to the threads regarding the Open Queue discrepancies, and I understand the importance of providing a clear problem statement. Here's a concise summary of the issue:
+
+**Problem Statement:**
+The Open Queue functionality in both Credit (Corporate Bond) and Rates (Government Bond) systems exhibits discrepancies in terms of controls and functionalities. These differences impact the downstream processes and the ability to effectively manage and track trade bookings.
+
+**Credit System Open Queue:**
+- **Error:** Accounts for Up or Downstream issues.
+- **BO Pend:** Accounts for Downstream issues.
+- **Partially Allocated/Not-Allocated:** Accounts for Downstream issues and separates CTM vs. Non-CTM Pending Allocations.
+
+**Rates System Open Queue:**
+- **Done:** Signifies booking process complete from an FO perspective. Does not account for Downstream issues.
+- **Done-Unallocated:** Trades booked to clients pending key with no distinction between CTM and non-CTM pending items.
+- **Open:** Signifies booking process incomplete from an FO perspective. Does not account for Downstream issues.
+
+**Key Observations:**
+1. The Error and BO Pend categories in Credit system specifically address both Upstream and Downstream issues, providing a comprehensive view of potential problems.
+2. Credit's Partially Allocated/Not-Allocated categories offer granularity, separating CTM vs. Non-CTM pending allocations, aiding in a more precise understanding of pending items.
+3. Rates' Done and Open categories primarily focus on the booking process from an FO perspective, with Done-Unallocated lacking the distinction between CTM and non-CTM pending items.
+
+**Impact:**
+- These discrepancies hinder the efficient tracking of trade bookings and may lead to challenges in identifying and resolving issues promptly.
+- The lack of uniformity in controls between the Credit and Rates systems poses operational challenges for the middle office teams.
+
+**Next Steps:**
+To address these discrepancies effectively, we recommend a collaborative effort to align the functionalities and controls across both systems. This alignment will not only streamline the tracking process but also enhance the overall efficiency of the middle office operations.
+
+Please let me know if you have any specific questions or if further clarification is required.
+
+Best regards,
+
+Jeremy
