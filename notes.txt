@@ -1,1 +1,75 @@
+Sub EmailWithSelectedColumns()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim bodyText As String
+    Dim ws As Worksheet
+    Dim columnArray As Variant
+    Dim col As Variant
+    Dim cellValue As String
+    
+    ' Set the active worksheet
+    Set ws = ActiveSheet
+    
+    ' Define columns to copy
+    columnArray = Array("B", "C", "D", "H", "I", "K", "L", "O", "Q", "U", "X", "Y", "Z", "AM", "AO", "BX")
+    
+    ' Create Outlook Application
+    On Error Resume Next
+    Set outlookApp = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+    
+    If outlookApp Is Nothing Then
+        Set outlookApp = CreateObject("Outlook.Application")
+    End If
+    
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+    
+    ' Customize email properties
+    With outlookMail
+        ' Leave "To" address blank
+        .To = ""
+        ' Set subject to the contents of cell Y2
+        .Subject = ws.Range("Y2").Value
+        
+        ' Construct the email body with headers and selected columns in table format
+        bodyText = "<html><body><p>Here are the selected columns:</p><table border='1' style='border-collapse: collapse;'>"
+        
+        ' Add header row to the email body
+        bodyText = bodyText & "<tr>"
+        For Each col In columnArray
+            ' Get header value from the worksheet
+            bodyText = bodyText & "<th>" & ws.Range(col & "1").Value & "</th>"
+        Next col
+        bodyText = bodyText & "</tr>"
+        
+        ' Loop through each row in the worksheet
+        For i = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row ' Assuming headers are in row 1
+            ' Append selected columns to the email body as a table row
+            bodyText = bodyText & "<tr>"
+            For Each col In columnArray
+                ' Convert cell value to string before appending to the body
+                cellValue = CStr(ws.Range(col & i).Value)
+                bodyText = bodyText & "<td>" & cellValue & "</td>"
+            Next col
+            bodyText = bodyText & "</tr>"
+        Next i
+        
+        ' Close the table and body tags
+        bodyText = bodyText & "</table></body></html>"
+        
+        ' Set the email body as HTML
+        .HTMLBody = bodyText
+        
+        ' Uncomment the line below if you want to display the email before sending
+        '.Display
+        
+        ' Comment out the line above and uncomment the line below to send the email directly
+        '.Send
+    End With
+    
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
 
