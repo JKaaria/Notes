@@ -1,1 +1,89 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim emailDict As Object
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim podCol As Integer
+    Dim statusReasonCol As Integer
+    Dim key As Variant
+    
+    ' Set worksheet
+    Set ws = ActiveSheet ' Change to your actual sheet
+    
+    ' Find the last row in the sheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set column numbers based on headers
+    podCol = 1 ' Column A (Pod)
+    statusReasonCol = WorksheetFunction.Match("STATUS_REASON", ws.Rows(1), 0)
+    
+    ' Create a dictionary to store email bodies based on Pod
+    Set emailDict = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through each row
+    For i = 2 To lastRow
+        ' Get the Pod and STATUS_REASON values
+        podValue = ws.Cells(i, podCol).Value
+        statusReasonValue = ws.Cells(i, statusReasonCol).Value
+        
+        ' Check if the Pod is already in the dictionary
+        If emailDict.Exists(podValue) Then
+            ' If yes, add the row content to the existing email body
+            emailDict(podValue) = emailDict(podValue) & GetTableRow(ws, i)
+        Else
+            ' If no, create a new entry in the dictionary with the row content
+            emailDict(podValue) = GetEmailHeader(podValue) & GetTableRow(ws, i)
+        End If
+    Next i
+    
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    
+    ' Loop through the dictionary and create an email for each Pod
+    For Each key In emailDict.Keys
+        ' Create a new mail item
+        Set outlookMail = outlookApp.CreateItem(0)
+        
+        ' Customize email properties
+        With outlookMail
+            .Subject = "Trade Details for Pod: " & key
+            .HTMLBody = emailDict(key) & GetEmailFooter()
+            .Display
+        End With
+        
+        ' Release Outlook mail object
+        Set outlookMail = Nothing
+    Next key
+    
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
+
+Function GetEmailHeader(podValue As String) As String
+    ' Customize the email header
+    GetEmailHeader = "<html><body><h2>Trade Details for Pod: " & podValue & "</h2>"
+End Function
+
+Function GetTableRow(ws As Worksheet, row As Long) As String
+    ' Get the HTML-formatted table row for a given row in the worksheet
+    Dim col As Range
+    Dim result As String
+    
+    result = "<table border='1' style='border-collapse: collapse;'>"
+    
+    For Each col In ws.Rows(1).SpecialCells(xlCellTypeConstants)
+        result = result & "<tr><td><strong>" & col.Value & ":</strong></td><td>" & ws.Cells(row, col.Column).Value & "</td></tr>"
+    Next col
+    
+    result = result & "</table>"
+    
+    GetTableRow = result
+End Function
+
+Function GetEmailFooter() As String
+    ' Customize the email footer
+    GetEmailFooter = "</body></html>"
+End Function
 
