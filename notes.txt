@@ -1,1 +1,88 @@
 
+Sub GenerateGroupedEmails()
+    Dim ws As Worksheet
+    Dim rngData As Range
+    Dim filterCriteria As Variant
+    Dim emailBodies As Collection
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim i As Long
+    Dim header As Variant
+    Dim statusReasonCol As Long
+    Dim podCol As Long
+    Dim podValue As String
+    
+    ' Set the active worksheet
+    Set ws = ActiveSheet
+    
+    ' Set the data range (assuming headers are in row 1)
+    Set rngData = ws.UsedRange
+    
+    ' Define the filter criteria
+    filterCriteria = Array("DDAT", "DDEA", "DELN", "DQUA", "DSEC", "DTRD", "MINO", "MUNO", "DEPT", "DMON", "ICAG", "NCRR", "PODU")
+    
+    ' Find the column numbers for "STATUS_REASON" and "Pod"
+    statusReasonCol = WorksheetFunction.Match(" STATUS_REASON", ws.Rows(1), 0)
+    podCol = WorksheetFunction.Match("Pod", ws.Rows(1), 0)
+    
+    ' Initialize the collection to store email bodies
+    Set emailBodies = New Collection
+    
+    ' Loop through visible rows after filtering
+    For i = 2 To rngData.Rows.Count
+        ' Check if the row meets the filter criteria
+        If IsError(Application.Match(ws.Cells(i, statusReasonCol).Value, filterCriteria, 0)) Then
+            ' Get the "Pod" value for grouping
+            podValue = ws.Cells(i, podCol).Value
+            
+            ' Initialize or add to the corresponding email body in the collection
+            If Not EmailExists(emailBodies, podValue) Then
+                emailBodies.Add "<html><body><p>Dear recipient,</p><p>Below are the details for the selected rows in Pod: " & podValue & ":</p><table border='1' style='border-collapse: collapse;'>"
+            End If
+            
+            ' Add headers to the email body
+            If Not EmailExists(emailBodies, podValue) Then
+                emailBodies(podValue) = emailBodies(podValue) & "<tr>"
+                For Each header In Array(" TRADE_DATE", " SETTLEMENT_DATE", " DIRECTION", " PRICE", " QUANTITY_OUT", " SETTLEMENT_CURRENCY", " ISIN", " STATUS_DESC", " NARRATIVE", " FO_Trade_ID", " Salesperson Name")
+                    emailBodies(podValue) = emailBodies(podValue) & "<th>" & header & "</th>"
+                Next header
+                emailBodies(podValue) = emailBodies(podValue) & "</tr>"
+            End If
+            
+            ' Add row contents to the email body as an HTML table row
+            emailBodies(podValue) = emailBodies(podValue) & "<tr>"
+            For Each header In Array(" TRADE_DATE", " SETTLEMENT_DATE", " DIRECTION", " PRICE", " QUANTITY_OUT", " SETTLEMENT_CURRENCY", " ISIN", " STATUS_DESC", " NARRATIVE", " FO_Trade_ID", " Salesperson Name")
+                emailBodies(podValue) = emailBodies(podValue) & "<td>" & ws.Cells(i, WorksheetFunction.Match(header, ws.Rows(1), 0)).Value & "</td>"
+            Next header
+            emailBodies(podValue) = emailBodies(podValue) & "</tr>"
+        End If
+    Next i
+    
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    
+    ' Loop through email bodies and create emails
+    For Each podValue In emailBodies.Keys
+        ' Close the HTML table and body tags
+        emailBodies(podValue) = emailBodies(podValue) & "</table></body></html>"
+        
+        ' Create a new mail item
+        Set outlookMail = outlookApp.CreateItem(0)
+        
+        ' Customize email properties
+        With outlookMail
+            .Subject = "Data Summary for Pod: " & podValue
+            .HTMLBody = emailBodies(podValue)
+            .Display ' Change to .Send if you want to send the email automatically
+        End With
+        
+        ' Release Outlook mail object
+        Set outlookMail = Nothing
+    Next podValue
+End Sub
+
+Function EmailExists(emailBodies As Collection, podValue As String) As Boolean
+    On Error Resume Next
+    EmailExists = Not emailBodies(podValue) = ""
+    On Error GoTo 0
+End Function
