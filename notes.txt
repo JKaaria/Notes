@@ -1,1 +1,74 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim filterColumn As Range
+    Dim cell As Range
+    Dim filterCriteria As Variant
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim podCol As Integer
+    Dim podValue As String
+
+    ' Set worksheet
+    Set ws = ActiveSheet ' Change to your actual sheet
+    
+    ' Set filter criteria
+    filterCriteria = Array("DDAT", "DDEA", "DELN", "DQUA", "DSEC", "DTRD", "MINO", "MUNO", "DEPT", "DMON", "ICAG", "NCRR", "PODU")
+    
+    ' Set column number based on header "STATUS_REASON"
+    statusReasonCol = WorksheetFunction.Match("STATUS_REASON", ws.Rows(1), 0)
+    
+    ' Find the last row in the sheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the filter range for column "STATUS_REASON"
+    Set filterColumn = ws.Range("A1:A" & lastRow)
+    
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    
+    ' Loop through each cell in column "STATUS_REASON"
+    For i = lastRow To 2 Step -1
+        Set cell = filterColumn.Cells(i, 1)
+        
+        ' Check if the row meets the filter criteria
+        If IsError(Application.Match(cell.Value, filterCriteria, 0)) Then
+            ' If not, remove the row
+            ws.Rows(i).Delete
+        Else
+            ' If yes, check the "Pod" column and generate email body
+            podCol = WorksheetFunction.Match("Pod", ws.Rows(1), 0)
+            podValue = ws.Cells(i, podCol).Value
+            
+            ' Generate HTML-formatted email body
+            emailBody = "<html><body>"
+            emailBody = emailBody & "<table border='1' style='border-collapse: collapse;'>"
+            
+            ' Add selected columns to the email body
+            For Each col In Array("TRADE_DATE", "SETTLEMENT_DATE", "DIRECTION", "PRICE", "QUANTITY_OUT", _
+                                   "SETTLEMENT_CURRENCY", "ISIN", "STATUS_DESC", "NARRATIVE", "FO_Trade_ID", "Salesperson Name")
+                emailBody = emailBody & "<tr><td><strong>" & col & ":</strong></td><td>" & ws.Cells(i, WorksheetFunction.Match(col, ws.Rows(1), 0)).Value & "</td></tr>"
+            Next col
+            
+            emailBody = emailBody & "</table></body></html>"
+            
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+            
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Trade Details"
+                .HTMLBody = emailBody
+                .Display
+            End With
+            
+            ' Release Outlook mail object
+            Set outlookMail = Nothing
+        End If
+    Next i
+    
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
 
