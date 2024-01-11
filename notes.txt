@@ -1,1 +1,130 @@
+Sub GenerateEmailsBasedOnPod()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim podCol As Integer
+    Dim i As Long
+    Dim podValue As String
+    Dim podDict As Object
+    Dim emailBody As String
+    
+    ' Set worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Replace "Sheet1" with the actual sheet name
+    
+    ' Set column number based on header "Pod"
+    podCol = WorksheetFunction.Match("Pod", ws.Rows(1), 0)
+    
+    ' Find the last row in the sheet
+    lastRow = ws.Cells(ws.Rows.Count, podCol).End(xlUp).Row
+    
+    ' Initialize a dictionary to store emails based on Pod
+    Set podDict = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through each row
+    For i = 2 To lastRow
+        ' Get the Pod value
+        podValue = ws.Cells(i, podCol).Value
+        
+        ' Check if the Pod is already in the dictionary
+        If podDict.Exists(podValue) Then
+            ' If yes, add the row content to the existing sheet
+            AppendRowToSheet ws, i, podDict(podValue)
+        Else
+            ' If no, create a new sheet and add the header and row content
+            podDict(podValue) = CreateSheetAndAddHeader(ws, i, podValue)
+        End If
+    Next i
+    
+    ' Generate emails based on each sheet
+    For Each podValue In podDict.Keys
+        GenerateEmail podDict(podValue)
+    Next podValue
+End Sub
+
+Sub AppendRowToSheet(ws As Worksheet, rowNum As Long, sheetName As String)
+    ' Add a new row to the specified sheet and copy the row content
+    Dim newSheet As Worksheet
+    Set newSheet = ThisWorkbook.Sheets(sheetName)
+    ws.Rows(rowNum).Copy Destination:=newSheet.Cells(newSheet.Cells(newSheet.Rows.Count, 1).End(xlUp).Row + 1, 1)
+End Sub
+
+Function CreateSheetAndAddHeader(ws As Worksheet, rowNum As Long, podValue As String) As String
+    ' Create a new sheet and add the header and the first row
+    Dim newSheet As Worksheet
+    Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
+    newSheet.Name = podValue
+    
+    ' Copy header
+    ws.Rows(1).Copy Destination:=newSheet.Rows(1)
+    
+    ' Copy the first row
+    ws.Rows(rowNum).Copy Destination:=newSheet.Rows(2)
+    
+    ' Return the sheet name
+    CreateSheetAndAddHeader = podValue
+End Function
+
+Sub GenerateEmail(sheetName As String)
+    ' Generate an email based on the contents of the specified sheet
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    
+    ' Set the new sheet
+    Dim newSheet As Worksheet
+    Set newSheet = ThisWorkbook.Sheets(sheetName)
+    
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    
+    ' Create a new mail item
+    Set outlookMail = outlookApp.CreateItem(0)
+    
+    ' Customize email properties
+    With outlookMail
+        .Subject = "Email Subject" ' Replace with your subject
+        ' Set email body using the contents of the sheet
+        emailBody = GetSheetContent(newSheet)
+        .HTMLBody = "<html><body>" & emailBody & "</body></html>"
+        .Display ' Display the email
+    End With
+    
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
+
+Function GetSheetContent(sheet As Worksheet) As String
+    ' Get the HTML-formatted content of the sheet
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim i As Long
+    Dim j As Long
+    Dim cellValue As Variant
+    Dim tableBody As String
+    
+    ' Find the last row and column in the sheet
+    lastRow = sheet.Cells(sheet.Rows.Count, 1).End(xlUp).Row
+    lastCol = sheet.Cells(1, sheet.Columns.Count).End(xlToLeft).Column
+    
+    ' Initialize table body
+    tableBody = ""
+    
+    ' Loop through each row in the sheet
+    For i = 1 To lastRow
+        ' Start a new table row
+        tableBody = tableBody & "<tr>"
+        ' Loop through each column in the row
+        For j = 1 To lastCol
+            ' Get the cell value
+            cellValue = sheet.Cells(i, j).Value
+            ' Add a table cell with the cell value
+            tableBody = tableBody & "<td>" & cellValue & "</td>"
+        Next j
+        ' End the table row
+        tableBody = tableBody & "</tr>"
+    Next i
+    
+    ' Return the HTML-formatted table body
+    GetSheetContent = "<table border='1'>" & tableBody & "</table>"
+End Function
 
