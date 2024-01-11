@@ -1,1 +1,6 @@
-
+' Get the value in the "Pod" column
+If Not IsError(ws.Cells(i, podCol).Value) Then
+    podValue = ws.Cells(i, podCol).Value
+Else
+    podValue = "" ' or any default value you prefer
+End If
