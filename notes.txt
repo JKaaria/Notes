@@ -1,18 +1,1 @@
-    ' Loop through each row
-    For i = 2 To lastRow
-        ' Get the Pod and STATUS_REASON values
-        Dim podValue As String
-        Dim statusReasonValue As String
-        podValue = ws.Cells(i, podCol).Value
-        statusReasonValue = ws.Cells(i, statusReasonCol).Value
-        
-        ' Check if the Pod is already in the dictionary
-        If emailDict.Exists(podValue) Then
-            ' If yes, add the row content to the existing email body
-            emailDict(podValue) = emailDict(podValue) & GetTableRow(ws, i)
-        Else
-            ' If no, create a new entry in the dictionary with the row content
-            emailDict(podValue) = GetEmailHeader(podValue) & GetTableRow(ws, i)
-        End If
-    Next i
 
