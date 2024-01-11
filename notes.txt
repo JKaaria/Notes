@@ -1,1 +1,107 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim filterColumn As Range
+    Dim cell As Range
+    Dim filterCriteria As Variant
+    Dim emailBodies As Collection
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim podCol As Integer
+    Dim podValue As String
+
+    ' Set worksheet
+    Set ws = ActiveSheet ' Change to your actual sheet
+    
+    ' Set filter criteria
+    filterCriteria = Array("DDAT", "DDEA", "DELN", "DQUA", "DSEC", "DTRD", "MINO", "MUNO", "DEPT", "DMON", "ICAG", "NCRR", "PODU")
+    
+    ' Set column number based on header "STATUS_REASON"
+    statusReasonCol = WorksheetFunction.Match("STATUS_REASON", ws.Rows(1), 0)
+    
+    ' Find the last row in the sheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the filter range for column "STATUS_REASON"
+    Set filterColumn = ws.Range("A1:A" & lastRow)
+    
+    ' Create a collection to store email bodies
+    Set emailBodies = New Collection
+    
+    ' Loop through each cell in column "STATUS_REASON" in reverse order
+    For i = lastRow To 2 Step -1
+        Set cell = filterColumn.Cells(i, 1)
+        
+        ' Check if the row meets the filter criteria
+        If IsError(Application.Match(cell.Value, filterCriteria, 0)) Then
+            ' If not, remove the row
+            ws.Rows(i).Delete
+        Else
+            ' If yes, check the "Pod" column and generate email body
+            podCol = WorksheetFunction.Match("Pod", ws.Rows(1), 0)
+            podValue = ws.Cells(i, podCol).Value
+            
+            ' Generate HTML-formatted email body
+            emailBody = "<html><body>"
+            emailBody = emailBody & "<table border='1' style='border-collapse: collapse;'>"
+            
+            ' Add selected columns to the email body
+            For Each col In Array("TRADE_DATE", "SETTLEMENT_DATE", "DIRECTION", "PRICE", "QUANTITY_OUT", _
+                                   "SETTLEMENT_CURRENCY", "ISIN", "STATUS_DESC", "NARRATIVE", "FO_Trade_ID", "Salesperson Name")
+                emailBody = emailBody & "<tr><td><strong>" & col & ":</strong></td><td>" & ws.Cells(i, WorksheetFunction.Match(col, ws.Rows(1), 0)).Value & "</td></tr>"
+            Next col
+            
+            emailBody = emailBody & "</table></body></html>"
+            
+            ' Add email body to the collection
+            emailBodies.Add emailBody, podValue
+        End If
+    Next i
+    
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    
+    ' Sort the collection by key (Pod values)
+    SortCollection emailBodies
+    
+    ' Loop through the sorted email bodies collection and create emails
+    For Each emailKey In emailBodies
+        ' Create a new mail item
+        Set outlookMail = outlookApp.CreateItem(0)
+        
+        ' Customize email properties
+        With outlookMail
+            .Subject = "Trade Details"
+            .HTMLBody = emailBodies(emailKey)
+            .Display
+        End With
+        
+        ' Release Outlook mail object
+        Set outlookMail = Nothing
+    Next emailKey
+    
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
+
+Sub SortCollection(col As Collection)
+    ' Sort the collection by key
+    Dim i As Integer, j As Integer
+    Dim tempKey As Variant, tempItem As Variant
+    
+    For i = 1 To col.Count - 1
+        For j = i + 1 To col.Count
+            If col(i) > col(j) Then
+                ' Swap key and item
+                tempKey = col(i).Key
+                tempItem = col(i)
+                col(i).Key = col(j).Key
+                col(i) = col(j)
+                col(j).Key = tempKey
+                col(j) = tempItem
+            End If
+        Next j
+    Next i
+End Sub
 
