@@ -1,10 +1,1 @@
-' Group emails by the column under column header "Pod"
-If podValue = "UK" Then
-    emailBodies.Add emailBody, "Email1_" & podValue
-ElseIf podValue = "EMEA 1" Then
-    emailBodies.Add emailBody, "Email2_" & podValue
-ElseIf podValue = "EMEA 2" Then
-    emailBodies.Add emailBody, "Email3_" & podValue
-ElseIf podValue = "NY" Then
-    emailBodies.Add emailBody, "Email4_" & podValue
-End If
+
