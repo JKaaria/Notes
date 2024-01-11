@@ -1,1 +1,32 @@
+Sub GenerateEmailsBasedOnSheets()
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim sheet As Worksheet
 
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Loop through each sheet except for the "TradeData" sheet
+    For Each sheet In ThisWorkbook.Sheets
+        If sheet.Name <> "TradeData" Then
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Email Subject" ' Replace with your subject
+                ' Set email body using the contents of the sheet
+                emailBody = GetSheetContent(sheet)
+                .HTMLBody = "<html><body>" & emailBody & "</body></html>"
+                .Display ' Display the email
+            End With
+
+            ' Release Outlook mail object
+            Set outlookMail = Nothing
+        End If
+    Next sheet
+
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
