@@ -1,1 +1,66 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim rngData As Range
+    Dim filterCriteria As Variant
+    Dim uniqueIDs As Collection
+    Dim uniqueID As Variant
+    Dim emailBody As String
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    
+    ' Set the active worksheet
+    Set ws = ActiveSheet
+    
+    ' Set the data range (assuming headers are in row 1)
+    Set rngData = ws.UsedRange
+    
+    ' Define the filter criteria
+    filterCriteria = Array("DDAT", "DDEA", "DELN", "DQUA", "DSEC", "DTRD", "MINO", "MUNO")
+    
+    ' Apply filter to the data
+    rngData.AutoFilter Field:=WorksheetFunction.Match(" STATUS_REASON", ws.Rows(1), 0), Criteria1:=filterCriteria, Operator:=xlFilterValues
+    
+    ' Initialize a collection to store unique CPTY_SDS_IDs
+    Set uniqueIDs = New Collection
+    
+    ' Loop through visible rows after filtering
+    On Error Resume Next
+    For Each cell In rngData.Columns(WorksheetFunction.Match(" CPTY_SDS_ID", ws.Rows(1), 0)).Offset(1, 0).SpecialCells(xlCellTypeVisible)
+        uniqueIDs.Add cell.Value, CStr(cell.Value)
+    Next cell
+    On Error GoTo 0
+    
+    ' Loop through each unique CPTY_SDS_ID and create an email
+    For Each uniqueID In uniqueIDs
+        ' Initialize email body
+        emailBody = "Dear recipient," & vbCrLf & vbCrLf
+        
+        ' Loop through the rows with the current CPTY_SDS_ID
+        For i = 2 To rngData.Rows.Count
+            If ws.Cells(i, WorksheetFunction.Match(" CPTY_SDS_ID", ws.Rows(1), 0)).Value = uniqueID And ws.Cells(i, WorksheetFunction.Match(" STATUS_REASON", ws.Rows(1), 0)).EntireRow.Hidden = False Then
+                ' Add row contents to email body
+                emailBody = emailBody & "Row " & i & ": " & Join(Application.Index(rngData.Rows(i).Value, 1, 0), ", ") & vbCrLf
+            End If
+        Next i
+        
+        ' Create Outlook Application
+        Set outlookApp = CreateObject("Outlook.Application")
+        
+        ' Create a new mail item
+        Set outlookMail = outlookApp.CreateItem(0)
+        
+        ' Customize email properties
+        With outlookMail
+            .Subject = "Data Summary for CPTY_SDS_ID: " & uniqueID
+            .Body = emailBody
+            .Display ' Change to .Send if you want to send the email automatically
+        End With
+        
+        ' Release Outlook mail object
+        Set outlookMail = Nothing
+    Next uniqueID
+    
+    ' Turn off the filter
+    ws.AutoFilterMode = False
+End Sub
 
