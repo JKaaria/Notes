@@ -1,0 +1,117 @@
+Sub CheckTradeDataAndSendEmail()
+    Dim wsTradeData As Worksheet
+    Dim wsLogicTable As Worksheet
+    Dim counterpartyColumn As Range
+    Dim washRealignCodeColumn As Range
+    Dim tradeIdColumn As Range
+    Dim quantityColumn As Range
+    Dim priceColumn As Range
+    Dim settleDateColumn As Range
+    Dim isinColumn As Range
+    Dim cell As Range
+    Dim exceptionList As String
+    Dim counterpartyList As Collection
+
+    ' Set references to sheets
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsLogicTable = ThisWorkbook.Sheets("LogicTable")
+
+    ' Find columns in TradeData sheet
+    Set counterpartyColumn = FindColumn(wsTradeData, "Counterparty")
+    Set washRealignCodeColumn = FindColumn(wsTradeData, "Wash Realign Code")
+    Set tradeIdColumn = FindColumn(wsTradeData, "Trade Id")
+    Set quantityColumn = FindColumn(wsTradeData, "Quantity")
+    Set priceColumn = FindColumn(wsTradeData, "Price")
+    Set settleDateColumn = FindColumn(wsTradeData, "Settle Date")
+    Set isinColumn = FindColumn(wsTradeData, "ISIN")
+
+    ' Check if any required column is not found
+    If counterpartyColumn Is Nothing Or washRealignCodeColumn Is Nothing Or tradeIdColumn Is Nothing Or quantityColumn Is Nothing Or priceColumn Is Nothing Or settleDateColumn Is Nothing Or isinColumn Is Nothing Then
+        MsgBox "Required column headers not found in TradeData sheet."
+        Exit Sub
+    End If
+
+    ' Initialize exception list and counterparty list
+    exceptionList = ""
+    Set counterpartyList = New Collection
+
+    ' Populate counterparty list from LogicTable column A
+    Dim logicTableCounterparty As Range
+    For Each logicTableCounterparty In wsLogicTable.Range(wsLogicTable.Cells(2, 1), wsLogicTable.Cells(wsLogicTable.Rows.Count, 1).End(xlUp))
+        counterpartyList.Add logicTableCounterparty.Value
+    Next logicTableCounterparty
+
+    ' Loop through Counterparty column in TradeData
+    For Each cell In wsTradeData.Range(wsTradeData.Cells(2, counterpartyColumn.Column), wsTradeData.Cells(wsTradeData.Rows.Count, counterpartyColumn.Column).End(xlUp))
+        ' Check if Counterparty is in the list
+        If IsInCollection(cell.Value, counterpartyList) Then
+            ' Find corresponding row in LogicTable
+            Dim logicTableRow As Range
+            Set logicTableRow = wsLogicTable.Columns(1).Find(cell.Value, LookIn:=xlValues)
+
+            ' Check if LogicTable row is found
+            If Not logicTableRow Is Nothing Then
+                ' Check if Wash Realign Code matches
+                If wsTradeData.Cells(cell.Row, washRealignCodeColumn.Column).Value <> wsLogicTable.Cells(logicTableRow.Row, 2).Value Then
+                    ' Add exception details to the list
+                    exceptionList = exceptionList & "Trade Id: " & wsTradeData.Cells(cell.Row, tradeIdColumn.Column).Value & vbCrLf & _
+                                    "Counterparty: " & cell.Value & vbCrLf & _
+                                    "Quantity: " & wsTradeData.Cells(cell.Row, quantityColumn.Column).Value & vbCrLf & _
+                                    "Price: " & wsTradeData.Cells(cell.Row, priceColumn.Column).Value & vbCrLf & _
+                                    "Settle Date: " & wsTradeData.Cells(cell.Row, settleDateColumn.Column).Value & vbCrLf & _
+                                    "ISIN: " & wsTradeData.Cells(cell.Row, isinColumn.Column).Value & vbCrLf & _
+                                    "Correct Wash Realign Code: " & wsLogicTable.Cells(logicTableRow.Row, 2).Value & vbCrLf & vbCrLf
+                End If
+            Else
+                ' Add exception details to the list if Counterparty not found in LogicTable
+                exceptionList = exceptionList & "Trade Id: " & wsTradeData.Cells(cell.Row, tradeIdColumn.Column).Value & vbCrLf & _
+                                "Counterparty: " & cell.Value & vbCrLf & _
+                                "Counterparty not found in LogicTable." & vbCrLf & vbCrLf
+            End If
+        End If
+    Next cell
+
+    ' Check if any exceptions were found
+    If Len(exceptionList) > 0 Then
+        ' Send email with exception details
+        SendExceptionEmail exceptionList
+    Else
+        MsgBox "No exceptions found."
+    End If
+End Sub
+
+Function IsInCollection(valueToBeFound As Variant, coll As Collection) As Boolean
+    On Error Resume Next
+    IsInCollection = (coll.Item(valueToBeFound) = valueToBeFound)
+    On Error GoTo 0
+End Function
+
+Function FindColumn(ws As Worksheet, header As String) As Range
+    Dim headerCell As Range
+    Set headerCell = ws.Rows(1).Find(header)
+    If Not headerCell Is Nothing Then
+        Set FindColumn = headerCell
+    End If
+End Function
+
+Sub SendExceptionEmail(exceptionList As String)
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+    Set outlookMail = outlookApp.CreateItem(0)
+
+    ' Set email properties
+    With outlookMail
+        .To = "recipient@example.com" ' Replace with the recipient's email address
+        .Subject = "Trade Data Exceptions"
+        .Body = "The following exceptions were found in the Trade Data:" & vbCrLf & vbCrLf & exceptionList
+        .Display ' Display email for review before sending
+        '.Send ' Uncomment this line to send the email automatically
+    End With
+
+    ' Clean up
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
