@@ -1,1 +1,65 @@
+Sub SendTradeDataEmails()
+    Dim wsTradeData As Worksheet
+    Dim wsSSIAffirmation As Worksheet
+    Dim tableTradeData As ListObject
+    Dim lastRowTradeData As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim i As Long
+
+    ' Set worksheets
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsSSIAffirmation = ThisWorkbook.Sheets("SSIAffirmation")
+
+    ' Assuming the table is in columns A to CR, adjust as needed
+    Set tableTradeData = wsTradeData.ListObjects(1)
+
+    ' Find the last row in the TradeData table
+    lastRowTradeData = tableTradeData.ListRows.Count
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Loop through each row in the TradeData table
+    For i = 1 To lastRowTradeData
+        ' Check if the value in TradeData column BI matches SSIAffirmation column C
+        If wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("BI").Index).Value = wsSSIAffirmation.Cells(i, "C").Value Then
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+
+            ' Customize email properties
+            With outlookMail
+                ' Build the subject with a "-" between values in SSIAffirmation columns A and B
+                .Subject = wsSSIAffirmation.Cells(i, "A").Value & " - " & wsSSIAffirmation.Cells(i, "B").Value & " UST SSI Affirmation"
+
+                ' Build the email body
+                Dim emailBody As String
+                emailBody = "Row " & i & ":" & vbCrLf & _
+                            " SDS: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("SDS").Index).Value & vbCrLf & _
+                            " Account Legal Name: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Account Legal Name").Index).Value & vbCrLf & _
+                            " Trade ID: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Trade ID").Index).Value & vbCrLf & _
+                            " Trade Data Entity: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Entity").Index).Value & vbCrLf & _
+                            " Logic Table Entity: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Entity from logicTable").Index).Value & vbCrLf & _
+                            " Quantity: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Quantity").Index).Value & vbCrLf & _
+                            " Security Description: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Security Description").Index).Value & vbCrLf & _
+                            " Settle Date: " & wsTradeData.Cells(i + tableTradeData.HeaderRowRange.Row, tableTradeData.ListColumns("Settle Date").Index).Value & vbCrLf & vbCrLf
+
+                ' Add the recipient's email address
+                .Recipients.Add wsSSIAffirmation.Cells(i, "C").Value
+
+                ' Add the email body
+                .Body = emailBody
+
+                ' Display the email
+                .Display
+            End With
+
+            ' Release Outlook objects
+            Set outlookMail = Nothing
+        End If
+    Next i
+
+    ' Release Outlook Application
+    Set outlookApp = Nothing
+End Sub
 
