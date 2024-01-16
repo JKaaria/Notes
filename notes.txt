@@ -1,1 +1,65 @@
+Sub CompareColumnHeaders()
+    Dim ws1 As Worksheet
+    Dim ws2 As Worksheet
+    Dim wsSummary As Worksheet
+    Dim col1 As Collection
+    Dim col2 As Collection
+    Dim actionSummary As Range
+    Dim header As Variant
+    Dim i As Integer
+
+    ' Set worksheets
+    Set ws1 = ThisWorkbook.Sheets("Sheet1")
+    Set ws2 = ThisWorkbook.Sheets("Sheet2")
+
+    ' Create or reference "ActionSummary" sheet
+    On Error Resume Next
+    Set wsSummary = ThisWorkbook.Sheets("ActionSummary")
+    On Error GoTo 0
+
+    If wsSummary Is Nothing Then
+        Set wsSummary = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsSummary.Name = "ActionSummary"
+    End If
+
+    ' Clear previous data in ActionSummary sheet
+    wsSummary.Cells.Clear
+
+    ' Create collections for column headers in each sheet
+    Set col1 = New Collection
+    Set col2 = New Collection
+
+    ' Populate collections with column headers from Sheet1
+    For i = 1 To ws1.UsedRange.Columns.Count
+        col1.Add ws1.Cells(1, i).Value
+    Next i
+
+    ' Populate collections with column headers from Sheet2
+    For i = 1 To ws2.UsedRange.Columns.Count
+        col2.Add ws2.Cells(1, i).Value
+    Next i
+
+    ' Compare column headers and write results to ActionSummary sheet
+    Set actionSummary = wsSummary.Cells(1, 1)
+
+    For Each header In col2
+        If Not Contains(col1, header) Then
+            actionSummary.Value = "Add column header: " & header
+            Set actionSummary = actionSummary.Offset(1, 0)
+        End If
+    Next header
+
+    For Each header In col1
+        If Not Contains(col2, header) Then
+            actionSummary.Value = "Remove column header: " & header
+            Set actionSummary = actionSummary.Offset(1, 0)
+        End If
+    Next header
+End Sub
+
+Function Contains(col As Collection, item As Variant) As Boolean
+    On Error Resume Next
+    Contains = col(item) > 0
+    On Error GoTo 0
+End Function
 
