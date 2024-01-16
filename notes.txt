@@ -1,1 +1,45 @@
+Sub GenerateEmails()
+    Dim tradeDataSheet As Worksheet
+    Dim ssiaffirmationSheet As Worksheet
+    Dim tradeDataLastRow As Long
+    Dim ssiaffirmationLastRow As Long
+    Dim i As Long, j As Long
+    Dim emailBody As String
+
+    ' Set the sheets
+    Set tradeDataSheet = ThisWorkbook.Sheets("TradeData")
+    Set ssiaffirmationSheet = ThisWorkbook.Sheets("SSIAffirmation")
+
+    ' Find the last row with data in each sheet
+    tradeDataLastRow = tradeDataSheet.Cells(tradeDataSheet.Rows.Count, "B").End(xlUp).Row
+    ssiaffirmationLastRow = ssiaffirmationSheet.Cells(ssiaffirmationSheet.Rows.Count, "B").End(xlUp).Row
+
+    ' Loop through TradeData sheet
+    For i = 2 To tradeDataLastRow
+        Dim tradeDataValue As Variant
+        tradeDataValue = tradeDataSheet.Cells(i, "BI").Value
+
+        ' Check if the value is found in SSIAffirmation sheet
+        If Not IsError(Application.Match(tradeDataValue, ssiaffirmationSheet.Range("B2:B" & ssiaffirmationLastRow), 0)) Then
+            ' If found, generate email body
+            emailBody = "Dear User," & vbCrLf & vbCrLf
+            emailBody = emailBody & "Details from TradeData sheet:" & vbCrLf
+            emailBody = emailBody & "Column E: " & tradeDataSheet.Cells(i, "E").Value & vbCrLf
+            emailBody = emailBody & "Column G: " & tradeDataSheet.Cells(i, "G").Value & vbCrLf
+            emailBody = emailBody & "Column H: " & tradeDataSheet.Cells(i, "H").Value & vbCrLf
+            emailBody = emailBody & "Column O: " & tradeDataSheet.Cells(i, "O").Value & vbCrLf
+            emailBody = emailBody & "Column T: " & tradeDataSheet.Cells(i, "T").Value & vbCrLf
+            emailBody = emailBody & "Column AF: " & tradeDataSheet.Cells(i, "AF").Value & vbCrLf
+            emailBody = emailBody & "Column AW: " & tradeDataSheet.Cells(i, "AW").Value & vbCrLf & vbCrLf
+
+            ' Add your email sending code here using the generated email body
+            ' Example: Uncomment the next line to display the email body in the Immediate Window
+            ' Debug.Print emailBody
+        End If
+    Next i
+
+    ' Clean up
+    Set tradeDataSheet = Nothing
+    Set ssiaffirmationSheet = Nothing
+End Sub
 
