@@ -1,0 +1,21 @@
+Sub InsertFormulaAndFilterTable()
+    Dim lastRow As Long
+    Dim table As ListObject
+    Dim i As Long
+    
+    ' Assuming the table is in column D and E, adjust as needed
+    Set table = ActiveSheet.ListObjects(1)
+    
+    ' Find the last row in the table
+    lastRow = table.ListRows(table.ListRows.Count).Range.Row
+    
+    ' Insert your formula in the first cell of the next empty row in column D
+    ActiveSheet.Cells(lastRow + 1, 4).Formula = "YourFormulaHere" ' Replace "YourFormulaHere" with your actual formula
+    
+    ' Loop through the table and delete rows where the value in column D equals the value in column E
+    For i = lastRow To 1 Step -1
+        If table.DataBodyRange.Cells(i, 4).Value = table.DataBodyRange.Cells(i, 5).Value Then
+            table.ListRows(i).Delete
+        End If
+    Next i
+End Sub
