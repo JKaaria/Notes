@@ -76,4 +76,3 @@ Sub GenerateAndDisplayEmails()
     Set outlookApp = Nothing
     Set mailItem = Nothing
 End Sub
-
