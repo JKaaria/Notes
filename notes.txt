@@ -1,1 +1,59 @@
+Sub SendConfirmationEmails()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim i As Long
+
+    ' Set the active sheet
+    Set ws = ActiveSheet
+
+    ' Find the last row in column C
+    lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
+    ' Loop through each row and send emails
+    For i = 2 To lastRow ' Assuming data starts from row 2, change as needed
+        ' Create a new mail item
+        Set outlookMail = outlookApp.CreateItem(0)
+
+        ' Customize email properties
+        With outlookMail
+            ' Extract information from columns A, B, and C
+            Dim customerName As String
+            Dim accountNumber As String
+            Dim emailAddress As String
+
+            customerName = ws.Cells(i, 1).Value
+            accountNumber = ws.Cells(i, 2).Value
+            emailAddress = ws.Cells(i, 3).Value
+
+            ' Build the subject with a "-" between values in columns A and B
+            .Subject = customerName & " - " & accountNumber
+
+            ' Build the email body
+            .Body = "Dear Customer," & vbCrLf & _
+                    "I trust this message finds you well." & vbCrLf & _
+                    "As part of our commitment to streamline processes, we are reaching out for your confirmation on the Settlement Standing Instruction (SSI) details associated with Barclays U.S. Treasury (UST) bookings;" & vbCrLf & _
+                    "in short, on which SSI do you instruct BARCLAYS, BBPLCLDN, BBI or BARCGBLDN Your response, quoting the SSI you have on record for Barclays in UST, is crucial in validating our automated T+0 reconciliation logic." & vbCrLf & _
+                    "Please take a moment to respond with the SSI details you are aware of for Barclays UST. Your timely confirmation ensures the accuracy of our records and the success of our UST booking process." & vbCrLf & _
+                    "Thank you for your cooperation, and we appreciate your contribution to this vital initiative." & vbCrLf & _
+                    "Kind Regards,"
+
+            ' Add the recipient's email address
+            .Recipients.Add emailAddress
+
+            ' Display the email
+            .Display
+        End With
+
+        ' Release Outlook objects
+        Set outlookMail = Nothing
+    Next i
+
+    ' Release Outlook Application
+    Set outlookApp = Nothing
+End Sub
 
