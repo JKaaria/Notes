@@ -1,1 +1,104 @@
+Certainly! Here's the information converted into the requested format:
 
+**1. BTSY Affirmations:**
+   - **Summary of Solution Proposed:**
+     - Built booking logic matrix for each booking method
+     - Built additional macro on top of booking logic matrix + live trade data to send out EB settle legal entity to BTSY at EOD
+   - **Business Problem:**
+     - EB faces BTSY on multiple BTSY SDS' via multiple EB books
+     - BTSY faces confusion on when to face which EB SDS (over 130 ways trades can be booked from EB to BTSY; causing multiple long-standing email chains over intercompany breaks)
+   - **Benefits of Solution:**
+     - Streamlined booking process with a logic matrix
+     - Reduced confusion and email chains
+   - **Impact if not Done:**
+     - Continued confusion in trade booking, prolonged email chains, and potential errors in intercompany breaks.
+
+**2. CB Priority UST Entity Auto-Reconciliation:**
+   - **Summary of Solution Proposed:**
+     - Built booking logic matrix for each client + affirmed wash with TPE
+     - Built additional macro on top of booking logic matrix + live trade data to auto-reconcile booking vs logic + send manual wash items to TCU
+   - **Business Problem:**
+     - CB desk requested root cause fix to consistent UST Booking entity mismatches with top 15 client base - consistent trade washing post VD and settlement failure risk poses substantial regulatory and financial impact as well as relationship impact
+   - **Benefits of Solution:**
+     - Improved entity matching, reduced trade washing, and minimized settlement failure risks
+   - **Impact if not Done:**
+     - Continued entity mismatches, increased trade washing, and heightened regulatory and financial risks.
+
+**3. CB UST EOD Blotter:**
+   - **Summary of Solution Proposed:**
+     - Built macro to filter down all UST booked to CB salespeople on T+0 as well as save/send file to OB sales automatically
+   - **Business Problem:**
+     - CB desk unable to view their trades due to SWS Cougar filters/queues not working
+     - CB Desk requested file containing UST bookings across the desk each day at EOD
+   - **Benefits of Solution:**
+     - Enhanced visibility for CB salespeople, automated file generation, and improved operational efficiency
+   - **Impact if not Done:**
+     - Continued inability to view trades, manual effort in generating daily files, and operational inefficiencies.
+
+**4. Fl Cash EOD Blotter for Repo Desk:**
+   - **Summary of Solution Proposed:**
+     - Built macro to filter down all Fl Cash booked to Repo salespeople on 1-0 as well as save/send file to Repo sales automatically
+   - **Business Problem:**
+     - Repo desk unable to view their trades due to SWS Cougar filters/queues not working
+     - Repo Desk requested file containing Fl Cash bookings across the desk each day at EOD
+   - **Benefits of Solution:**
+     - Improved visibility for Repo salespeople, automated file generation, and streamlined workflow
+   - **Impact if not Done:**
+     - Continued inability to view trades, manual effort in generating daily files, and workflow disruptions.
+
+**5. UST DK Workflow:**
+   - **Summary of Solution Proposed:**
+     - Build Macro to consolidate EOD UST DK Reports/filter LDN population B
+     - Send report of LDN items to US Fails MgM at EOD along with client contacts & US Fails Mgm to respond with TCS action points per trade
+   - **Business Problem:**
+     - UST DK items sent to TOS in individual emails overnight to be picked up case by case on VD+1
+     - UST Fails are managed on a first-come-first-serve basis as opposed to priority in risk
+   - **Benefits of Solution:**
+     - Consolidated reporting, prioritized response to fails, and improved risk management
+   - **Impact if not Done:**
+     - Continued manual processing, potential delays in addressing fails, and increased risk.
+
+**6. Delphi Fails:**
+   - **Summary of Solution Proposed:**
+     - Build macro to separate by region, automate actionable items intuitively visualize fails data to view workflow consolidations etc.
+     - Group by firm depot/source status & auto generate reports to action owners
+   - **Business Problem:**
+     - Delphi not useful for BAU users given lack of intuition in the interface, no means for grouping out to regions, no visualizing data to view workflow consolidations and encourages manual case by case fails management processing
+   - **Benefits of Solution:**
+     - Enhanced usability, intuitive visualization, and streamlined fails management
+   - **Impact if not Done:**
+     - Continued challenges in interface usability, lack of workflow visualization, and manual processing inefficiencies.
+
+**7. 15c3 UST WI Affirmations:**
+   - **Summary of Solution Proposed:**
+     - NY IBMO requested script to automate affirmation process with trades in scope
+   - **Business Problem:**
+     - 15C3 Lock Up constraint dictates a need to affirm high-risk trades around month end
+     - High-value WI US Treasury trades run the risk of failure due to re-coup process
+   - **Benefits of Solution:**
+     - Automated affirmation process, reduced risk of trade failure, and compliance with lock-up constraints
+   - **Impact if not Done:**
+     - Increased risk of trade failure, potential compliance issues, and manual effort in affirmation.
+
+**8. ALL client UST Entity Auto-Reconciliation (Extended):**
+   - **Summary of Solution Proposed:**
+     - Analyze volume/performance metrics to create a list of top failing clients in UST over time
+     - Expanded CB UST Auto rec EOD process to include these clients.
+   - **Business Problem:**
+     - Existing UST Rec in place for select Central Bank clients driven by relationship requirement
+     - Data shows Italy/Interbank desks highest number of fails on a consistent basis
+   - **Benefits of Solution:**
+     - Improved analysis, targeted reconciliation for top failing clients, and enhanced risk management
+   - **Impact if not Done:**
+     - Continued high number of fails, increased operational risks, and potential strain on client relationships.
+
+**9. USD Credit Reconciliation:**
+   - **Summary of Solution Proposed:**
+     - Built booking logic matrix for each client + affirmed wash with TPE
+     - Built additional macro on top of booking logic matrix + live trade data to auto-reconcile booking vs logic + send manual wash items to TCU
+   - **Business Problem:**
+     - CB desk requested root cause fix to consistent USD Credit Booking entity mismatches with select client base - consistent trade washing post VD and settlement failure risk poses substantial regulatory and financial impact as well as relationship impact
+   - **Benefits of Solution:**
+     - Improved entity matching, reduced trade washing, and minimized settlement failure risks
+   - **Impact if not Done:**
+     - Continued entity mismatches, increased trade washing, and heightened regulatory and financial risks.
