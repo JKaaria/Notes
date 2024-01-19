@@ -1,1 +1,61 @@
+Sub Two()
+    Dim sheet1 As Worksheet, sheet2 As Worksheet, resultsSheet As Worksheet
+    Dim lastRow1 As Long, lastRow2 As Long, resultsRow As Long
+    Dim valueToMatch As Variant
+
+    ' Set your sheet names here
+    Set sheet1 = ThisWorkbook.Sheets("TradeData")
+    Set sheet2 = ThisWorkbook.Sheets("CBLogicTable")
+    
+    ' Check if resultsSheet exists, delete it if it does
+    On Error Resume Next
+    Application.DisplayAlerts = False ' Avoid confirmation prompt
+    ThisWorkbook.Sheets("CBCreditTrades").Delete
+    On Error GoTo 0
+    Application.DisplayAlerts = True
+
+    ' Create a new sheet for results
+    Set resultsSheet = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    resultsSheet.Name = "CBCreditTrades"
+
+    ' Copy column headers from sheet1 to resultsSheet
+    sheet1.Rows(1).Copy resultsSheet.Rows(1)
+
+    ' Find the last rows in both sheets
+    lastRow1 = sheet1.Cells(sheet1.Rows.Count, "B").End(xlUp).Row
+    lastRow2 = sheet2.Cells(sheet2.Rows.Count, "B").End(xlUp).Row
+
+    ' Initialize the row for results
+    resultsRow = 2 ' Start from the second row for data
+
+    ' Loop through rows in sheet1
+    For i = 2 To lastRow1 ' Start from the second row to skip headers
+        ' Get the value to match from column B of sheet1
+        valueToMatch = sheet1.Cells(i, "B").Value
+        
+        ' Check if the value exists in column B of sheet2
+        If WorksheetFunction.CountIf(sheet2.Range("B1:B" & lastRow2), valueToMatch) > 0 Then
+            ' Copy the entire row from sheet1 to resultsSheet
+            sheet1.Rows(i).Copy resultsSheet.Rows(resultsRow)
+            resultsRow = resultsRow + 1
+        End If
+    Next i
+    
+    ' Find the last row in CBCreditTrades sheet
+    lastRowResults = resultsSheet.Cells(resultsSheet.Rows.Count, "B").End(xlUp).Row
+    
+    ' Loop through rows in CBCreditTrades sheet
+    For i = 2 To lastRowResults ' Start from the second row to skip headers
+        ' Get the value to match from column CC of CBCreditTrades sheet
+        valueToMatchCC = resultsSheet.Cells(i, "CC").Value
+        
+        ' Check if the value exists in column C of CBLogicTable sheet
+        If WorksheetFunction.CountIf(sheet2.Range("C1:C" & lastRow2), valueToMatchCC) = 0 Then
+            ' If not found, delete the row in CBCreditTrades
+            resultsSheet.Rows(i).Delete
+            lastRowResults = lastRowResults - 1 ' Adjust lastRowResults
+            i = i - 1 ' Adjust loop counter to recheck the current row
+        End If
+    Next i
+End Sub
 
