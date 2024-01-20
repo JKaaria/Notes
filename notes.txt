@@ -1,12 +1,1 @@
-Sub Two()
-    ' ... (existing code)
-
-    ' Loop through rows in resultsSheet (CBCreditTrades)
-    For i = 2 To resultsSheet.Cells(resultsSheet.Rows.Count, "B").End(xlUp).Row
-        ' Insert VLOOKUP formula into column A of CBCreditTrades
-        resultsSheet.Cells(i, 1).Formula = "=VLOOKUP(G" & i & ",CBLogicTable!$G:$I,3,FALSE)"
-    Next i
-
-    MsgBox "Matching rows with headers copied to CBCreditTrades, and VLOOKUP formula added to column A!", vbInformation
-End Sub
 
