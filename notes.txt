@@ -1,16 +1,1 @@
-' Helper function to construct the formula string
-Function GetFormula(row As Long) As String
-    GetFormula = "=IF($CC" & row & "=""PLC_WASH"", ""DTC 2196 or CBL 34797"", " & _
-                 "IF($CC" & row & "=""POLARITE"", ""DTC 7256 or CBL 15996"", " & _
-                 "IF($CG" & row & "=""BREXIT"", ""DTC____ or CBL 21864"", " & _
-                 "IF($CC" & row & "=""IMP_LNBR"", ""DTC 7254 or CBL 34797"", " & _
-                 "IF($BF" & row & "=""LNBR"", ""DTC 7254 or CBL 34797"", ""DTC 7256 or CBL 15996""))))"
-End Function
 
-' Loop through TradeData sheet again to add the formula
-tradeDataLastRow = tradeDataSheet.Cells(tradeDataSheet.Rows.Count, "B").End(xlUp).Row ' Update the last row after deletion
-For i = 2 To tradeDataLastRow
-    If Not IsEmpty(tradeDataSheet.Cells(i, "B").Value) Then
-        tradeDataSheet.Cells(i, "A").Formula = GetFormula(i)
-    End If
-Next i
