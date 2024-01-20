@@ -1,1 +1,2 @@
-
+            ' Set the sender's email address using SendOnBehalfOf
+            .SendOnBehalfOf = "sender@example.com"
