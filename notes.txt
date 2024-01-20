@@ -1,25 +1,29 @@
-Sub Two()
+Sub CopyMatchingRowsWithHeaders()
     Dim sheet1 As Worksheet, sheet2 As Worksheet, resultsSheet As Worksheet
     Dim lastRow1 As Long, lastRow2 As Long, resultsRow As Long
     Dim valueToMatch As Variant
-
+    
     ' Set your sheet names here
-    Set sheet1 = ThisWorkbook.Sheets("TradeData")
-    Set sheet2 = ThisWorkbook.Sheets("CBLogicTable")
+    Set sheet1 = ThisWorkbook.Sheets("Sheet1")
+    Set sheet2 = ThisWorkbook.Sheets("Sheet2")
     
     ' Create a new sheet for results
     Set resultsSheet = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
-    resultsSheet.Name = "CBCreditTrades"
-
+    resultsSheet.Name = "ResultsSheet"
+    
     ' Find the last rows in both sheets
     lastRow1 = sheet1.Cells(sheet1.Rows.Count, "B").End(xlUp).Row
     lastRow2 = sheet2.Cells(sheet2.Rows.Count, "B").End(xlUp).Row
-
+    
     ' Initialize the row for results
     resultsRow = 1
-
+    
+    ' Copy headers from sheet1 to resultsSheet
+    sheet1.Rows(1).Copy resultsSheet.Rows(resultsRow)
+    resultsRow = resultsRow + 1
+    
     ' Loop through rows in sheet1
-    For i = 1 To lastRow1
+    For i = 2 To lastRow1 ' Start from row 2 to skip the header
         ' Get the value to match from column B of sheet1
         valueToMatch = sheet1.Cells(i, "B").Value
         
@@ -30,5 +34,6 @@ Sub Two()
             resultsRow = resultsRow + 1
         End If
     Next i
+    
+    MsgBox "Matching rows with headers copied to ResultsSheet!", vbInformation
 End Sub
-
