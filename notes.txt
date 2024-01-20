@@ -26,10 +26,10 @@ Sub Two()
     lastRow2 = sheet2.Cells(sheet2.Rows.Count, "B").End(xlUp).Row
 
     ' Initialize the row for results
-    resultsRow = 2 ' Start from the second row for data
+    resultsRow = 2 ' Start from the second row to avoid overwriting headers
 
     ' Loop through rows in sheet1
-    For i = 2 To lastRow1 ' Start from the second row to skip headers
+    For i = 2 To lastRow1 ' Start from the second row to avoid copying headers again
         ' Get the value to match from column B of sheet1
         valueToMatch = sheet1.Cells(i, "B").Value
         
@@ -41,4 +41,3 @@ Sub Two()
         End If
     Next i
 End Sub
-
