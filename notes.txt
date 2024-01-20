@@ -18,18 +18,15 @@ Sub Two()
     Set resultsSheet = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
     resultsSheet.Name = "CBCreditTrades"
 
-    ' Copy column headers from sheet1 to resultsSheet
-    sheet1.Rows(1).Copy resultsSheet.Rows(1)
-
     ' Find the last rows in both sheets
     lastRow1 = sheet1.Cells(sheet1.Rows.Count, "B").End(xlUp).Row
     lastRow2 = sheet2.Cells(sheet2.Rows.Count, "B").End(xlUp).Row
 
     ' Initialize the row for results
-    resultsRow = 2 ' Start from the second row to avoid overwriting headers
+    resultsRow = 1
 
     ' Loop through rows in sheet1
-    For i = 2 To lastRow1 ' Start from the second row to avoid copying headers again
+    For i = 1 To lastRow1
         ' Get the value to match from column B of sheet1
         valueToMatch = sheet1.Cells(i, "B").Value
         
