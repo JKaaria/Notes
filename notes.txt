@@ -1,1 +1,8 @@
+' Loop through TradeData sheet again to add the formula
+tradeDataLastRow = tradeDataSheet.Cells(tradeDataSheet.Rows.Count, "B").End(xlUp).Row ' Update the last row after deletion
+For i = 2 To tradeDataLastRow
+    If Not IsEmpty(tradeDataSheet.Cells(i, "B").Value) Then
+        tradeDataSheet.Cells(i, "A").Formula = "=IF(CC" & i & "=""PLC_WASH"", ""DTC 2196 or CBL 34797"", IF(CC" & i & "=""POLARITE"", ""DTC 7256 or CBL 15996"", IF(CG" & i & "=""BREXIT"", ""DTC____ or CBL 21864"", IF(CC" & i & "=""IMP_LNBR"", ""DTC 7254 or CBL 34797"", IF(BF" & i & "=""LNBR"", ""DTC 7254 or CBL 34797"", ""DTC 7256 or CBL 15996""))))"
+    End If
+Next i
 
