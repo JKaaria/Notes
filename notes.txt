@@ -1,1 +1,15 @@
+Sub PasteFormula()
+    Dim lastRow As Long
+    Dim i As Long
+
+    ' Find the last row with data in column B
+    lastRow = Cells(Rows.Count, "B").End(xlUp).Row
+
+    ' Loop through each row with data in column B and paste the formula in column A
+    For i = 2 To lastRow
+        If Not IsEmpty(Cells(i, "B").Value) Then
+            Cells(i, "A").Formula = "=IF(CC" & i & "=""PLC_WASH"", ""DTC 2196 or CBL 34797"", IF(CC" & i & "=""POLARITE"", ""DTC 7256 or CBL 15996"", IF(CG" & i & "=""BREXIT"", ""DTC or CBL 21864"", IF(CC" & i & "=""IMP_LNBR"", ""DTC 7254 or CBL 34797"", IF(BF" & i & "=""LNBR"", ""DTC 7254 or CBL 34797"", ""DTC 7256 or CBL 15996""))))"
+        End If
+    Next i
+End Sub
 
