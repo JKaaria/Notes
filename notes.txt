@@ -1,1 +1,20 @@
 
+Sub DeleteRowsNotKaariaJeremy()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData") ' Change "TradeData" to your sheet name
+    
+    ' Find the last row in column G
+    lastRow = ws.Cells(ws.Rows.Count, "G").End(xlUp).Row
+    
+    ' Loop through the rows in column G
+    For i = lastRow To 2 Step -1 ' Start from the last row and go upward
+        If ws.Cells(i, "G").Value <> "Kaaria, Jeremy" Then
+            ' Delete the entire row if the value in column G is not "Kaaria, Jeremy"
+            ws.Rows(i).Delete
+        End If
+    Next i
+End Sub
