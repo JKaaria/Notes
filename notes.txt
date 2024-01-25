@@ -1,5 +1,4 @@
-
-Sub DeleteRowsNotKaariaJeremy()
+Sub DeleteRowsNotKaariaJeremyOrSmithJohn()
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim i As Long
@@ -12,8 +11,11 @@ Sub DeleteRowsNotKaariaJeremy()
     
     ' Loop through the rows in column G
     For i = lastRow To 2 Step -1 ' Start from the last row and go upward
-        If ws.Cells(i, "G").Value <> "Kaaria, Jeremy" Then
-            ' Delete the entire row if the value in column G is not "Kaaria, Jeremy"
+        Dim cellValue As String
+        cellValue = ws.Cells(i, "G").Value
+        
+        ' Delete the entire row if the value in column G is not "Kaaria, Jeremy" or "Smith, John"
+        If cellValue <> "Kaaria, Jeremy" And cellValue <> "Smith, John" Then
             ws.Rows(i).Delete
         End If
     Next i
