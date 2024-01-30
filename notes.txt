@@ -1,26 +1,18 @@
-Sub MergeAndSplitTextToColumns()
-    Dim csvFilePath As String
+Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
     Dim originalData As Variant
     Dim mergedData As Variant
     Dim numRows As Long, numCols As Long
     Dim i As Long, j As Long
     Dim mergedColumn As Long
     
-    ' Specify the path to your CSV file
-    csvFilePath = "C:\Path\To\Your\File.csv"
-    
-    ' Open the CSV file and read data into an array
-    With Workbooks.Open(csvFilePath)
-        ' Assuming the data is in the first sheet, adjust if needed
-        With .Sheets(1)
-            ' Find the last row and column with data
-            numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
-            numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
-            
-            ' Read data into an array
-            originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
-        End With
-        .Close False
+    ' Assuming the data is in the active sheet, adjust if needed
+    With ActiveSheet
+        ' Find the last row and column with data
+        numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
+        numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
+        
+        ' Read data into an array
+        originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
     End With
     
     ' Create a new array to store merged data
@@ -42,19 +34,16 @@ Sub MergeAndSplitTextToColumns()
         Next j
     Next i
     
-    ' Create a new workbook to store merged data
-    With Workbooks.Add
-        .Sheets(1).Range("A1").Resize(numRows, 1).Value = mergedData
-        
-        ' Split the merged data into columns using text to columns
-        .Sheets(1).Columns("A:A").TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
-            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-            Semicolon:=False, Comma:=True, Space:=False, Other:=False
-        
-        ' Save the workbook with the corrected data
-        .SaveAs "C:\Path\To\Your\Corrected\File.csv", FileFormat:=xlCSV
-        .Close False
-    End With
+    ' Clear existing data in the sheet
+    ActiveSheet.Cells.Clear
     
-    MsgBox "Data merged and split successfully!", vbInformation
+    ' Paste the merged data into the sheet
+    ActiveSheet.Range("A1").Resize(numRows, 1).Value = mergedData
+    
+    ' Split the merged data into columns using text to columns
+    ActiveSheet.Columns("A:A").TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=True, Space:=False, Other:=False
+    
+    MsgBox "Data merged and split successfully in the current workbook!", vbInformation
 End Sub
