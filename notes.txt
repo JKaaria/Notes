@@ -4,6 +4,7 @@ Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
     Dim numRows As Long, numCols As Long
     Dim i As Long, j As Long
     Dim mergedColumn As Long
+    Dim previousRow As Long
     
     ' Assuming the data is in the active sheet, adjust if needed
     With ActiveSheet
@@ -32,6 +33,18 @@ Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
                 mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & ","
             End If
         Next j
+        
+        ' Check if the merged data in the current row makes sense in the context of the previous row
+        If i > 1 Then
+            If Not ValidateMergedData(mergedData(i, mergedColumn), mergedData(previousRow, mergedColumn)) Then
+                ' Handle misalignment - you can add your logic here (e.g., prompt user, log error, etc.)
+                MsgBox "Misalignment detected in Row " & i & ". Please check the data.", vbExclamation
+                Exit Sub
+            End If
+        End If
+        
+        ' Update the previous row
+        previousRow = i
     Next i
     
     ' Clear existing data in the sheet
@@ -47,3 +60,22 @@ Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
     
     MsgBox "Data merged and split successfully in the current workbook!", vbInformation
 End Sub
+
+Function ValidateMergedData(currentRowData As Variant, previousRowData As Variant) As Boolean
+    ' Add your validation logic here
+    ' You may compare the current row data with the previous row data to check for misalignment
+    ' Return True if the data is aligned, False otherwise
+    
+    ' For example, you can check if the length of the current row data is greater than the previous row data
+    ' Modify this logic based on your specific requirements
+    
+    Dim currentLength As Long
+    Dim previousLength As Long
+    
+    ' Convert the variant data to a string for length comparison
+    currentLength = Len(CStr(currentRowData))
+    previousLength = Len(CStr(previousRowData))
+    
+    ' Compare the length of the current row data with the previous row data
+    ValidateMergedData = currentLength >= previousLength
+End Function
