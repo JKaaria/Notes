@@ -1,81 +1,54 @@
-Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
-    Dim originalData As Variant
-    Dim mergedData As Variant
-    Dim numRows As Long, numCols As Long
-    Dim i As Long, j As Long
-    Dim mergedColumn As Long
-    Dim previousRow As Long
+Sub SplitTextToColumnsAndAlign()
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim dataRange As Range
+    Dim currentRow As Long
+    Dim colCount As Long
+    Dim cellValue As String
+    Dim commaCount As Long
+    Dim targetCommaCount As Long
     
-    ' Assuming the data is in the active sheet, adjust if needed
-    With ActiveSheet
-        ' Find the last row and column with data
-        numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
-        numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
-        
-        ' Read data into an array
-        originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
-    End With
+    ' Find the last row and column with data
+    lastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+    lastCol = ActiveSheet.Cells(1, ActiveSheet.Columns.Count).End(xlToLeft).Column
     
-    ' Create a new array to store merged data
-    ReDim mergedData(1 To numRows, 1 To 1)
+    ' Set the data range
+    Set dataRange = ActiveSheet.Range(ActiveSheet.Cells(1, 1), ActiveSheet.Cells(lastRow, lastCol))
     
-    ' Loop through each row to merge data into a single column
-    For i = 1 To numRows
-        ' Initialize the merged column
-        mergedColumn = 1
+    ' Iterate through each row starting from the second row (assuming the first row contains headers)
+    For currentRow = 2 To lastRow
+        ' Get the cell value in the first column of the current row
+        cellValue = ActiveSheet.Cells(currentRow, 1).Value
         
-        ' Loop through each column to concatenate data
-        For j = 1 To numCols
-            mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & originalData(i, j)
-            
-            ' Add a delimiter if not the last column
-            If j < numCols Then
-                mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & ","
-            End If
-        Next j
+        ' Count the number of commas in the cell value
+        commaCount = Len(cellValue) - Len(Replace(cellValue, ",", ""))
         
-        ' Check if the merged data in the current row makes sense in the context of the previous row
-        If i > 1 Then
-            If Not ValidateMergedData(mergedData(i, mergedColumn), mergedData(previousRow, mergedColumn)) Then
-                ' Handle misalignment - you can add your logic here (e.g., prompt user, log error, etc.)
-                MsgBox "Misalignment detected in Row " & i & ". Please check the data.", vbExclamation
-                Exit Sub
-            End If
+        ' Determine the target number of commas based on the number of columns
+        targetCommaCount = lastCol - 1 ' Assuming the first column is not part of the TextToColumns operation
+        
+        ' Add or delete commas to match the target number
+        If commaCount < targetCommaCount Then
+            ' Add commas
+            Do While commaCount < targetCommaCount
+                cellValue = cellValue & ","
+                commaCount = commaCount + 1
+            Loop
+        ElseIf commaCount > targetCommaCount Then
+            ' Delete commas
+            Do While commaCount > targetCommaCount
+                cellValue = Left(cellValue, InStrRev(cellValue, ",") - 1) & Mid(cellValue, InStrRev(cellValue, ",") + 1)
+                commaCount = commaCount - 1
+            Loop
         End If
         
-        ' Update the previous row
-        previousRow = i
-    Next i
+        ' Set the modified cell value back to the cell
+        ActiveSheet.Cells(currentRow, 1).Value = cellValue
+    Next currentRow
     
-    ' Clear existing data in the sheet
-    ActiveSheet.Cells.Clear
-    
-    ' Paste the merged data into the sheet
-    ActiveSheet.Range("A1").Resize(numRows, 1).Value = mergedData
-    
-    ' Split the merged data into columns using text to columns
-    ActiveSheet.Columns("A:A").TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
+    ' Use TextToColumns to split the data based on commas
+    dataRange.TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
         TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
         Semicolon:=False, Comma:=True, Space:=False, Other:=False
-    
-    MsgBox "Data merged and split successfully in the current workbook!", vbInformation
+        
+    MsgBox "Text split to columns and aligned successfully!", vbInformation
 End Sub
-
-Function ValidateMergedData(currentRowData As Variant, previousRowData As Variant) As Boolean
-    ' Add your validation logic here
-    ' You may compare the current row data with the previous row data to check for misalignment
-    ' Return True if the data is aligned, False otherwise
-    
-    ' For example, you can check if the length of the current row data is greater than the previous row data
-    ' Modify this logic based on your specific requirements
-    
-    Dim currentLength As Long
-    Dim previousLength As Long
-    
-    ' Convert the variant data to a string for length comparison
-    currentLength = Len(CStr(currentRowData))
-    previousLength = Len(CStr(previousRowData))
-    
-    ' Compare the length of the current row data with the previous row data
-    ValidateMergedData = currentLength >= previousLength
-End Function
