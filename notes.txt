@@ -1,0 +1,24 @@
+Sub CleanAndCorrectData()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim i As Long, j As Long
+
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to your sheet name
+
+    ' Find the last row and last column with data
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+
+    ' Loop through each row
+    For i = 1 To lastRow
+        ' Loop through each column
+        For j = lastCol To 2 Step -1 ' Start from the last column and move to the left
+            ' Combine the data in misaligned columns
+            ws.Cells(i, j - 1).Value = ws.Cells(i, j - 1).Value & ws.Cells(i, j).Value
+            ' Clear the data in the misaligned column
+            ws.Cells(i, j).Clear
+        Next j
+    Next i
+End Sub
