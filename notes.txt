@@ -1,24 +1,60 @@
-Sub CleanAndCorrectData()
-    Dim ws As Worksheet
-    Dim lastRow As Long
-    Dim lastCol As Long
+Sub MergeAndSplitTextToColumns()
+    Dim csvFilePath As String
+    Dim originalData As Variant
+    Dim mergedData As Variant
+    Dim numRows As Long, numCols As Long
     Dim i As Long, j As Long
-
-    ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to your sheet name
-
-    ' Find the last row and last column with data
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
-
-    ' Loop through each row
-    For i = 1 To lastRow
-        ' Loop through each column
-        For j = lastCol To 2 Step -1 ' Start from the last column and move to the left
-            ' Combine the data in misaligned columns
-            ws.Cells(i, j - 1).Value = ws.Cells(i, j - 1).Value & ws.Cells(i, j).Value
-            ' Clear the data in the misaligned column
-            ws.Cells(i, j).Clear
+    Dim mergedColumn As Long
+    
+    ' Specify the path to your CSV file
+    csvFilePath = "C:\Path\To\Your\File.csv"
+    
+    ' Open the CSV file and read data into an array
+    With Workbooks.Open(csvFilePath)
+        ' Assuming the data is in the first sheet, adjust if needed
+        With .Sheets(1)
+            ' Find the last row and column with data
+            numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
+            numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
+            
+            ' Read data into an array
+            originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
+        End With
+        .Close False
+    End With
+    
+    ' Create a new array to store merged data
+    ReDim mergedData(1 To numRows, 1 To 1)
+    
+    ' Loop through each row to merge data into a single column
+    For i = 1 To numRows
+        ' Initialize the merged column
+        mergedColumn = 1
+        
+        ' Loop through each column to concatenate data
+        For j = 1 To numCols
+            mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & originalData(i, j)
+            
+            ' Add a delimiter if not the last column
+            If j < numCols Then
+                mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & ","
+            End If
         Next j
     Next i
+    
+    ' Create a new workbook to store merged data
+    With Workbooks.Add
+        .Sheets(1).Range("A1").Resize(numRows, 1).Value = mergedData
+        
+        ' Split the merged data into columns using text to columns
+        .Sheets(1).Columns("A:A").TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
+            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+            Semicolon:=False, Comma:=True, Space:=False, Other:=False
+        
+        ' Save the workbook with the corrected data
+        .SaveAs "C:\Path\To\Your\Corrected\File.csv", FileFormat:=xlCSV
+        .Close False
+    End With
+    
+    MsgBox "Data merged and split successfully!", vbInformation
 End Sub
