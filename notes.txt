@@ -1,3 +1,47 @@
+Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
+    Dim originalData As Variant
+    Dim mergedData As Variant
+    Dim numRows As Long, numCols As Long
+    Dim i As Long, j As Long
+    Dim mergedColumn As Long
+    
+    ' Assuming the data is in the active sheet, adjust if needed
+    With ActiveSheet
+        ' Find the last row and column with data
+        numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
+        numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
+        
+        ' Read data into an array
+        originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
+    End With
+    
+    ' Create a new array to store merged data
+    ReDim mergedData(1 To numRows, 1 To 1)
+    
+    ' Loop through each row to merge data into a single column
+    For i = 1 To numRows
+        ' Initialize the merged column
+        mergedColumn = 1
+        
+        ' Loop through each column to concatenate data
+        For j = 1 To numCols
+            mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & originalData(i, j)
+            
+            ' Add a delimiter if not the last column
+            If j < numCols Then
+                mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & ","
+            End If
+        Next j
+    Next i
+    
+    ' Clear existing data in the sheet
+    ActiveSheet.Cells.Clear
+    
+    ' Paste the merged data into the sheet
+    ActiveSheet.Range("A1").Resize(numRows, 1).Value = mergedData
+  
+End Sub
+
 Sub SplitTextToColumnsAndAlign()
     Dim lastRow As Long
     Dim lastCol As Long
