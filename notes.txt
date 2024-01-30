@@ -1,50 +1,65 @@
-Sub SplitTextToColumnsAndAlign()
+Sub CreateMasterTable()
+    Dim ws As Worksheet
+    Dim masterTable As Worksheet
     Dim lastRow As Long
+    Dim commonIdentifier As Range
+    
+    ' Create a new worksheet for the master table
+    Set masterTable = Sheets.Add(After:=Sheets(Sheets.Count))
+    masterTable.Name = "MasterTable"
+    
+    ' Iterate through each sheet with data
+    For Each ws In ThisWorkbook.Sheets
+        ' Check if the sheet is not the master table itself
+        If ws.Name <> masterTable.Name Then
+            ' Find the last row with data in the current sheet
+            lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+            
+            ' Identify the common identifier column
+            Select Case ws.Name
+                Case "FI_Cash_AFT"
+                    Set commonIdentifier = ws.Range("A1:A" & lastRow)
+                Case "FI_Cash_SWIFT_Report"
+                    Set commonIdentifier = ws.Range("B1:B" & lastRow)
+                Case "FI_FISS_Inventory"
+                    ' Adjust this based on the actual common identifier column in FI_FISS_Inventory
+                    Set commonIdentifier = ws.Range("A1:A" & lastRow)
+                Case "FI_Cash_Fails"
+                    Set commonIdentifier = ws.Range("E1:E" & lastRow)
+                Case "FI_Cash_Exceptions"
+                    Set commonIdentifier = ws.Range("B1:B" & lastRow)
+                Case "SWS_Recent_Trades"
+                    Set commonIdentifier = ws.Range("A1:A" & lastRow)
+                ' Add more cases if needed for other sheets
+            End Select
+            
+            ' Copy data to the master table based on the common identifier
+            If Not commonIdentifier Is Nothing Then
+                If masterTable.UsedRange.Rows.Count = 1 Then
+                    commonIdentifier.EntireRow.Copy masterTable.Range("A1")
+                Else
+                    commonIdentifier.EntireRow.Copy masterTable.Cells(masterTable.Cells(Rows.Count, 1).End(xlUp).Row + 1, 1)
+                End If
+            End If
+        End If
+    Next ws
+    
+    ' Remove blank columns
+    Call RemoveBlankColumns(masterTable)
+End Sub
+
+Sub RemoveBlankColumns(ws As Worksheet)
     Dim lastCol As Long
-    Dim currentRow As Long
-    Dim currentCol As Long
-    Dim targetCommaCount As Long
-    Dim cellValue As String
-    Dim commaCount As Long
-    Dim headerCommaCount As Long
+    Dim i As Long
     
-    ' Find the last row and column with data
-    lastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
-    lastCol = ActiveSheet.Cells(1, ActiveSheet.Columns.Count).End(xlToLeft).Column
+    ' Find the last column with data
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
     
-    ' Count the number of commas in the header row
-    headerCommaCount = Len(ActiveSheet.Cells(1, 1).Value) - Len(Replace(ActiveSheet.Cells(1, 1).Value, ",", ""))
-    
-    ' Iterate through each row
-    For currentRow = 2 To lastRow
-        ' Iterate through each column in the current row
-        For currentCol = 1 To lastCol
-            ' Get the cell value in the current cell
-            cellValue = ActiveSheet.Cells(currentRow, currentCol).Value
-            
-            ' Count the number of commas in the cell value
-            commaCount = Len(cellValue) - Len(Replace(cellValue, ",", ""))
-            
-            ' Determine the target number of commas based on the header row
-            targetCommaCount = headerCommaCount
-            
-            ' Add or remove commas to match the target number
-            Do While commaCount < targetCommaCount
-                ' Add commas
-                cellValue = cellValue & ","
-                commaCount = commaCount + 1
-            Loop
-            
-            Do While commaCount > targetCommaCount
-                ' Remove commas
-                cellValue = Left(cellValue, InStrRev(cellValue, ",") - 1) & Mid(cellValue, InStrRev(cellValue, ",") + 1)
-                commaCount = commaCount - 1
-            Loop
-            
-            ' Set the modified cell value back to the cell
-            ActiveSheet.Cells(currentRow, currentCol).Value = cellValue
-        Next currentCol
-    Next currentRow
-    
-    MsgBox "Text split to columns and aligned successfully!", vbInformation
+    ' Loop through columns in reverse order
+    For i = lastCol To 1 Step -1
+        ' Check if the entire column is empty
+        If WorksheetFunction.CountA(ws.Columns(i)) = 0 Then
+            ws.Columns(i).Delete
+        End If
+    Next i
 End Sub
