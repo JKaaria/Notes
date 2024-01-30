@@ -1,99 +1,50 @@
-Sub MergeAndSplitTextToColumnsOnCurrentWorkbook()
-    Dim originalData As Variant
-    Dim mergedData As Variant
-    Dim numRows As Long, numCols As Long
-    Dim i As Long, j As Long
-    Dim mergedColumn As Long
-    
-    ' Assuming the data is in the active sheet, adjust if needed
-    With ActiveSheet
-        ' Find the last row and column with data
-        numRows = .Cells(.Rows.Count, 1).End(xlUp).Row
-        numCols = .Cells(1, .Columns.Count).End(xlToLeft).Column
-        
-        ' Read data into an array
-        originalData = .Range(.Cells(1, 1), .Cells(numRows, numCols)).Value
-    End With
-    
-    ' Create a new array to store merged data
-    ReDim mergedData(1 To numRows, 1 To 1)
-    
-    ' Loop through each row to merge data into a single column
-    For i = 1 To numRows
-        ' Initialize the merged column
-        mergedColumn = 1
-        
-        ' Loop through each column to concatenate data
-        For j = 1 To numCols
-            mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & originalData(i, j)
-            
-            ' Add a delimiter if not the last column
-            If j < numCols Then
-                mergedData(i, mergedColumn) = mergedData(i, mergedColumn) & ","
-            End If
-        Next j
-    Next i
-    
-    ' Clear existing data in the sheet
-    ActiveSheet.Cells.Clear
-    
-    ' Paste the merged data into the sheet
-    ActiveSheet.Range("A1").Resize(numRows, 1).Value = mergedData
-  
-End Sub
-
 Sub SplitTextToColumnsAndAlign()
     Dim lastRow As Long
     Dim lastCol As Long
-    Dim currentCol As Long
     Dim currentRow As Long
+    Dim currentCol As Long
     Dim targetCommaCount As Long
     Dim cellValue As String
     Dim commaCount As Long
+    Dim headerCommaCount As Long
     
     ' Find the last row and column with data
     lastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
     lastCol = ActiveSheet.Cells(1, ActiveSheet.Columns.Count).End(xlToLeft).Column
     
-    ' Iterate through each column starting from the second column (assuming the first column is not part of the TextToColumns operation)
-    For currentCol = 2 To lastCol
-        ' Iterate through each row in the current column
-        For currentRow = 1 To lastRow
+    ' Count the number of commas in the header row
+    headerCommaCount = Len(ActiveSheet.Cells(1, 1).Value) - Len(Replace(ActiveSheet.Cells(1, 1).Value, ",", ""))
+    
+    ' Iterate through each row
+    For currentRow = 2 To lastRow
+        ' Iterate through each column in the current row
+        For currentCol = 1 To lastCol
             ' Get the cell value in the current cell
             cellValue = ActiveSheet.Cells(currentRow, currentCol).Value
             
             ' Count the number of commas in the cell value
             commaCount = Len(cellValue) - Len(Replace(cellValue, ",", ""))
             
-            ' Determine the target number of commas based on the number of columns
-            targetCommaCount = 1 ' Assuming each column should have one comma
+            ' Determine the target number of commas based on the header row
+            targetCommaCount = headerCommaCount
             
-            ' Add or delete commas to match the target number
-            If commaCount < targetCommaCount Then
+            ' Add or remove commas to match the target number
+            Do While commaCount < targetCommaCount
                 ' Add commas
-                Do While commaCount < targetCommaCount
-                    cellValue = cellValue & ","
-                    commaCount = commaCount + 1
-                Loop
-            ElseIf commaCount > targetCommaCount Then
-                ' Delete commas
-                Do While commaCount > targetCommaCount
-                    cellValue = Left(cellValue, InStrRev(cellValue, ",") - 1) & Mid(cellValue, InStrRev(cellValue, ",") + 1)
-                    commaCount = commaCount - 1
-                Loop
-            End If
+                cellValue = cellValue & ","
+                commaCount = commaCount + 1
+            Loop
+            
+            Do While commaCount > targetCommaCount
+                ' Remove commas
+                cellValue = Left(cellValue, InStrRev(cellValue, ",") - 1) & Mid(cellValue, InStrRev(cellValue, ",") + 1)
+                commaCount = commaCount - 1
+            Loop
             
             ' Set the modified cell value back to the cell
             ActiveSheet.Cells(currentRow, currentCol).Value = cellValue
-        Next currentRow
-    Next currentCol
-    
-    ' Use TextToColumns to split the data based on commas in each column
-    For currentCol = 2 To lastCol
-        ActiveSheet.Columns(currentCol).TextToColumns Destination:=ActiveSheet.Cells(1, currentCol), DataType:=xlDelimited, _
-            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-            Semicolon:=False, Comma:=True, Space:=False, Other:=False
-    Next currentCol
+        Next currentCol
+    Next currentRow
     
     MsgBox "Text split to columns and aligned successfully!", vbInformation
 End Sub
