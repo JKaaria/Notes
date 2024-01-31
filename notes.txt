@@ -16,12 +16,11 @@ Sub InsertVLookupFormula()
     ' Find the last row in column AU
     lastRow = ws.Cells(ws.Rows.Count, "AU").End(xlUp).Row
     
-    ' Insert VLOOKUP formula in column BM from row 2 to the last used row
-    ws.Range("BM2:BM" & lastRow).Formula = "=IF(AU2="""",AE2,AU2)"
+    ' Insert modified formula in column BM from row 2 to the last used row
+    ws.Range("BM2:BM" & lastRow).Formula = "=IF(ISNUMBER(SEARCH(""DUM..."", AU2)), AE2, AU2)"
     
     ' Optional: If you want to convert formulas to values, uncomment the line below
     ' ws.Range("BM2:BM" & lastRow).Value = ws.Range("BM2:BM" & lastRow).Value
     
-    MsgBox "VLOOKUP formulas successfully inserted in column BM.", vbInformation
+    MsgBox "Modified formula successfully inserted in column BM.", vbInformation
 End Sub
-
