@@ -1,1 +1,28 @@
+Sub InsertDynamicVLOOKUPFormula()
+    Dim wsCashFails As Worksheet
+    Dim wsFISSInventory As Worksheet
+    Dim lastRowCashFails As Long
+    Dim lastRowFISSInventory As Long
+    
+    ' Set the worksheet references
+    Set wsCashFails = ThisWorkbook.Sheets("FI_Cash_Fails")
+    Set wsFISSInventory = ThisWorkbook.Sheets("FI_FISS_Inventory")
+    
+    ' Find the last row in column T of FI_Cash_Fails
+    lastRowCashFails = wsCashFails.Cells(wsCashFails.Rows.Count, "T").End(xlUp).Row
+    
+    ' Find the last row in column A of FI_FISS_Inventory (assuming data starts from row 1)
+    lastRowFISSInventory = wsFISSInventory.Cells(wsFISSInventory.Rows.Count, "A").End(xlUp).Row
+    
+    ' Insert VLOOKUP formula in each cell in column T of FI_Cash_Fails
+    ' starting from T2 to the last row in FI_Cash_Fails
+    For i = 2 To lastRowCashFails
+        ' Build a dynamic range for FI_FISS_Inventory based on its last row
+        Dim lookupRange As Range
+        Set lookupRange = wsFISSInventory.Range("A1:D" & lastRowFISSInventory)
+        
+        ' Insert dynamic VLOOKUP formula
+        wsCashFails.Range("T" & i).Formula = "=VLOOKUP(T" & i & ", " & lookupRange.Address & ", 4, FALSE)"
+    Next i
+End Sub
 
