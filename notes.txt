@@ -1,1 +1,29 @@
+Sub RenameCellToQUE()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim cell As Range
+    
+    ' Set the worksheet variable
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("FI_Cash_Fails")
+    On Error GoTo 0
+    
+    ' Check if the worksheet exists
+    If ws Is Nothing Then
+        MsgBox "Worksheet 'FI_Cash_Fails' not found in the current workbook.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Find the last row in column AE
+    lastRow = ws.Cells(ws.Rows.Count, "AE").End(xlUp).Row
+    
+    ' Loop through each cell in column AE and rename cell to "QUE" if "DUM" is found
+    For Each cell In ws.Range("AE2:AE" & lastRow)
+        If InStr(1, UCase(cell.Value), "DUM") > 0 Then
+            cell.Value = "QUE"
+        End If
+    Next cell
+    
+    MsgBox "Cells in column AE containing 'DUM' have been renamed to 'QUE'.", vbInformation
+End Sub
 
