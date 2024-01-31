@@ -1,1 +1,44 @@
 
+Sub InsertColumnAndLookup()
+    Dim wsCashFails As Worksheet
+    Dim wsInventory As Worksheet
+    Dim lastRowCashFails As Long
+    Dim i As Long
+    Dim instrumentId As Variant
+    Dim lookupRange As Range
+    Dim resultValue As Variant
+    
+    ' Set references to worksheets
+    Set wsCashFails = ThisWorkbook.Sheets("FI_Cash_Fails")
+    Set wsInventory = ThisWorkbook.Sheets("FI_FISS_Inventory")
+    
+    ' Find the last row in FI_Cash_Fails sheet
+    lastRowCashFails = wsCashFails.Cells(wsCashFails.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the lookup range in FI_FISS_Inventory sheet
+    Set lookupRange = wsInventory.Range("A2:A" & wsInventory.Cells(wsInventory.Rows.Count, "A").End(xlUp).Row)
+    
+    ' Loop through each row in FI_Cash_Fails
+    For i = 2 To lastRowCashFails ' Assuming the data starts from row 2
+    
+        ' Get the Instrument Id value from column A of FI_Cash_Fails
+        instrumentId = wsCashFails.Cells(i, 1).Value
+        
+        ' Perform the lookup in FI_FISS_Inventory
+        resultValue = Application.VLookup(instrumentId, lookupRange, 5, False)
+        
+        ' Check if a match is found
+        If Not IsError(resultValue) Then
+            ' Insert a new column in column A of FI_Cash_Fails
+            wsCashFails.Cells(i, 1).EntireRow.Insert
+            ' Populate the newly inserted cell with the result value
+            wsCashFails.Cells(i, 1).Value = resultValue
+        End If
+        
+    Next i
+    
+    ' Cleanup
+    Set wsCashFails = Nothing
+    Set wsInventory = Nothing
+    Set lookupRange = Nothing
+End Sub
