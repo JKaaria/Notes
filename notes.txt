@@ -1,1 +1,27 @@
+Sub InsertVLookupFormula()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Set the worksheet variable
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("FI_Cash_Fails")
+    On Error GoTo 0
+    
+    ' Check if the worksheet exists
+    If ws Is Nothing Then
+        MsgBox "Worksheet 'FI_Cash_Fails' not found in the current workbook.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Find the last row in column AU
+    lastRow = ws.Cells(ws.Rows.Count, "AU").End(xlUp).Row
+    
+    ' Insert VLOOKUP formula in column BM from row 2 to the last used row
+    ws.Range("BM2:BM" & lastRow).Formula = "=IF(AU2="""",AE2,AU2)"
+    
+    ' Optional: If you want to convert formulas to values, uncomment the line below
+    ' ws.Range("BM2:BM" & lastRow).Value = ws.Range("BM2:BM" & lastRow).Value
+    
+    MsgBox "VLOOKUP formulas successfully inserted in column BM.", vbInformation
+End Sub
 
