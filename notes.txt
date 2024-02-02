@@ -1,1 +1,19 @@
+Subject: Follow-Up and Progress on Fails Analysis & Net Position Workflow
 
+Hi ,
+
+I hope this message finds you well. Following our meeting on the 24th, I wanted to provide you with a sample SWIFT report document, which serves as the foundation for the Access Fintech Data feeds. However, we've encountered concerns regarding the data integrity of these feeds.
+
+Upon closer examination, we find that IBMO's FISS Fails report offers more reliable data. This report captures all unsettled FISS/GLOSS items, feeding directly from SWS Rates, including items from the exception queue. Currently, we overlay this information with FISS Inventory and SWS Recent trade data to optimize our Fails Analysis & Net Position Workflow for the FI Cash Desk.
+
+Moving forward, we are looking to enhance this workflow by improving the inventory data feed. Additionally, we plan to migrate the workflow into our firm-approved Data Platform, Alteryx. This initiative is also centrally documented in the GMO Go book of work under ID ____.
+
+Your insights and feedback on this approach would be highly valuable. Please let me know a convenient time for a follow-up discussion to delve deeper into these enhancements and address any concerns.
+
+Thank you for your time, and I look forward to our continued collaboration on this project.
+
+Best regards,
+
+[Your Full Name]
+[Your Position]
+[Your Contact Information]
