@@ -30,15 +30,13 @@ Sub SortAndAppendRecentTrades()
     ' Find the last row with data in T+0 WI Bookings sheet
     lastRowT0Bookings = wsT0Bookings.Cells(wsT0Bookings.Rows.Count, "A").End(xlUp).Row
     
-    ' Copy recent trades to T+0 WI Bookings sheet
-    Dim i As Long
-    For i = 1 To lastRowTradeData ' Including the header row
-        If CStr(wsTradeData.Cells(i, 1).Value) = recentTradeDate Then ' Convert to String for comparison
+    ' Copy recent trades to T+0 WI Bookings sheet, including the header row
+    For i = 1 To lastRowTradeData
+        If CStr(wsTradeData.Cells(i, 1).Value) = recentTradeDate Then
             ' Copy the entire row to the T+0 WI Bookings sheet
             wsTradeData.Rows(i).Copy Destination:=wsT0Bookings.Rows(lastRowT0Bookings + 1)
             lastRowT0Bookings = lastRowT0Bookings + 1
         Else
-            ' Since the data is sorted, we can exit the loop once we find a trade with a different date
             Exit For
         End If
     Next i
