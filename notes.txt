@@ -1,5 +1,4 @@
-
-Sub CheckTradeIDs()
+Sub GenerateEmailsForMatchingTradeIDs()
     Dim wsTradeData As Worksheet
     Dim wsT0WIBookings As Worksheet
     Dim lastRowTradeData As Long
@@ -7,43 +6,62 @@ Sub CheckTradeIDs()
     Dim tradeIDColumnIndexTradeData As Long
     Dim tradeIDColumnIndexT0WIBookings As Long
     Dim cell As Range
-    
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+
     ' Set the worksheets
     Set wsTradeData = ThisWorkbook.Sheets("TradeData")
     Set wsT0WIBookings = ThisWorkbook.Sheets("T+0 WI Bookings")
-    
+
     ' Find the last row in the TradeData sheet
     lastRowTradeData = wsTradeData.Cells(wsTradeData.Rows.Count, 1).End(xlUp).Row
-    
+
     ' Find the column index of the "Trade ID" column in TradeData sheet (assumes it's in the first row)
     tradeIDColumnIndexTradeData = FindColumnIndex(wsTradeData, "Trade ID")
-    
+
     ' Check if "Trade ID" column was found in TradeData sheet
     If tradeIDColumnIndexTradeData = 0 Then
         MsgBox "The 'Trade ID' column was not found in TradeData sheet.", vbExclamation
         Exit Sub
     End If
-    
+
     ' Set the range for the "Trade ID" column in TradeData sheet
     Set tradeIDCol = wsTradeData.Range(wsTradeData.Cells(2, tradeIDColumnIndexTradeData), wsTradeData.Cells(lastRowTradeData, tradeIDColumnIndexTradeData))
-    
-    ' Find the column index of the "Trade ID" column in T+0 WI Bookings sheet (assumes it's in the first row)
-    tradeIDColumnIndexT0WIBookings = FindColumnIndex(wsT0WIBookings, "Trade ID")
-    
-    ' Check if "Trade ID" column was found in T+0 WI Bookings sheet
-    If tradeIDColumnIndexT0WIBookings = 0 Then
-        MsgBox "The 'Trade ID' column was not found in T+0 WI Bookings sheet.", vbExclamation
-        Exit Sub
-    End If
-    
+
+    ' Create Outlook Application
+    Set outlookApp = CreateObject("Outlook.Application")
+
     ' Loop through each cell in the "Trade ID" column in TradeData sheet
     For Each cell In tradeIDCol
         ' Check if the current cell's value is in the "T+0 WI Bookings" sheet
-        If Not IsError(Application.Match(cell.Value, wsT0WIBookings.Columns(tradeIDColumnIndexT0WIBookings), 0)) Then
-            ' Display a pop-up message with the matching Trade ID
-            MsgBox "Matching Trade ID found: " & cell.Value, vbInformation
+        If Not IsError(Application.Match(cell.Value, wsT0WIBookings.Columns("A"), 0)) Then
+            ' Generate HTML-formatted email body
+            emailBody = "<html><body>"
+            emailBody = emailBody & "<p><strong>Trade ID:</strong> " & cell.Value & "</p>"
+            emailBody = emailBody & "<p><strong>Quantity:</strong> " & wsTradeData.Cells(cell.Row, WorksheetFunction.Match("Quantity", wsTradeData.Rows(1), 0)).Value & "</p>"
+            emailBody = emailBody & "<p><strong>BARC Direction:</strong> " & wsTradeData.Cells(cell.Row, WorksheetFunction.Match("BARC Direction", wsTradeData.Rows(1), 0)).Value & "</p>"
+            ' ... (rest of the email body generation)
+            emailBody = emailBody & "</body></html>"
+
+            ' Create a new mail item
+            Set outlookMail = outlookApp.CreateItem(0)
+
+            ' Customize email properties
+            With outlookMail
+                .Subject = "Trade Details for US Treasury WI"
+                .HTMLBody = emailBody
+                .Recipients.Add "recipient@example.com" ' Add recipient's email address
+                .Display
+            End With
+
+            ' Release Outlook mail object
+            Set outlookMail = Nothing
         End If
     Next cell
+
+    ' Release Outlook application object
+    Set outlookApp = Nothing
 End Sub
 
 Function FindColumnIndex(ws As Worksheet, header As String) As Long
