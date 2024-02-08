@@ -1,1 +1,33 @@
+Sub Two()
+    Dim wsTrade As Worksheet
+    Dim LastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim tradeDateCol As Integer
+    Dim i As Long
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    
+    ' Set column numbers based on headers
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    tradeDateCol = WorksheetFunction.Match("Trade Date", wsTrade.Rows(1), 0)
+    
+    ' Set filter for the most recent trade date
+    wsTrade.Rows(1).AutoFilter field:=tradeDateCol, Criteria1:=Application.WorksheetFunction.Max(wsTrade.Columns(tradeDateCol))
+    
+    ' Find the last row in the sheet
+    LastRow = wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+    
+    ' Loop through visible rows after applying filter
+    For i = 2 To LastRow
+        ' Check if the value does not begin with "US Treasury WI"
+        If Left(wsTrade.Cells(i, issuerAbbrevCol).Value, 14) <> "US Treasury WI" Then
+            ' If not, remove the row
+            wsTrade.Rows(i).Delete
+        End If
+    Next i
+    
+    ' Turn off the AutoFilter
+    wsTrade.AutoFilterMode = False
+End Sub
 
