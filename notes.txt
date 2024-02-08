@@ -1,1 +1,43 @@
+Sub CheckTradeIDs()
+    Dim wsTradeData As Worksheet
+    Dim wsT0WIBookings As Worksheet
+    Dim lastRowTradeData As Long
+    Dim tradeIDCol As Range
+    Dim tradeIDColumnIndex As Long
+    Dim cell As Range
+    
+    ' Set the worksheets
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsT0WIBookings = ThisWorkbook.Sheets("T+0 WI Bookings")
+    
+    ' Find the last row in the TradeData sheet
+    lastRowTradeData = wsTradeData.Cells(wsTradeData.Rows.Count, 1).End(xlUp).Row
+    
+    ' Find the column index of the "Trade ID" column (assumes it's in the first row)
+    tradeIDColumnIndex = 0
+    For i = 1 To wsTradeData.Cells(1, wsTradeData.Columns.Count).End(xlToLeft).Column
+        If wsTradeData.Cells(1, i).Value = "Trade ID" Then
+            tradeIDColumnIndex = i
+            Exit For
+        End If
+    Next i
+    
+    ' Check if "Trade ID" column was found
+    If tradeIDColumnIndex = 0 Then
+        MsgBox "The 'Trade ID' column was not found.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Set the range for the "Trade ID" column
+    Set tradeIDCol = wsTradeData.Range(wsTradeData.Cells(2, tradeIDColumnIndex), wsTradeData.Cells(lastRowTradeData, tradeIDColumnIndex))
+    
+    ' Loop through each cell in the "Trade ID" column
+    For Each cell In tradeIDCol
+        ' Check if the current cell's value is in the "T+0 WI Bookings" sheet
+        If Not IsError(Application.Match(cell.Value, wsT0WIBookings.Columns("A"), 0)) Then
+            ' Display a pop-up message with the matching Trade ID
+            MsgBox "Matching Trade ID found: " & cell.Value, vbInformation
+        End If
+    Next cell
+End Sub
 
