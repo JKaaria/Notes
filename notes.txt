@@ -1,53 +1,59 @@
-
-Sub ProcessTradeData()
-    ' Delete the last row with data in TradeData sheet
-    DeleteLastRowWithData
-    
-    ' Filter and delete rows in TradeData sheet based on Status column
-    FilterAndDeleteRows
-    
-    ' Append rows to T+0 WI Bookings if trade date matches the most recent date
-    AppendRowsToT0WIBookings
-End Sub
-
-Sub FilterAndDeleteRows()
+Sub AppendRowsToT0WIBookings()
     Dim wsTradeData As Worksheet
+    Dim wsT0WIBookings As Worksheet
     Dim lastRowTradeData As Long
-    Dim statusCol As Range
-    Dim cell As Range
-    Dim i As Long
+    Dim tradeDateCol As Range
+    Dim currentDate As Date
+    Dim mostRecentDate As Date
+    Dim tradeDateColumnIndex As Long
+    Dim targetRow As Long
     
-    ' Set the worksheet
+    ' Set the worksheets
     Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsT0WIBookings = ThisWorkbook.Sheets("T+0 WI Bookings")
     
     ' Find the last row in the TradeData sheet
     lastRowTradeData = wsTradeData.Cells(wsTradeData.Rows.Count, 1).End(xlUp).Row
     
-    ' Find the column index of the "Status" column (assumes it's in the first row)
-    Dim statusColumnIndex As Long
-    statusColumnIndex = 0
+    ' Find the column index of the "Trade Date" column (assumes it's in the first row)
+    tradeDateColumnIndex = 0
     For i = 1 To wsTradeData.Cells(1, wsTradeData.Columns.Count).End(xlToLeft).Column
-        If wsTradeData.Cells(1, i).Value = "Status" Then
-            statusColumnIndex = i
+        If wsTradeData.Cells(1, i).Value = "Trade Date" Then
+            tradeDateColumnIndex = i
             Exit For
         End If
     Next i
     
-    ' Check if "Status" column was found
-    If statusColumnIndex = 0 Then
-        MsgBox "The 'Status' column was not found.", vbExclamation
+    ' Check if "Trade Date" column was found
+    If tradeDateColumnIndex = 0 Then
+        MsgBox "The 'Trade Date' column was not found.", vbExclamation
         Exit Sub
     End If
     
-    ' Set the range for the "Status" column
-    Set statusCol = wsTradeData.Range(wsTradeData.Cells(2, statusColumnIndex), wsTradeData.Cells(lastRowTradeData, statusColumnIndex))
+    ' Set the range for the "Trade Date" column
+    Set tradeDateCol = wsTradeData.Range(wsTradeData.Cells(2, tradeDateColumnIndex), wsTradeData.Cells(lastRowTradeData, tradeDateColumnIndex))
     
-    ' Loop through each cell in the "Status" column
-    For i = statusCol.Rows.Count To 1 Step -1
-        Set cell = statusCol.Cells(i, 1)
-        If Not (cell.Value = "Done" Or cell.Value = "Done-Unallocated") Then
-            ' Delete the entire row if status is not "Done" or "Done-Unallocated"
-            wsTradeData.Rows(cell.Row).Delete
+    ' Initialize mostRecentDate with the first date in the column
+    mostRecentDate = tradeDateCol.Cells(1, 1).Value
+    
+    ' Extract only the date part from mostRecentDate
+    mostRecentDate = Int(mostRecentDate)
+    
+    ' Loop through each cell in the "Trade Date" column
+    For Each cell In tradeDateCol
+        If IsDate(cell.Value) Then
+            ' Extract only the date part from the cell value
+            Dim cellDate As Date
+            cellDate = Int(cell.Value)
+            
+            ' Check if the current cell's date is equal to the mostRecentDate
+            If cellDate = mostRecentDate Then
+                ' Find the target row in the T+0 WI Bookings sheet
+                targetRow = wsT0WIBookings.Cells(wsT0WIBookings.Rows.Count, 1).End(xlUp).Row + 1
+                
+                ' Copy the entire row from TradeData to T+0 WI Bookings
+                wsTradeData.Rows(cell.Row).Copy wsT0WIBookings.Rows(targetRow)
+            End If
         End If
-    Next i
+    Next cell
 End Sub
