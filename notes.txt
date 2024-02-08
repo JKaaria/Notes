@@ -32,7 +32,7 @@ Sub SortAndAppendRecentTrades()
     
     ' Copy recent trades to T+0 WI Bookings sheet
     Dim i As Long
-    For i = 2 To lastRowTradeData ' Assuming data starts from row 2
+    For i = 1 To lastRowTradeData ' Including the header row
         If CStr(wsTradeData.Cells(i, 1).Value) = recentTradeDate Then ' Convert to String for comparison
             ' Copy the entire row to the T+0 WI Bookings sheet
             wsTradeData.Rows(i).Copy Destination:=wsT0Bookings.Rows(lastRowT0Bookings + 1)
@@ -46,4 +46,3 @@ Sub SortAndAppendRecentTrades()
     ' Optional: Clear the sorted TradeData sheet if needed
     ' wsTradeData.Sort.SortFields.Clear
 End Sub
-
