@@ -1,1 +1,35 @@
-
+Sub FilterAndCopy()
+    Dim wsTrade As Worksheet
+    Dim wsT0Bookings As Worksheet
+    Dim lastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim targetSheetName As String
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    
+    ' Set column number based on header "Issuer Abbrev"
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    
+    ' Find the last row in the sheet
+    lastRow = wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+    
+    ' Set target sheet name
+    targetSheetName = "T+0 WI Bookings"
+    
+    ' Set the target worksheet (create if not exists)
+    On Error Resume Next
+    Set wsT0Bookings = ThisWorkbook.Sheets(targetSheetName)
+    On Error GoTo 0
+    
+    If wsT0Bookings Is Nothing Then
+        Set wsT0Bookings = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsT0Bookings.Name = targetSheetName
+    End If
+    
+    ' Filter and cut/paste to T+0 WI Bookings sheet
+    wsTrade.Rows(1).Copy Destination:=wsT0Bookings.Rows(1)
+    wsTrade.UsedRange.AutoFilter Field:=issuerAbbrevCol, Criteria1:="<>US Treasury WI"
+    wsTrade.UsedRange.SpecialCells(xlCellTypeVisible).Copy Destination:=wsT0Bookings.Cells(wsT0Bookings.Rows.Count, 1).End(xlUp).Offset(1, 0)
+    wsTrade.AutoFilterMode = False
+End Sub
