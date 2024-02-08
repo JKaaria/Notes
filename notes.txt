@@ -1,32 +1,30 @@
-
 Sub SortTradeDataByDate()
     Dim ws As Worksheet
     Dim lastRow As Long
     
-    ' Set the worksheet variable to the "TradeData" sheet
+    ' Set the worksheet
     Set ws = ThisWorkbook.Sheets("TradeData")
     
-    ' Find the last row in the "Trade Date" column
+    ' Find the last row with data in Column A
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
     
-    ' Sort the data based on the "Trade Date" column in descending order
+    ' Convert the dates to strings in a helper column (e.g., Column B)
+    ws.Range("B2:B" & lastRow).Formula = "=TEXT(A2,""DD/MM/YY"")"
+    
+    ' Sort the data based on the helper column (Column B)
     ws.Sort.SortFields.Clear
-    ws.Sort.SortFields.Add Key:=Range("B2:B" & lastRow), _
-        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortTextAsNumbers
+    ws.Sort.SortFields.Add Key:=ws.Range("B2:B" & lastRow), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ws.Sort
-        .SetRange Range("A1:Z" & lastRow) ' Adjust the range accordingly
-        .Header = xlYes ' Assumes the first row contains headers
+        .SetRange ws.Range("A1").Resize(lastRow, 2) ' Adjust the range as needed
+        .Header = xlYes
         .MatchCase = False
         .Orientation = xlTopToBottom
         .SortMethod = xlPinYin
         .Apply
     End With
     
-    ' Your code to loop through the sorted data goes here
-    ' Example: (replace this with your actual processing logic)
-    For i = 2 To lastRow
-        ' Access each row using ws.Cells(i, ColumnNumber)
-        ' Example: tradeDate = ws.Cells(i, 2).Value
-        ' Your processing logic goes here
-    Next i
+    ' Remove the helper column (Column B)
+    ws.Range("B:B").Delete
+    
+    MsgBox "TradeData sheet has been sorted by Trade Date."
 End Sub
