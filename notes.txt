@@ -1,1 +1,39 @@
+Sub SortTradeDataByDate()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData")
+    
+    ' Find the last row with data in column A
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Delete the last row with data
+    If lastRow > 1 Then
+        ws.Rows(lastRow).Delete
+        lastRow = lastRow - 1 ' Update the lastRow variable
+    End If
+    
+    ' Convert date strings to actual Date objects
+    Dim dateRange As Range
+    Set dateRange = ws.Range("A2:A" & lastRow)
+    
+    For Each cell In dateRange
+        cell.Value = CDate(cell.Value)
+    Next cell
+    
+    ' Sort the data by Trade Date in descending order
+    ws.Sort.SortFields.Clear
+    ws.Sort.SortFields.Add Key:=dateRange, SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ws.Sort
+        .SetRange dateRange ' Exclude the deleted row from the sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+
+End Sub
 
