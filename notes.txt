@@ -1,1 +1,55 @@
+Sub Two()
+    Dim wsTrade As Worksheet
+    Dim wsTPlusZero As Worksheet
+    Dim LastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim tradeDateCol As Integer
+    Dim i As Long
+
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+
+    ' Set column numbers based on headers
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    tradeDateCol = WorksheetFunction.Match("Trade Date", wsTrade.Rows(1), 0)
+
+    ' Find the last row in the sheet
+    LastRow = wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+
+    ' Add a helper column for numeric values of "Trade Date"
+    wsTrade.Columns(wsTrade.Columns.Count + 1).Insert Shift:=xlToRight
+    wsTrade.Cells(1, wsTrade.Columns.Count).Value = "Trade Date Numeric"
+    wsTrade.Range(wsTrade.Cells(2, wsTrade.Columns.Count), wsTrade.Cells(LastRow, wsTrade.Columns.Count)).Formula = _
+        "=IF(ISNUMBER(" & wsTrade.Cells(2, tradeDateCol).Address & ")," & wsTrade.Cells(2, tradeDateCol).Address & ",0)"
+
+    ' Set filter for the helper column to keep only the most recent trade date
+    wsTrade.AutoFilterMode = False ' Remove existing filters
+    wsTrade.Range("A1").AutoFilter Field:=wsTrade.Columns.Count, Operator:=xlFilterValues, _
+        Criteria1:=Application.WorksheetFunction.Max(wsTrade.Range(wsTrade.Cells(2, wsTrade.Columns.Count), wsTrade.Cells(LastRow, wsTrade.Columns.Count)))
+
+    ' Check if the destination sheet "T+0 WI Bookings" exists, if not, create it
+    On Error Resume Next
+    Set wsTPlusZero = ThisWorkbook.Sheets("T+0 WI Bookings")
+    On Error GoTo 0
+    
+    If wsTPlusZero Is Nothing Then
+        Set wsTPlusZero = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsTPlusZero.Name = "T+0 WI Bookings"
+    End If
+
+    ' Loop through "Issuer Abbrev" column starting from the second row
+    For i = LastRow To 2 Step -1
+        ' Check if the value begins with US Treasury WI
+        If Left(wsTrade.Cells(i, issuerAbbrevCol).Value, 14) = "US Treasury WI" Then
+            ' Cut and paste the row to the "T+0 WI Bookings" sheet
+            wsTrade.Rows(i).Cut Destination:=wsTPlusZero.Rows(wsTPlusZero.Cells(wsTPlusZero.Rows.Count, 1).End(xlUp).Row + 1)
+        End If
+    Next i
+
+    ' Delete the helper column
+    wsTrade.Columns(wsTrade.Columns.Count).Delete
+
+    ' Turn off the AutoFilter after processing
+    wsTrade.AutoFilterMode = False
+End Sub
 
