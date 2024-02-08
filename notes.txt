@@ -1,1 +1,53 @@
 
+Sub ProcessTradeData()
+    ' Delete the last row with data in TradeData sheet
+    DeleteLastRowWithData
+    
+    ' Filter and delete rows in TradeData sheet based on Status column
+    FilterAndDeleteRows
+    
+    ' Append rows to T+0 WI Bookings if trade date matches the most recent date
+    AppendRowsToT0WIBookings
+End Sub
+
+Sub FilterAndDeleteRows()
+    Dim wsTradeData As Worksheet
+    Dim lastRowTradeData As Long
+    Dim statusCol As Range
+    Dim cell As Range
+    Dim i As Long
+    
+    ' Set the worksheet
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    
+    ' Find the last row in the TradeData sheet
+    lastRowTradeData = wsTradeData.Cells(wsTradeData.Rows.Count, 1).End(xlUp).Row
+    
+    ' Find the column index of the "Status" column (assumes it's in the first row)
+    Dim statusColumnIndex As Long
+    statusColumnIndex = 0
+    For i = 1 To wsTradeData.Cells(1, wsTradeData.Columns.Count).End(xlToLeft).Column
+        If wsTradeData.Cells(1, i).Value = "Status" Then
+            statusColumnIndex = i
+            Exit For
+        End If
+    Next i
+    
+    ' Check if "Status" column was found
+    If statusColumnIndex = 0 Then
+        MsgBox "The 'Status' column was not found.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Set the range for the "Status" column
+    Set statusCol = wsTradeData.Range(wsTradeData.Cells(2, statusColumnIndex), wsTradeData.Cells(lastRowTradeData, statusColumnIndex))
+    
+    ' Loop through each cell in the "Status" column
+    For i = statusCol.Rows.Count To 1 Step -1
+        Set cell = statusCol.Cells(i, 1)
+        If Not (cell.Value = "Done" Or cell.Value = "Done-Unallocated") Then
+            ' Delete the entire row if status is not "Done" or "Done-Unallocated"
+            wsTradeData.Rows(cell.Row).Delete
+        End If
+    Next i
+End Sub
