@@ -1,1 +1,33 @@
+Sub FilterAndAppend()
+    Dim wsTrade As Worksheet
+    Dim wsAppend As Worksheet
+    Dim lastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim i As Long
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    
+    ' Set column number based on header "Issuer Abbrev"
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    
+    ' Find or create the "T+0 WI Bookings" sheet
+    On Error Resume Next
+    Set wsAppend = ThisWorkbook.Sheets("T+0 WI Bookings")
+    On Error GoTo 0
+    
+    If wsAppend Is Nothing Then
+        Set wsAppend = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+        wsAppend.Name = "T+0 WI Bookings"
+    End If
+    
+    ' Loop through "Issuer Abbrev" column starting from the second row
+    For i = 2 To wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+        ' Check if the value begins with "US Treasury WI"
+        If Left(wsTrade.Cells(i, issuerAbbrevCol).Value, 14) = "US Treasury WI" Then
+            ' Copy the entire row to the "T+0 WI Bookings" sheet
+            wsTrade.Rows(i).Copy Destination:=wsAppend.Rows(wsAppend.Cells(wsAppend.Rows.Count, 1).End(xlUp).Row + 1)
+        End If
+    Next i
+End Sub
 
