@@ -1,1 +1,33 @@
+Sub FindMostRecentTradeDate()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim tradeDateCol As Range
+    Dim currentDate As Date
+    Dim mostRecentDate As Date
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("TradeData")
+    
+    ' Find the last row in the "Trade Date" column
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the range for the "Trade Date" column
+    Set tradeDateCol = ws.Range("A2:A" & lastRow)
+    
+    ' Initialize mostRecentDate with the first date in the column
+    mostRecentDate = tradeDateCol.Cells(1, 1).Value
+    
+    ' Loop through each cell in the "Trade Date" column
+    For Each cell In tradeDateCol
+        If IsDate(cell.Value) Then
+            ' Check if the current cell's date is greater than the current mostRecentDate
+            If cell.Value > mostRecentDate Then
+                mostRecentDate = cell.Value
+            End If
+        End If
+    Next cell
+    
+    ' Display the most recent date in a pop-up message box
+    MsgBox "The most recent trade date is: " & Format(mostRecentDate, "DD/MM/YY"), vbInformation
+End Sub
 
