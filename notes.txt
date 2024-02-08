@@ -1,1 +1,12 @@
+Sub CopyHeaderRow()
+    Dim wsTradeData As Worksheet
+    Dim wsT0Bookings As Worksheet
+    
+    ' Set the worksheets
+    Set wsTradeData = ThisWorkbook.Sheets("Trade Data")
+    Set wsT0Bookings = ThisWorkbook.Sheets("T+0 WI Bookings")
+    
+    ' Copy header row from Trade Data to T+0 WI Bookings
+    wsTradeData.Rows(1).Copy Destination:=wsT0Bookings.Rows(1)
+End Sub
 
