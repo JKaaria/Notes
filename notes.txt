@@ -1,1 +1,38 @@
+Sub CopyLatestTrades()
+    Dim wsTradeData As Worksheet
+    Dim wsNewSheet As Worksheet
+    Dim lastRow As Long
+    Dim currentRow As Long
+    Dim latestDate As Date
+    Dim currentDate As Date
+    
+    ' Set the worksheets
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
+    Set wsNewSheet = ThisWorkbook.Sheets.Add(After:=Sheets(Sheets.Count))
+    wsNewSheet.Name = "LatestTrades"
+    
+    ' Find the last row in the TradeData sheet
+    lastRow = wsTradeData.Cells(wsTradeData.Rows.Count, "A").End(xlUp).Row
+    
+    ' Initialize the latest date variable
+    latestDate = DateSerial(1900, 1, 1)
+    
+    ' Loop through the TradeData sheet
+    For currentRow = 2 To lastRow ' Assuming row 1 is header
+        ' Get the current date from the "Trade Date" column
+        currentDate = wsTradeData.Cells(currentRow, "A").Value
+        
+        ' Check if the current date is later than the latestDate
+        If currentDate > latestDate Then
+            ' Update the latestDate
+            latestDate = currentDate
+            
+            ' Clear the contents of the new sheet
+            wsNewSheet.Cells.Clear
+            
+            ' Copy the entire row to the new sheet
+            wsTradeData.Rows(currentRow).Copy Destination:=wsNewSheet.Rows(1)
+        End If
+    Next currentRow
+End Sub
 
