@@ -1,24 +1,24 @@
-Sub Two()
-    Dim wsUSTWIBookings As Worksheet
+Sub Three()
+    Dim wsTradeData As Worksheet
     Dim LastRow As Long
     Dim issuerAbbrevCol As Integer
     Dim i As Long
     
     ' Set worksheet
-    Set wsUSTWIBookings = ThisWorkbook.Sheets("T+0 UST WI Bookings")
+    Set wsTradeData = ThisWorkbook.Sheets("TradeData")
     
     ' Set column number based on header "Issuer Abbrev"
-    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsUSTWIBookings.Rows(1), 0)
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTradeData.Rows(1), 0)
     
     ' Find the last row in the sheet
-    LastRow = wsUSTWIBookings.Cells(wsUSTWIBookings.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+    LastRow = wsTradeData.Cells(wsTradeData.Rows.Count, issuerAbbrevCol).End(xlUp).Row
     
     ' Loop through "Issuer Abbrev" column starting from the second row
     For i = LastRow To 2 Step -1
-        ' Check if the value does not begin with US Treasury WI
-        If Left(wsUSTWIBookings.Cells(i, issuerAbbrevCol).Value, 14) <> "US Treasury WI" Then
-            ' If not, remove the row
-            wsUSTWIBookings.Rows(i).Delete
+        ' Check if the value contains "US Treasury WI"
+        If InStr(1, wsTradeData.Cells(i, issuerAbbrevCol).Value, "US Treasury WI") > 0 Then
+            ' If yes, remove the row
+            wsTradeData.Rows(i).Delete
         End If
     Next i
 End Sub
