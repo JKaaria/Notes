@@ -1,1 +1,55 @@
+---
+
+## Trade Data Processing Automation: Affirmation Email Trigger
+
+### Overview:
+
+This document outlines the non-technical process for the automation of affirmation emails for U.S. Treasury When Issued (UST WI) trades within the Fixed Income Middle Office. The script provided automates the processing of trade data, specifically focusing on triggering affirmation emails after the recoup process has occurred.
+
+### Key Phases:
+
+#### Phase 1: Initial Setup
+- The automation script consists of several phases to facilitate the processing of UST WI trades.
+- Ensure that the necessary data files are available and organized in the specified folder.
+
+#### Phase 2: Data Extraction
+- The script extracts relevant trade data from the source files and copies it to a designated worksheet.
+
+#### Phase 3: Identification of Most Recent Trade Date
+- Identify the most recent trade date from the extracted data.
+
+#### Phase 4: T+0 WI Bookings
+- Append rows to T+0 WI Bookings based on the most recent trade date.
+
+#### Phase 5: Trade Date Matching
+- Match trade dates between Trade Data and T+0 WI Bookings sheets to identify the trades for affirmation.
+
+#### Phase 6: Email Trigger
+- Utilize the "Trade ID" column to trigger affirmation emails for the matched trades.
+- The email includes relevant trade details and is sent to the concerned parties.
+
+### User Instructions:
+
+1. **Initiate the Script:**
+   - Run the "ExecuteTradeDataProcessing" macro to execute the entire trade data processing script.
+
+2. **Data Extraction:**
+   - Use the "One" macro to extract and organize data from source files.
+
+3. **Most Recent Trade Date:**
+   - Run the "Two" macro to identify the most recent trade date.
+
+4. **T+0 WI Bookings:**
+   - Execute the "Three" macro to append rows to T+0 WI Bookings based on the most recent trade date.
+
+5. **Trade Date Matching:**
+   - Run the "Four" and "Five" macros to match trade dates and filter relevant UST WI trades.
+
+6. **Email Trigger:**
+   - Execute the "Six" macro to trigger affirmation emails for the matched trades.
+
+### Notes:
+
+- Ensure that source files are available in the specified folder before running the script.
+- Regularly check for any email communications triggered by the script for trade affirmation.
 
