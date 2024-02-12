@@ -1,1 +1,17 @@
+Sub TransposeRowToColumn()
+    ' Define the range of the row you want to transpose
+    Dim sourceRange As Range
+    Set sourceRange = Rows("1:1") ' Change this to the specific row you want to transpose
+    
+    ' Define the destination range (column A in this case)
+    Dim destinationRange As Range
+    Set destinationRange = Columns("A")
+    
+    ' Transpose the data
+    sourceRange.Copy
+    destinationRange.PasteSpecial Transpose:=True
+    
+    ' Clear the clipboard
+    Application.CutCopyMode = False
+End Sub
 
