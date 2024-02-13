@@ -1,1 +1,36 @@
 
+Sub ApplyVLookupToColumnWithHeaderChange()
+
+    Dim wsOpenFISS As Worksheet
+    Dim wsInventory As Worksheet
+    Dim openFISSColumn As Range
+    Dim lastRow As Long
+    Dim vlookupFormula As String
+
+    ' Set references to worksheets
+    Set wsOpenFISS = ThisWorkbook.Sheets("Open FISS Trades")
+    Set wsInventory = ThisWorkbook.Sheets("Inventory")
+
+    ' Search for the "Contract Reference" column header in the "Open FISS Trades" sheet
+    Set openFISSColumn = wsOpenFISS.Rows(1).Find("Contract Reference", LookIn:=xlValues, LookAt:=xlWhole)
+
+    ' Check if the column header is found
+    If Not openFISSColumn Is Nothing Then
+        ' Find the last row in the "Open FISS Trades" sheet
+        lastRow = wsOpenFISS.Cells(wsOpenFISS.Rows.Count, openFISSColumn.Column).End(xlUp).Row
+
+        ' Construct the VLOOKUP formula
+        vlookupFormula = "=VLOOKUP(" & wsOpenFISS.Name & "!U2, " & wsInventory.Name & "!A:Z, " & openFISSColumn.Column & ", FALSE)"
+
+        ' Apply the VLOOKUP formula to the entire column under the "Contract Reference" header
+        wsOpenFISS.Range(wsOpenFISS.Cells(2, openFISSColumn.Column + 1), wsOpenFISS.Cells(lastRow, openFISSColumn.Column + 1)).Formula = vlookupFormula
+
+        ' Change the column header to "Inventory"
+        wsOpenFISS.Cells(1, openFISSColumn.Column + 1).Value = "Inventory"
+
+        MsgBox "VLOOKUP formula applied successfully to the entire column, and header changed to 'Inventory'!", vbInformation
+    Else
+        MsgBox "Column header 'Contract Reference' not found in 'Open FISS Trades' sheet.", vbExclamation
+    End If
+
+End Sub
