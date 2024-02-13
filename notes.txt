@@ -1,1 +1,31 @@
 
+Sub ApplyVLOOKUPAndUpdateHeader()
+    Dim wsOpenFISS As Worksheet
+    Dim wsInventory As Worksheet
+    Dim lastRow As Long
+    Dim contractRefColumn As Long
+    Dim currentRow As Long
+
+    ' Set references to the sheets
+    Set wsOpenFISS = ThisWorkbook.Sheets("Open FISS Trades")
+    Set wsInventory = ThisWorkbook.Sheets("Inventory")
+
+    ' Find the "Contract Reference" column header in the "Open FISS Trades" sheet
+    contractRefColumn = Application.Match("Contract Reference", wsOpenFISS.Rows(1), 0)
+
+    ' Check if the header is found
+    If Not IsError(contractRefColumn) Then
+        ' Determine the last row in the "Open FISS Trades" sheet
+        lastRow = wsOpenFISS.Cells(wsOpenFISS.Rows.Count, contractRefColumn).End(xlUp).Row
+
+        ' Loop through each row and apply the VLOOKUP formula to the "Contract Reference" column
+        For currentRow = 2 To lastRow
+            wsOpenFISS.Cells(currentRow, contractRefColumn).Formula = "=VLOOKUP(" & wsOpenFISS.Cells(currentRow, contractRefColumn).Address & ", 'Inventory'!A:Z, 12, FALSE)"
+        Next currentRow
+
+        ' Change the column header to "Inventory"
+        wsOpenFISS.Cells(1, contractRefColumn).Value = "Inventory"
+    Else
+        MsgBox "Column header 'Contract Reference' not found in 'Open FISS Trades' sheet.", vbExclamation
+    End If
+End Sub
