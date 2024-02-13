@@ -1,1 +1,39 @@
+Sub ApplyVLOOKUPAndUpdateHeader()
+    Dim wsOpenFissTrades As Worksheet
+    Dim wsInventory As Worksheet
+    Dim lastRowOpenFissTrades As Long
+    Dim vlookupFormula As String
+    Dim columnHeader As String
+    Dim headerCell As Range
+    
+    ' Set references to the worksheets
+    Set wsOpenFissTrades = ThisWorkbook.Sheets("Open Fiss Trades")
+    Set wsInventory = ThisWorkbook.Sheets("Inventory")
+    
+    ' Find the last row in the "Open Fiss Trades" sheet
+    lastRowOpenFissTrades = wsOpenFissTrades.Cells(wsOpenFissTrades.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the dynamic column header (you can change this if the header changes)
+    columnHeader = "Contract Reference"
+    
+    ' Set the header cell
+    Set headerCell = wsOpenFissTrades.Rows(1).Find(columnHeader, LookIn:=xlValues, LookAt:=xlWhole)
+    
+    ' If the header is found, update it to "Inventory"
+    If Not headerCell Is Nothing Then
+        headerCell.Value = "Inventory"
+        
+        ' Build the VLOOKUP formula
+        vlookupFormula = "=VLOOKUP(I2, 'Inventory'!A:Z, 12, FALSE)"
+        
+        ' Loop through the cells under the dynamic column header and apply the VLOOKUP formula
+        For Each cell In wsOpenFissTrades.Range("I2:I" & lastRowOpenFissTrades)
+            If wsOpenFissTrades.Cells(1, cell.Column).Value = "Inventory" Then
+                cell.Formula = vlookupFormula
+            End If
+        Next cell
+    Else
+        MsgBox "Column header '" & columnHeader & "' not found.", vbExclamation
+    End If
+End Sub
 
