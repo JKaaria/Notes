@@ -1,14 +1,1 @@
-To support the case for enhancing trade matching efficiency in the fixed income middle office, you could consider collecting the following types of statistics from both conventional and unconventional sources:
 
-Average Time to Resolve Trade Mismatches:
-
-Conventional source: Internal records and historical data from the investment bank's trade matching process.
-Unconventional source: Benchmark data from industry reports or surveys on trade matching efficiency in the fixed income sector.
-Average Cost for Time Failed:
-
-Conventional source: Internal cost accounting data related to manual interventions and delayed trade resolutions.
-Unconventional source: Comparative studies or analyses from financial industry publications on the costs associated with trade discrepancies.
-Number of Mismatches Accounting for Daily Fail Count:
-
-Conventional source: Internal data tracking daily trade discrepancies and mismatches.
-Unconventional source: Peer-reviewed articles or case studies from other financial institutions sharing insights on daily fail counts in fixed income trade matching.
