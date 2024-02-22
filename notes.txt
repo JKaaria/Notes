@@ -1,1 +1,39 @@
+Sub Two()
+    Dim wsTrade As Worksheet
+    Dim LastRow As Long
+    Dim issuerAbbrevCol As Integer
+    Dim latestSrcCol As Integer
+    Dim i As Long
+    
+    ' Set worksheet
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    
+    ' Set column numbers based on headers
+    issuerAbbrevCol = WorksheetFunction.Match("Issuer Abbrev", wsTrade.Rows(1), 0)
+    latestSrcCol = WorksheetFunction.Match("Latest Src", wsTrade.Rows(1), 0)
+    
+    ' Find the last row in the sheet for "Issuer Abbrev" column
+    LastRow = wsTrade.Cells(wsTrade.Rows.Count, issuerAbbrevCol).End(xlUp).Row
+    
+    ' Loop through "Issuer Abbrev" column starting from the second row
+    For i = LastRow To 2 Step -1
+        ' Check if the value does not begin with US Treasury WI
+        If Left(wsTrade.Cells(i, issuerAbbrevCol).Value, 14) <> "US Treasury WI" Then
+            ' If not, remove the row
+            wsTrade.Rows(i).Delete
+        End If
+    Next i
+    
+    ' Find the last row in the sheet for "Latest Src" column
+    LastRow = wsTrade.Cells(wsTrade.Rows.Count, latestSrcCol).End(xlUp).Row
+    
+    ' Loop through "Latest Src" column starting from the second row
+    For i = LastRow To 2 Step -1
+        ' Check if the value does not contain "US Treasury WI"
+        If InStr(1, wsTrade.Cells(i, latestSrcCol).Value, "US Treasury WI", vbTextCompare) = 0 Then
+            ' If not, remove the row
+            wsTrade.Rows(i).Delete
+        End If
+    Next i
+End Sub
 
