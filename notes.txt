@@ -1,1 +1,100 @@
 
+Sub Three()
+    Dim wsTrade As Worksheet
+    Dim wsContacts As Worksheet
+    Dim wsAffirmed As Worksheet
+    Dim lastRow As Long
+    Dim counterpartyIdCol As Range
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim toAddress As Variant
+    Dim tradeID As Variant
+
+    ' Set worksheets
+    Set wsTrade = ThisWorkbook.Sheets("TradeData")
+    Set wsContacts = ThisWorkbook.Sheets("Contacts")
+    Set wsAffirmed = ThisWorkbook.Sheets("Affirmed")
+
+    ' Find the "Counterparty ID" column based on header
+    Set counterpartyIdCol = wsTrade.Rows(1).Find("Counterparty ID", LookIn:=xlValues, LookAt:=xlWhole)
+
+    ' Check if the "Counterparty ID" column is found
+    If Not counterpartyIdCol Is Nothing Then
+        ' Find the last row in the TradeData sheet
+        lastRow = wsTrade.Cells(wsTrade.Rows.Count, counterpartyIdCol.Column).End(xlUp).Row
+
+        ' Create Outlook Application
+        Set outlookApp = CreateObject("Outlook.Application")
+
+        ' Loop through each row in "Counterparty ID" column
+        For i = lastRow To 2 Step -1
+            ' Debugging: Display the value in "Counterparty ID" for the current row
+            Debug.Print "Counterparty ID for Row " & i & ": " & wsTrade.Cells(i, counterpartyIdCol.Column).Value
+
+            ' VLOOKUP to retrieve "To" address from the "Contacts" sheet
+            toAddress = Application.VLookup(wsTrade.Cells(i, counterpartyIdCol.Column).Value, wsContacts.Columns("B:C"), 2, False)
+
+            ' Debugging: Display the retrieved "To" address
+            Debug.Print "To Address for Row " & i & ": " & toAddress
+
+            ' Check if the VLOOKUP was successful
+            If Not IsError(toAddress) Then
+                ' Check if the trade ID exists in the Affirmed sheet
+                tradeID = wsTrade.Cells(i, WorksheetFunction.Match("Trade ID", wsTrade.Rows(1), 0)).Value
+                If Not WorksheetFunction.CountIf(wsAffirmed.Columns("D:D"), tradeID) > 0 Then
+                    ' Generate HTML-formatted email body
+                    emailBody = "<html><body>"
+                    emailBody = emailBody & "<p><strong>Trade ID:</strong> " & tradeID & "</p>"
+                    emailBody = emailBody & "<p><strong>Quantity:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Quantity", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>BARC Direction:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("BARC Direction", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Security Description:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Security Description", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Dirty Price:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Dirty Price", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Settle Date:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Settle Date", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Trade Date:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Trade Date", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Mat Date:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Mat Date", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Net:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Net", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>CUSIP:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("CUSIP", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>ISIN:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("ISIN", wsTrade.Rows(1), 0)).Value & "</p>"
+                    emailBody = emailBody & "<p><strong>Client Contact:</strong> " & wsTrade.Cells(i, WorksheetFunction.Match("Client Contact", wsTrade.Rows(1), 0)).Value & "</p>"
+                    
+                    ' ... (rest of the email body generation)
+                    emailBody = emailBody & "</body></html>"
+
+                    ' Create a new mail item
+                    Set outlookMail = outlookApp.CreateItem(0)
+
+                    ' Customize email properties
+                    With outlookMail
+                        If Not IsEmpty(toAddress) Then
+                            ' Send to the retrieved "To" address
+                            .Recipients.Add toAddress
+                        Else
+                            ' If contact not found, send to Jeremy
+                            .Recipients.Add "jeremy.kaaria@barclays.com"
+                            .Subject = "Please Update Contact Matrix"
+                        End If
+
+                        .SentOnBehalfOfName = "fi_allocations@barclayscorp.com"
+                        .HTMLBody = emailBody
+                        .Display
+                    End With
+
+                    ' Release Outlook mail object
+                    Set outlookMail = Nothing
+                Else
+                    ' If the trade is affirmed, delete the row from TradeData sheet
+                    wsTrade.Rows(i).Delete
+                End If
+            Else
+                MsgBox "Error retrieving 'To' address for Trade ID: " & tradeID, vbExclamation
+            End If
+        Next i
+    Else
+        MsgBox "Column 'Counterparty ID' not found in the TradeData sheet.", vbExclamation
+    End If
+
+    ' Release Outlook application object
+    Set outlookApp = Nothing
+End Sub
