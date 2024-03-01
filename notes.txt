@@ -1,1 +1,42 @@
+Sub DeleteRowsBasedOnFailCodes()
+    Dim wsAFT As Worksheet
+    Dim wsFailCodes As Worksheet
+    Dim failCodeColumn As Range
+    Dim lastRowAFT As Long
+    Dim lastRowFailCodes As Long
+    Dim i As Long
+    Dim failCode As Variant
+    Dim foundCode As Range
+
+    ' Set the worksheet variables
+    Set wsAFT = ThisWorkbook.Sheets("AFT")
+    Set wsFailCodes = ThisWorkbook.Sheets("FailCodes")
+
+    ' Find the header row and locate the "Fail Code" column in AFT sheet
+    On Error Resume Next
+    Set failCodeColumn = wsAFT.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" column is found in AFT sheet
+    If Not failCodeColumn Is Nothing Then
+        ' Find the last row in the "Fail Code" column in AFT sheet
+        lastRowAFT = wsAFT.Cells(wsAFT.Rows.Count, failCodeColumn.Column).End(xlUp).Row
+
+        ' Loop through each row in the "Fail Code" column in AFT sheet
+        For i = lastRowAFT To 2 Step -1 ' Loop backward to avoid issues with row deletion
+            ' Get the Fail Code from the current row in AFT sheet
+            failCode = wsAFT.Cells(i, failCodeColumn.Column).Value
+
+            ' Check if the Fail Code is in the FailCodes sheet
+            Set foundCode = wsFailCodes.Columns(1).Find(What:=failCode, LookIn:=xlValues, LookAt:=xlWhole)
+
+            ' If the Fail Code is not found in FailCodes sheet, delete the row in AFT sheet
+            If foundCode Is Nothing Then
+                wsAFT.Rows(i).Delete
+            End If
+        Next i
+    Else
+        MsgBox "Column 'Fail Code' not found in the 'AFT' worksheet."
+    End If
+End Sub
 
