@@ -1,1 +1,39 @@
+Sub DeleteRowsBasedOnFailCode()
+    Dim tradeDataSheet As Worksheet
+    Dim failCodesSheet As Worksheet
+    Dim failCodeColumn As Range
+    Dim tradeDataRow As Range
+    Dim failCode As Variant
+    Dim matchingRow As Range
+
+    ' Set the worksheet variables
+    Set tradeDataSheet = ThisWorkbook.Sheets("Trade Data")
+    Set failCodesSheet = ThisWorkbook.Sheets("FailCodes")
+
+    ' Find the header row and locate the "Fail Code" column in Trade Data sheet
+    On Error Resume Next
+    Set failCodeColumn = tradeDataSheet.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" column is found
+    If Not failCodeColumn Is Nothing Then
+        ' Loop through each row in the "Fail Code" column
+        For Each tradeDataRow In tradeDataSheet.Range(tradeDataSheet.Cells(2, failCodeColumn.Column), tradeDataSheet.Cells(tradeDataSheet.Rows.Count, failCodeColumn.Column).End(xlUp))
+            failCode = tradeDataRow.Value
+
+            ' Find the matching row in FailCodes sheet
+            Set matchingRow = failCodesSheet.Columns(1).Find(What:=failCode, LookIn:=xlValues, LookAt:=xlWhole)
+
+            ' Check if a match is found and the corresponding value in column C is blank
+            If Not matchingRow Is Nothing Then
+                If IsEmpty(matchingRow.Offset(0, 2).Value) Then
+                    ' Delete the row in Trade Data sheet
+                    tradeDataRow.EntireRow.Delete
+                End If
+            End If
+        Next tradeDataRow
+    Else
+        MsgBox "Column 'Fail Code' not found in the 'Trade Data' sheet."
+    End If
+End Sub
 
