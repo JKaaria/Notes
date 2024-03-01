@@ -1,1 +1,40 @@
+Sub DeleteRowsBasedOnFailCode()
+    Dim aftSheet As Worksheet
+    Dim failCodesSheet As Worksheet
+    Dim aftFailCodeColumn As Range
+    Dim failCodeCell As Range
+    Dim failCode As Variant
+    Dim matchRow As Range
+
+    ' Set the worksheet variables
+    Set aftSheet = ThisWorkbook.Sheets("AFT")
+    Set failCodesSheet = ThisWorkbook.Sheets("FailCodes")
+
+    ' Find the header row and locate the "Fail Code" column in the AFT sheet
+    On Error Resume Next
+    Set aftFailCodeColumn = aftSheet.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" column is found in the AFT sheet
+    If Not aftFailCodeColumn Is Nothing Then
+        ' Loop through each cell in the "Fail Code" column starting from row 2
+        For Each failCodeCell In aftSheet.Range(aftSheet.Cells(2, aftFailCodeColumn.Column), aftSheet.Cells(aftSheet.Rows.Count, aftFailCodeColumn.Column).End(xlUp))
+            ' Get the fail code value from the AFT sheet
+            failCode = failCodeCell.Value
+
+            ' Find the matching row in the FailCodes sheet
+            Set matchRow = failCodesSheet.Columns(1).Find(What:=failCode, LookIn:=xlValues, LookAt:=xlWhole)
+
+            ' Check if a match is found and the adjacent cell in column C is blank
+            If Not matchRow Is Nothing Then
+                If IsEmpty(matchRow.Offset(0, 2).Value) Then
+                    ' Delete the corresponding row in the AFT sheet
+                    failCodeCell.EntireRow.Delete
+                End If
+            End If
+        Next failCodeCell
+    Else
+        MsgBox "Column 'Fail Code' not found in the AFT sheet."
+    End If
+End Sub
 
