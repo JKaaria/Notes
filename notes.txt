@@ -1,1 +1,126 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim failCodeColumn As Range
+    Dim failDescriptionColumn As Range
+    Dim lastRow As Long
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim groupedFailCodes As String
+
+    ' Set the worksheet variable
+    Set ws = ThisWorkbook.Sheets("AFT")
+
+    ' Find the header row and locate the "Fail Code" and "Fail Description" columns
+    On Error Resume Next
+    Set failCodeColumn = ws.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    Set failDescriptionColumn = ws.Rows(1).Find(What:="Fail Description", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" and "Fail Description" columns are found
+    If Not (failCodeColumn Is Nothing Or failDescriptionColumn Is Nothing) Then
+        ' Find the last row in the "Fail Code" column
+        lastRow = ws.Cells(ws.Rows.Count, failCodeColumn.Column).End(xlUp).Row
+
+        ' Loop through each row in the "Fail Code" column
+        For i = 2 To lastRow ' Assuming data starts from row 2
+
+            ' Get the values from specified columns
+            Dim failCode As Variant
+            Dim failDescription As Variant
+
+            ' Assign values from the row to variables
+            failCode = ws.Cells(i, failCodeColumn.Column).Value
+            failDescription = ws.Cells(i, failDescriptionColumn.Column).Value
+
+            ' Check the rules for grouping
+            If (failCode = 102 Or failCode = 133) Then
+                ' Grouped email for Fail Code 102 and 133
+                emailBody = emailBody & GetEmailBody(ws, i)
+            ElseIf (failCode = 107 Or failCode = 108 Or failCode = 67 Or failCode = 11) Then
+                ' Grouped email for Fail Code 107, 108, 67, and 11
+                groupedFailCodes = groupedFailCodes & vbCrLf & failCode
+                emailBody = emailBody & GetEmailBody(ws, i)
+            Else
+                ' Individual email for other Fail Codes
+                emailBody = GetEmailBody(ws, i)
+                SendEmail failDescription, emailBody
+            End If
+        Next i
+
+        ' Send grouped email for Fail Codes 107, 108, 67, and 11
+        If Len(groupedFailCodes) > 0 Then
+            SendEmail "Grouped Fail Codes: " & groupedFailCodes, emailBody
+        End If
+    Else
+        MsgBox "Column 'Fail Code' or 'Fail Description' not found in the worksheet."
+    End If
+End Sub
+
+Function GetEmailBody(ws As Worksheet, rowIndex As Long) As String
+    ' Function to generate email body based on row values
+    Dim tradeDate As Variant
+    Dim ps As Variant
+    Dim price As Variant
+    Dim valueDate As Variant
+    Dim nominal As Variant
+    Dim ticket As Variant
+    Dim instrumentID As Variant
+    Dim instrument As Variant
+    Dim accruedInterest As Variant
+    Dim netProceeds As Variant
+    Dim failDescription As Variant
+    Dim salespersonName As Variant
+    Dim crestID As Variant
+
+    ' Assign values from the row to variables
+    tradeDate = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Trade Date").Column).Value
+    ps = ws.Cells(rowIndex, ws.Rows(1).Find(What:="P/S").Column).Value
+    price = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Price").Column).Value
+    valueDate = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Value Date").Column).Value
+    nominal = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Nominal").Column).Value
+    ticket = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Ticket").Column).Value
+    instrumentID = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Instrument ID").Column).Value
+    instrument = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Instrument").Column).Value
+    accruedInterest = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Accrued Interest").Column).Value
+    netProceeds = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Net Proceeds").Column).Value
+    failDescription = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Fail Description").Column).Value
+    salespersonName = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Salesperson Name").Column).Value
+    crestID = ws.Cells(rowIndex, ws.Rows(1).Find(What:="Crest ID").Column).Value
+
+    ' Create and return email body
+    GetEmailBody = "Trade Date: " & tradeDate & vbCrLf _
+                & "P/S: " & ps & vbCrLf _
+                & "Price: " & price & vbCrLf _
+                & "Value Date: " & valueDate & vbCrLf _
+                & "Nominal: " & nominal & vbCrLf _
+                & "Ticket: " & ticket & vbCrLf _
+                & "Instrument ID: " & instrumentID & vbCrLf _
+                & "Instrument: " & instrument & vbCrLf _
+                & "Accrued Interest: " & accruedInterest & vbCrLf _
+                & "Net Proceeds: " & netProceeds & vbCrLf _
+                & "Fail Description: " & failDescription & vbCrLf _
+                & "Salesperson Name: " & salespersonName & vbCrLf _
+                & "Crest ID: " & crestID & vbCrLf
+End Function
+
+Sub SendEmail(subject As String, body As String)
+    ' Sub to send email
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+
+    ' Create and display email
+    Set outlookApp = CreateObject("Outlook.Application")
+    Set outlookMail = outlookApp.CreateItem(0)
+    With outlookMail
+        .Subject = subject
+        .Body = body
+        .Display
+    End With
+
+    ' Release Outlook objects
+    Set outlookMail = Nothing
+    Set outlookApp = Nothing
+End Sub
 
