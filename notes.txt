@@ -1,1 +1,90 @@
+Sub GenerateEmails()
+    Dim ws As Worksheet
+    Dim failCodeColumn As Range
+    Dim failDescriptionColumn As Range
+    Dim lastRow As Long
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+
+    ' Set the worksheet variable
+    Set ws = ThisWorkbook.Sheets("AFT")
+
+    ' Find the header row and locate the "Fail Code" and "Fail Description" columns
+    On Error Resume Next
+    Set failCodeColumn = ws.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    Set failDescriptionColumn = ws.Rows(1).Find(What:="Fail Description", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" and "Fail Description" columns are found
+    If Not (failCodeColumn Is Nothing Or failDescriptionColumn Is Nothing) Then
+        ' Find the last row in the "Fail Code" column
+        lastRow = ws.Cells(ws.Rows.Count, failCodeColumn.Column).End(xlUp).Row
+
+        ' Loop through each row in the "Fail Code" column
+        For i = 2 To lastRow ' Assuming data starts from row 2
+
+            ' Get the values from specified columns
+            Dim tradeDate As Variant
+            Dim ps As Variant
+            Dim price As Variant
+            Dim valueDate As Variant
+            Dim nominal As Variant
+            Dim ticket As Variant
+            Dim instrumentID As Variant
+            Dim instrument As Variant
+            Dim accruedInterest As Variant
+            Dim netProceeds As Variant
+            Dim failDescription As Variant
+            Dim salespersonName As Variant
+            Dim crestID As Variant
+
+            ' Assign values from the row to variables
+            tradeDate = ws.Cells(i, ws.Rows(1).Find(What:="Trade Date").Column).Value
+            ps = ws.Cells(i, ws.Rows(1).Find(What:="P/S").Column).Value
+            price = ws.Cells(i, ws.Rows(1).Find(What:="Price").Column).Value
+            valueDate = ws.Cells(i, ws.Rows(1).Find(What:="Value Date").Column).Value
+            nominal = ws.Cells(i, ws.Rows(1).Find(What:="Nominal").Column).Value
+            ticket = ws.Cells(i, ws.Rows(1).Find(What:="Ticket").Column).Value
+            instrumentID = ws.Cells(i, ws.Rows(1).Find(What:="Instrument ID").Column).Value
+            instrument = ws.Cells(i, ws.Rows(1).Find(What:="Instrument").Column).Value
+            accruedInterest = ws.Cells(i, ws.Rows(1).Find(What:="Accrued Interest").Column).Value
+            netProceeds = ws.Cells(i, ws.Rows(1).Find(What:="Net Proceeds").Column).Value
+            failDescription = ws.Cells(i, failDescriptionColumn.Column).Value
+            salespersonName = ws.Cells(i, ws.Rows(1).Find(What:="Salesperson Name").Column).Value
+            crestID = ws.Cells(i, ws.Rows(1).Find(What:="Crest ID").Column).Value
+
+            ' Create email body
+            Dim emailBody As String
+            emailBody = "Trade Date: " & tradeDate & vbCrLf _
+                      & "P/S: " & ps & vbCrLf _
+                      & "Price: " & price & vbCrLf _
+                      & "Value Date: " & valueDate & vbCrLf _
+                      & "Nominal: " & nominal & vbCrLf _
+                      & "Ticket: " & ticket & vbCrLf _
+                      & "Instrument ID: " & instrumentID & vbCrLf _
+                      & "Instrument: " & instrument & vbCrLf _
+                      & "Accrued Interest: " & accruedInterest & vbCrLf _
+                      & "Net Proceeds: " & netProceeds & vbCrLf _
+                      & "Fail Description: " & failDescription & vbCrLf _
+                      & "Salesperson Name: " & salespersonName & vbCrLf _
+                      & "Crest ID: " & crestID
+
+            ' Create and display email
+            Set outlookApp = CreateObject("Outlook.Application")
+            Set outlookMail = outlookApp.CreateItem(0)
+            With outlookMail
+                .Subject = failDescription
+                .Body = emailBody
+                .Display
+            End With
+
+            ' Release Outlook objects
+            Set outlookMail = Nothing
+            Set outlookApp = Nothing
+        Next i
+    Else
+        MsgBox "Column 'Fail Code' or 'Fail Description' not found in the worksheet."
+    End If
+End Sub
 
