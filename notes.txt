@@ -1,1 +1,89 @@
+Sub GenerateEmailsAndGroup()
+    Dim ws As Worksheet
+    Dim failCodeColumn As Range
+    Dim lastRow As Long
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim currentFailCode As Variant
+
+    ' Set the worksheet variable
+    Set ws = ThisWorkbook.Sheets("AFT")
+
+    ' Find the header row and locate the "Fail Code" column
+    On Error Resume Next
+    Set failCodeColumn = ws.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" column is found
+    If Not failCodeColumn Is Nothing Then
+        ' Find the last row in the "Fail Code" column
+        lastRow = ws.Cells(ws.Rows.Count, failCodeColumn.Column).End(xlUp).Row
+
+        ' Loop through each row in the "Fail Code" column
+        For i = lastRow To 2 Step -1 ' Loop backward to insert rows without affecting the loop index
+
+            ' Get the current "Fail Code" value
+            currentFailCode = ws.Cells(i, failCodeColumn.Column).Value
+
+            ' Insert a new blank row at the end of every unique "Fail Code" cell value
+            If i <> lastRow And currentFailCode <> ws.Cells(i + 1, failCodeColumn.Column).Value Then
+                ws.Rows(i + 1).Insert Shift:=xlDown
+            End If
+
+            ' Get the values from specified columns
+            ' ... (same as before)
+
+            ' Append row values to the email body
+            emailBody = "Trade Date: " & tradeDate & vbCrLf _
+                      & "P/S: " & ps & vbCrLf _
+                      & "Price: " & price & vbCrLf _
+                      & "Value Date: " & valueDate & vbCrLf _
+                      & "Nominal: " & nominal & vbCrLf _
+                      & "Ticket: " & ticket & vbCrLf _
+                      & "Instrument ID: " & instrumentID & vbCrLf _
+                      & "Instrument: " & instrument & vbCrLf _
+                      & "Accrued Interest: " & accruedInterest & vbCrLf _
+                      & "Net Proceeds: " & netProceeds & vbCrLf _
+                      & "Fail Description: " & failDescription & vbCrLf _
+                      & "Salesperson Name: " & salespersonName & vbCrLf _
+                      & "Crest ID: " & crestID & vbCrLf
+
+            ' Check if the current "Fail Code" needs to be grouped
+            If currentFailCode = 102 Or currentFailCode = 133 Or currentFailCode = 107 Or _
+               currentFailCode = 108 Or currentFailCode = 67 Or currentFailCode = 11 Then
+
+                ' If it's the last row for the group, create and display an email
+                If i = 2 Or currentFailCode <> ws.Cells(i - 1, failCodeColumn.Column).Value Then
+                    ' Create and display email
+                    Set outlookApp = CreateObject("Outlook.Application")
+                    Set outlookMail = outlookApp.CreateItem(0)
+                    With outlookMail
+                        .Subject = failDescription
+                        .Body = emailBody
+                        .Display
+                    End With
+
+                    ' Clear the email body for the next group
+                    emailBody = ""
+                End If
+
+            Else
+                ' If it's not part of the grouped fail codes, create and display an email for each row
+                Set outlookApp = CreateObject("Outlook.Application")
+                Set outlookMail = outlookApp.CreateItem(0)
+                With outlookMail
+                    .Subject = failDescription
+                    .Body = emailBody
+                    .Display
+                End With
+                ' Clear the email body for the next row
+                emailBody = ""
+            End If
+        Next i
+    Else
+        MsgBox "Column 'Fail Code' not found in the worksheet."
+    End If
+End Sub
 
