@@ -1,1 +1,100 @@
+Sub GenerateGroupedEmails()
+    Dim ws As Worksheet
+    Dim failCodeColumn As Range
+    Dim lastRow As Long
+    Dim i As Long
+    Dim outlookApp As Object
+    Dim outlookMail As Object
+    Dim emailBody As String
+    Dim groupSubject As String
+    Dim currentGroup As String
 
+    ' Set the worksheet variable
+    Set ws = ThisWorkbook.Sheets("AFT")
+
+    ' Find the header row and locate the "Fail Code" column
+    On Error Resume Next
+    Set failCodeColumn = ws.Rows(1).Find(What:="Fail Code", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+
+    ' Check if the "Fail Code" column is found
+    If Not failCodeColumn Is Nothing Then
+        ' Find the last row in the "Fail Code" column
+        lastRow = ws.Cells(ws.Rows.Count, failCodeColumn.Column).End(xlUp).Row
+
+        ' Loop through each row in the "Fail Code" column
+        For i = 2 To lastRow ' Assuming data starts from row 2
+
+            ' Get the "Fail Code" value for the current row
+            Dim failCode As Variant
+            failCode = ws.Cells(i, failCodeColumn.Column).Value
+
+            ' Check the rules and group rows accordingly
+            Select Case failCode
+                Case 102, 133
+                    groupSubject = "Group 1"
+                Case 107, 108, 67, 11
+                    groupSubject = "Group 2"
+                Case Else
+                    ' Add more cases for other groups if needed
+                    groupSubject = "Other Group"
+            End Select
+
+            ' If the group has changed, create a new email body
+            If currentGroup <> groupSubject Then
+                ' If not the first iteration, send the previous email
+                If currentGroup <> "" Then
+                    ' Create and display email
+                    Set outlookApp = CreateObject("Outlook.Application")
+                    Set outlookMail = outlookApp.CreateItem(0)
+                    With outlookMail
+                        .Subject = currentGroup
+                        .Body = emailBody
+                        .Display
+                    End With
+
+                    ' Release Outlook objects
+                    Set outlookMail = Nothing
+                    Set outlookApp = Nothing
+                End If
+
+                ' Reset email body and current group
+                emailBody = ""
+                currentGroup = groupSubject
+            End If
+
+            ' Add the current row's information to the email body
+            emailBody = emailBody & "Trade Date: " & ws.Cells(i, ws.Rows(1).Find(What:="Trade Date").Column).Value & vbCrLf _
+                      & "P/S: " & ws.Cells(i, ws.Rows(1).Find(What:="P/S").Column).Value & vbCrLf _
+                      & "Price: " & ws.Cells(i, ws.Rows(1).Find(What:="Price").Column).Value & vbCrLf _
+                      & "Value Date: " & ws.Cells(i, ws.Rows(1).Find(What:="Value Date").Column).Value & vbCrLf _
+                      & "Nominal: " & ws.Cells(i, ws.Rows(1).Find(What:="Nominal").Column).Value & vbCrLf _
+                      & "Ticket: " & ws.Cells(i, ws.Rows(1).Find(What:="Ticket").Column).Value & vbCrLf _
+                      & "Instrument ID: " & ws.Cells(i, ws.Rows(1).Find(What:="Instrument ID").Column).Value & vbCrLf _
+                      & "Instrument: " & ws.Cells(i, ws.Rows(1).Find(What:="Instrument").Column).Value & vbCrLf _
+                      & "Accrued Interest: " & ws.Cells(i, ws.Rows(1).Find(What:="Accrued Interest").Column).Value & vbCrLf _
+                      & "Net Proceeds: " & ws.Cells(i, ws.Rows(1).Find(What:="Net Proceeds").Column).Value & vbCrLf _
+                      & "Fail Description: " & ws.Cells(i, ws.Rows(1).Find(What:="Fail Description").Column).Value & vbCrLf _
+                      & "Salesperson Name: " & ws.Cells(i, ws.Rows(1).Find(What:="Salesperson Name").Column).Value & vbCrLf _
+                      & "Crest ID: " & ws.Cells(i, ws.Rows(1).Find(What:="Crest ID").Column).Value & vbCrLf & vbCrLf
+        Next i
+
+        ' Send the last email
+        If currentGroup <> "" Then
+            ' Create and display email
+            Set outlookApp = CreateObject("Outlook.Application")
+            Set outlookMail = outlookApp.CreateItem(0)
+            With outlookMail
+                .Subject = currentGroup
+                .Body = emailBody
+                .Display
+            End With
+
+            ' Release Outlook objects
+            Set outlookMail = Nothing
+            Set outlookApp = Nothing
+        End If
+    Else
+        MsgBox "Column 'Fail Code' not found in the worksheet."
+    End If
+End Sub
