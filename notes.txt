@@ -1,1 +1,28 @@
 
+Sub ConvertHeadersToHorizontalList()
+    Dim ws As Worksheet
+    Dim headerRange As Range
+    Dim cell As Range
+    Dim result As String
+
+    ' Set the worksheet
+    Set ws = ActiveSheet ' Change this to the desired worksheet if not the active sheet
+    
+    ' Set the range containing column headers (assuming they are in the first row)
+    Set headerRange = ws.Rows(1)
+
+    ' Loop through each cell in the header range
+    For Each cell In headerRange
+        ' Check if the cell value is not empty
+        If Not IsEmpty(cell.Value) Then
+            ' Append the cell value to the result string
+            result = result & cell.Value & ", "
+        End If
+    Next cell
+
+    ' Remove the trailing comma and space
+    result = Left(result, Len(result) - 2)
+
+    ' Display the result in a message box (you can modify this part as needed)
+    MsgBox result
+End Sub
