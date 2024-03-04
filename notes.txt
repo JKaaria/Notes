@@ -1,1 +1,67 @@
 
+Workflow for Standardised Net Position Calculation
+
+Overview:
+
+The Standardised Net Position Calculation workflow aims to ensure timely, accurate, and standardised net position data for the Repo Trading Desk within the Investment Banking Global Markets Division. The workflow involves leveraging various systems and datasets, including Settlement Systems (FISS/GLOSS/GOSS), Inventory Report (RTSR), Trading Systems (TCW, IREPO), and Data Platform (DSP).
+
+Steps:
+
+1.Data Investigation Settlement System(s):
+Utilise FISS/GLOSS/GOSS for on-premises database investigation.
+Perform structured queries on trade data to locate settled and unsettled trades, collateral, and associated products within a 3-month history.
+Access the archive version for older trades.
+
+2.Data Investigation Inventory Report (RTSR):
+Leverage RTSR, a cloud-based database investigation UI.
+Conduct structured queries on data related to bonds, collateral, and associated products.
+Retrieve information on the bank's holdings across entities and individual depots.
+
+3.Data Retrieval Trading System(s):
+Access TCW and IREPO, the bond and repo/collateral booking systems.
+Search for trades booked within the desired timeframe (n days) based on user queries.
+Extract relevant information on trades and associated products.
+
+4.Data Access Data Platform (DSP):
+Utilise Microsoft DSP, an ETL software with access to the above systems.
+Query the systems via API or batch download for data retrieval.
+Leverage DSP for data science activities using standard tools such as Python.
+
+5.Data Integration:
+Combine data retrieved from Settlement System(s), Inventory Report (RTSR), Trading System(s), and Data Platform (DSP).
+Ensure data consistency and uniformity for standardised net position calculations.
+
+6.Collaboration and Validation:
+Engage in collaborative discussions with relevant teams, including the Repo Trading Desk and Data Management Team(s).
+Share findings and collaborate on refining data practices for net position calculations.
+Validate the integrated dataset to ensure accuracy and reliability.
+
+7.Enhanced Collateral Valuation:
+Implement enhanced methods for real-time collateral positioning.
+Integrate with collateral booking or settlement systems for enhanced analysis capabilities.
+
+8.Continuous Position Monitoring:
+Establish systems for continuous monitoring of positions throughout the trading day.
+Consider both streamed and batch ingestion for real-time updates.
+
+9.Intraday Risk Assessments:
+Conduct intraday risk assessments, considering real-time market data.
+
+10.Immediate Settlement Reconciliation:
+Develop mechanisms for immediate reconciliation of settlement data.
+
+11.Real-Time Analytics Development:
+Implement real-time analytics tools for fail reporting and net position calculations.
+
+12.Collaboration with Technology Team:
+Collaborate with technology teams where external support is needed.
+Address data engineering requirements for the implementation of real-time data ingestion.
+
+13.Validation and Testing:
+Thoroughly validate and test the standardised net position calculation methods.
+
+Conclusion:
+
+This workflow ensures a comprehensive and standardised approach to net position calculation, addressing challenges in delayed fails reporting and providing a reliable foundation for funding decisions within the Repo Trading Desk. The collaborative and iterative nature of the workflow allows for continuous improvement and adaptability to evolving market conditions.
+
+
