@@ -1,1 +1,44 @@
 
+Certainly, given the key focus on allocation states, let's enhance the suggested visualizations to incorporate this aspect:
+
+1. **Stacked Bar Chart - Allocation States by Trade Type:**
+   - X-Axis: Trade Type
+   - Y-Axis: Count of Trades
+   - Stacked by: Allocation State (e.g., Allocated, Not Allocated, >5mm, Post VD/VD Today, Booked Today)
+   - Purpose: Highlight the distribution of allocation states within each trade type.
+
+2. **Stacked Area Chart - Allocation State Evolution Over Time:**
+   - X-Axis: Trade Date
+   - Y-Axis: Count of Trades
+   - Stacked by: Allocation State
+   - Purpose: Track how the allocation states evolve over time.
+
+3. **Bubble Chart - Quantity vs. Spread vs. Yield with Allocation State Color:**
+   - X-Axis: Quantity
+   - Y-Axis: Spread
+   - Bubble Size: Yield
+   - Color: Allocation State
+   - Purpose: Visualize the relationship between quantity, spread, and yield while considering different allocation states.
+
+4. **Heatmap - Approval and Allocation Status by Sales Person:**
+   - Rows: Sales Person
+   - Columns: Allocation State and Approval Status
+   - Color: Count of Trades
+   - Purpose: Understand how allocation and approval status vary for each salesperson.
+
+5. **Donut Chart - Allocation State Distribution by Product Type:**
+   - Donut Rings: Product Type
+   - Segments: Allocation State
+   - Purpose: Provide insights into the allocation states within different product types.
+
+6. **Pie Chart - Counterparty Distribution with Allocation State Breakdown:**
+   - Segments: Counterparty
+   - Sub-segments: Allocation State
+   - Purpose: Highlight the allocation states for each counterparty.
+
+7. **Treemap - Allocation State Distribution by Book Name and Region:**
+   - Hierarchical Visualization: Book Region > Book Name
+   - Color or Size: Count of Trades
+   - Purpose: Understand the distribution of trades across books and regions with a focus on allocation states.
+
+Remember to adapt the visualizations based on the specific nuances and priorities of your data and the operational risks you want to address. These visualizations will help you gain insights into how allocation states interact with other variables in your trade booking system data.
