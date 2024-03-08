@@ -1,1 +1,46 @@
+Sub MatchSDSIDsAndAppendStatus()
+    Dim wsMaster As Worksheet
+    Dim lastRowMaster As Long
+    Dim sdsIdColumn As Range
+    Dim cell As Range
+    Dim matchFound As Boolean
+    Dim statusColumn As Range
+    Dim wsSheet2 As Worksheet
+    Dim lookupRange As Range
+    
+    ' Set the master sheet
+    Set wsMaster = ThisWorkbook.Sheets("master")
+    
+    ' Find the last row in the master sheet
+    lastRowMaster = wsMaster.Cells(wsMaster.Rows.Count, "D").End(xlUp).Row
+    
+    ' Set the SDS id column in the master sheet
+    Set sdsIdColumn = wsMaster.Range("D2:D" & lastRowMaster)
+    
+    ' Add a new column for the status
+    wsMaster.Cells(1, lastRowMaster + 2).Value = "Status"
+    Set statusColumn = wsMaster.Range(wsMaster.Cells(2, lastRowMaster + 2), wsMaster.Cells(lastRowMaster + 1, lastRowMaster + 2))
+    
+    ' Set the lookup range in Sheet 2
+    Set wsSheet2 = ThisWorkbook.Sheets(2)
+    Set lookupRange = wsSheet2.Columns("G")
+    
+    ' Loop through each cell in the SDS id column
+    For Each cell In sdsIdColumn
+        ' Reset match status
+        matchFound = False
+        
+        ' Check for match in Sheet 2 (Column G)
+        If WorksheetFunction.CountIf(lookupRange, cell.Value) > 0 Then
+            matchFound = True
+        End If
+        
+        ' Update the status column based on match
+        If matchFound Then
+            statusColumn.Cells(cell.Row - 1, 1).Value = "Match Found"
+        Else
+            statusColumn.Cells(cell.Row - 1, 1).Value = "Please Update SDS"
+        End If
+    Next cell
+End Sub
 
