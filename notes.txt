@@ -1,1 +1,80 @@
+Sub ImportDataFromExtractsFolder()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim wsMaster As Worksheet
+    Dim wsTemp As Worksheet
+    Dim lastRow As Long
+    Dim headerRange As Range
+    Dim sourceWorkbook As Workbook
+    Dim repairAttempted As Boolean
+    
+    ' Set the folder path
+    folderPath = ThisWorkbook.Path & "\Extracts\"
+    
+    ' Set the master sheet
+    Set wsMaster = ThisWorkbook.Sheets("master")
+    
+    ' Create a temporary sheet to store each file's data
+    Set wsTemp = ThisWorkbook.Sheets.Add
+    
+    ' Find the header range in the master sheet
+    On Error Resume Next
+    Set headerRange = wsMaster.Rows(1).Find("*", LookIn:=xlValues, LookAt:=xlWhole)
+    On Error GoTo 0
+    
+    ' Loop through each file in the Extracts folder
+    fileName = Dir(folderPath & "*.*")
+    
+    Do While fileName <> ""
+        If fileName <> ThisWorkbook.Name Then ' Skip the current workbook
+            ' Clear temporary sheet
+            wsTemp.Cells.Clear
+            
+            ' Attempt to open the file
+            On Error Resume Next
+            Set sourceWorkbook = Workbooks.Open(folderPath & fileName, CorruptLoad:=xlRepairFile)
+            If Err.Number = 1004 Then
+                ' Error 1004 indicates that the file couldn't be opened even with repair
+                repairAttempted = False
+            Else
+                repairAttempted = True
+            End If
+            On Error GoTo 0
+            
+            If Not sourceWorkbook Is Nothing Then
+                If repairAttempted Then
+                    ' If repair was attempted, save the repaired file
+                    Dim savePath As String
+                    savePath = folderPath & "Repaired_" & fileName ' You can customize the save path as needed
+                    sourceWorkbook.SaveAs savePath
+                End If
+                
+                ' Copy data to the temporary sheet
+                sourceWorkbook.Sheets(1).UsedRange.Copy wsTemp.Cells(1, 1)
+                
+                ' Close the source workbook without saving changes
+                sourceWorkbook.Close SaveChanges:=False
+                
+                ' Check if headers are already present in the master sheet
+                ' ...
+                ' (rest of your existing code)
+                ' ...
+                
+                ' Close any open dialog boxes after repair
+                Application.DisplayAlerts = False
+            Else
+                MsgBox "Error opening workbook: " & folderPath & fileName, vbExclamation
+            End If
+        End If
+        
+        ' Get the next file
+        fileName = Dir
+    Loop
+    
+    ' Delete the temporary sheet
+    Application.DisplayAlerts = True
+    Application.DisplayAlerts = False ' Restore the default setting for DisplayAlerts
+    wsTemp.Delete
+    Application.DisplayAlerts = True
+End Sub
 
