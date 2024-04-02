@@ -1,15 +1,15 @@
-# Import the UIAutomation module
-Import-Module UIAutomation
+Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+    public class UserWindows {
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")]
+        public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+    }
+"@
 
-# Start the target application
-Start-Process -FilePath "C:\Path\To\Your\Application.exe" -PassThru | Wait-Process
-
-# Find the main window of the application
-$mainWindow = Get-UIAWindow -Name "Your Application Name"
-
-# Find the "to Excel" button
-$excelButton = $mainWindow | Get-UIAButton -Name "To Excel"
-
-# Click the "to Excel" button
-$excelButton | Invoke-UIAButtonClick
-
+$foregroundWindow = [UserWindows]::GetForegroundWindow()
+$windowTitle = New-Object -TypeName System.Text.StringBuilder 256
+[UserWindows]::GetWindowText($foregroundWindow, $windowTitle, $windowTitle.Capacity) | Out-Null
+$windowTitle.ToString()
