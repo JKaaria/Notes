@@ -1,15 +1,11 @@
-Add-Type @"
-    using System;
-    using System.Runtime.InteropServices;
-    public class UserWindows {
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
-        [DllImport("user32.dll")]
-        public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
-    }
-"@
+# Start the target application
+Start-Process -FilePath "C:\Path\To\Your\Application.exe" -PassThru | Wait-Process
 
-$foregroundWindow = [UserWindows]::GetForegroundWindow()
-$windowTitle = New-Object -TypeName System.Text.StringBuilder 256
-[UserWindows]::GetWindowText($foregroundWindow, $windowTitle, $windowTitle.Capacity) | Out-Null
-$windowTitle.ToString()
+# Wait for the application to fully load
+Start-Sleep -Seconds 10  # Adjust the wait time as needed based on your application's load time
+
+# Simulate keyboard shortcut to trigger "To Excel" functionality (assuming Alt + E is the shortcut)
+$wshell = New-Object -ComObject wscript.shell
+$wshell.AppActivate("Your Application Window Title")  # Activate the application window by its title
+Start-Sleep -Seconds 1  # Wait for activation to complete
+$wshell.SendKeys("%E")  # Send Alt + E to simulate triggering the "To Excel" functionality
