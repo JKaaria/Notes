@@ -1,1 +1,18 @@
+Subject: Follow-Up: Request for Database Access for GMO Risk Dashboard Integration
 
+Hi Lucy and Nikhil,
+
+I hope this email finds you well.
+
+Following our recent discussions about the rates allocations blotter enhancement for back-office detail, I wanted to bring to your attention the priority shift regarding our data requirements.
+
+As we continue to address outstanding requests with SWS technology teams, it's imperative that we streamline our approach to meet critical risk and control enhancements ahead of markets transitioning to T+1 settlement.
+
+Given the challenges faced with obtaining automated extracts and scheduling them on an hourly frequency intraday, I propose exploring alternative solutions to ensure timely and efficient access to essential data.
+
+Could we schedule a meeting to discuss the feasibility and steps required to proceed with granting database access to SWS/CATS/TCW via our data platform, Altery? This approach not only addresses our current requirements but also aligns with our broader objective of enhancing risk management capabilities.
+
+Looking forward to your insights and guidance on this matter.
+
+Best Regards,
+Jeremy Kaaria
