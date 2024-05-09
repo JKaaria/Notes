@@ -1,1 +1,16 @@
+Sub ClearTradeData()
+    Dim lastRow As Long
+    
+    ' Find the last row with data in column A
+    lastRow = Sheets("Sheet1").Cells(Sheets("Sheet1").Rows.Count, "A").End(xlUp).Row
+    
+    ' Clear contents of "TradeData" from row 2 down
+    With Sheets("Sheet1").Range("TradeData")
+        If .Row >= 2 Then
+            .Offset(1, 0).Resize(lastRow - .Row).ClearContents
+        Else
+            .Resize(lastRow - .Row).ClearContents
+        End If
+    End With
+End Sub
 
