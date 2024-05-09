@@ -5,7 +5,7 @@ Sub ClearTradeData()
     lastRow = Sheets("TradeData").Cells(Sheets("TradeData").Rows.Count, "A").End(xlUp).Row
     
     ' Clear contents of "TradeData" from row 2 down
-    With Sheets("TradeData").Range("A2:A" & lastRow)
-        .ClearContents
+    With Sheets("TradeData")
+        .Range("A2:" & .Cells(lastRow, .Columns.Count).Address).ClearContents
     End With
 End Sub
