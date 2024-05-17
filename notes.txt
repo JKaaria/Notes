@@ -1,1 +1,90 @@
+**Agency Overview:** - leading staffing agency for global fintech and payments platform companies.
 
+**Position Overview:**
+We are seeking a skilled Data Engineer to design, implement, and manage scalable data solutions.
+
+**Key Responsibilities:**
+- Develop and maintain data pipelines and ETL processes.
+- Collaborate with stakeholders for data requirements.
+- Optimize and maintain data warehouses.
+- Develop data models and integration architectures.
+- Clean, transform, and enrich data.
+- Monitor and troubleshoot data systems.
+- Implement data governance policies.
+
+**Qualifications:**
+- Proficiency in SQL, Python, Java, or Scala.
+- Experience with big data technologies (Hadoop, Spark, Kafka).
+- Hands-on with cloud platforms (AWS, GCP, Azure).
+- Knowledge of data warehousing tools (Snowflake, Hive).
+- Familiarity with data integration tools (NiFi, Talend).
+
+**Preferred Qualifications:**
+- Experience with real-time data processing (Flink, Storm).
+- Knowledge of machine learning frameworks.
+- Experience with data visualization tools (Tableau, Power BI).
+- Understanding of financial regulations and compliance.
+_________________________________________________________________
+
+### Industry and Market Insights
+1. **Current Trends:**
+   - What are the current trends and challenges in the fintech/payments industry?
+   - How do you see the industry evolving in the next 5-10 years?
+
+2. **Key Players and Technologies:**
+   - Which companies or technologies are currently leading the market?
+   - Are there any emerging technologies or startups to watch out for?
+
+### Project Management and Execution
+3. **Project Challenges:**
+   - What are the common challenges faced when managing data engineering projects in this space?
+   - How do you typically overcome these challenges?
+
+4. **Project Lifecycle:**
+   - Can you walk me through the typical lifecycle of a project from initiation to completion?
+   - What are the critical success factors at each stage?
+
+5. **Stakeholder Management:**
+   - How do you manage and communicate with stakeholders, especially when it comes to data projects?
+   - What strategies do you use to align technical teams with business objectives?
+
+### Technical Insights
+6. **Data Infrastructure:**
+   - What are the most important considerations when designing data infrastructure for payments platforms?
+   - Which data engineering tools and technologies are most effective in this industry?
+
+7. **Security and Compliance:**
+   - How do you ensure data security and compliance with regulations such as GDPR, PCI-DSS, etc.?
+   - What are the best practices for managing sensitive financial data?
+
+### Career Advice
+8. **Skill Development:**
+   - What skills and knowledge areas should I focus on to succeed as a data engineer in this industry?
+   - Are there any certifications or courses you recommend?
+
+9. **Career Path:**
+   - How did you progress in your career to your current role?
+   - What advice would you give to someone transitioning into contracting in this field?
+
+### Real-world Examples
+10. **Success Stories:**
+    - Can you share an example of a particularly successful project you managed?
+    - What made it successful, and what were the key takeaways?
+
+11. **Lessons Learned:**
+    - Can you describe a project that didn’t go as planned?
+    - What were the lessons learned, and how did you apply them to future projects?
+
+### Networking and Opportunities
+12. **Industry Connections:**
+    - Are there any industry events, forums, or groups you recommend for networking and staying updated?
+    - Can you introduce me to any other professionals or resources that could be helpful?
+
+### Contracting Specifics
+13. **Contracting Tips:**
+    - What should I be aware of when transitioning to contracting in this industry?
+    - Any tips for negotiating contracts and setting rates?
+
+14. **Client Relationships:**
+    - How do you manage relationships with clients to ensure repeat business and referrals?
+    - What are some common expectations clients have from contractors, and how do you exceed them?
